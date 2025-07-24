@@ -7,14 +7,15 @@ const About = () => {
             <Image
                 src="/code_cat_fill.svg"
                 alt="Background Image"
-                fill
-                style={{ zIndex: -1, opacity: 0.30 }}
-                className="absolute rounded-lg pointer-events-none"
+                width={500}
+                height={500}
+                style={{ opacity: 0.30 }}
+                className="absolute rounded-lg pointer-events-none dark:invert"
             />
-            <p className="text-2xl text-center w-lg">
+            <p className="text-2xl z-10 text-center w-lg dark:text-white">
                 Code, Coffee, and Cats.
             </p>
-            <p className="text-lg text-center w-lg">
+            <p className="text-lg z-10 text-center w-lg dark:text-white">
                 That, and effective and simple web solutions, is what we love.
                 Pittsburgh-based and proud, we strive to offer the best possible service
                 we can in development to your needs, from creating a landing page for
