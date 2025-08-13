@@ -22,6 +22,8 @@ export default function Home() {
   const highlights = {
     code: 'text-lavender',
     coffee: 'text-rosewater',
+    personal: 'text-rosewater',
+    vibes: 'text-rosewater',
     cats: 'text-peach',
     cattiness: 'text-peach',
     development: 'text-lavender',
@@ -29,7 +31,7 @@ export default function Home() {
     solutions: 'text-lavender',
     pittsburgh: 'text-rosewater',
     service: 'text-lavender',
-    easy: 'text-rosweater',
+    easy: 'text-rosewater',
     fix: 'text-rosewater',
   };
 
