@@ -30,9 +30,7 @@ export default function Home() {
     web: 'text-lavender',
     solutions: 'text-lavender',
     pittsburgh: 'text-rosewater',
-    service: 'text-lavender',
-    easy: 'text-rosewater',
-    fix: 'text-rosewater',
+    service: 'text-rosewater'
   };
 
   return (
@@ -62,7 +60,7 @@ export default function Home() {
           </p>
           <p className="text-lg z-10 text-center font-medium leading-relaxed dark:text-white">
             {highlight(
-              "That, and effective and simple web solutions, is what we love. Pittsburgh-based and proud, we strive to offer the best possible service we can in development to your needs, from creating a landing page for your newly created business that matches your personal vibes, to engineering a solution for that monotonous, repeatable task that’s driving you wild. Spreadsheet data entry and data crunching, generation of tailored PDF reports, we’re happy to chat about any problems you’re experiencing, and see if we can’t help you find an easy fix, no overhead, no cattiness. We leave that to the actual cats in our lives!",
+              "That, plus effective and simple web solutions, is what we love. Pittsburgh-based and proud, we strive to offer the best possible service in development to your needs, from creating a landing page for your newly created business that matches your personal vibes, to engineering a solution for that monotonous, repeatable task that’s driving you wild. Spreadsheet data entry and data crunching, generation of tailored PDF reports, we’re happy to chat about any problems you’re experiencing, and find a path forward, no overhead, no cattiness. We leave that to the actual cats in our lives!",
               highlights
             )}
           </p>
