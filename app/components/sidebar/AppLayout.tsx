@@ -3,6 +3,7 @@
 
 import {useState} from 'react';
 import Sidebar from './Sidebar';
+import Footer from "@/components/Footer";
 
 interface AppLayoutProps {
     children: React.ReactNode;

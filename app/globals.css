@@ -1,6 +1,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Catppuccin Mocha Color Palette */
   --ctp-rosewater: #f5e0dc;
