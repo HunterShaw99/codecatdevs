@@ -8,7 +8,7 @@ const highlight = (text: string, highlights: { [key: string]: string }) => {
       ? (
         <span
           key={i}
-          className={`font-bold rounded transition-colors ${highlights[part.toLowerCase()]}`}
+          className={`transition-colors ${highlights[part.toLowerCase()]}`}
           style={{ padding: 0, margin: 0, display: 'inline' }}
         >
           {part}
