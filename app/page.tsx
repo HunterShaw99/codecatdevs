@@ -46,7 +46,7 @@ export default function Home() {
           priority
         />
         <h1 className="text-6xl font-bold z-10 mb-6 text-sapphire">Code Cat Developers</h1>
-        <div className="relative flex flex-col gap-[16px] justify-center items-center rounded-3xl p-8 bg-surface0/80 shadow-2xl border-4 border-surface2 w-full">
+        <div className="relative flex flex-col gap-[1s6px] justify-center items-center rounded-3xl p-8 w-full">
           <Image
             src="/code_cat_fill.svg"
             alt="Background Image"
