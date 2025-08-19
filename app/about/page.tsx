@@ -1,12 +1,24 @@
+import Image from 'next/image';
+
 export default function AboutPage() {
   return (
     <div className="space-y-6 px-2">
+      <h1 className="text-6xl text-center font-bold items-center z-10 mb-6 p-6 text-lavender">Code Cat Developers</h1>
+
       {/* Hero Section */}
-      <div className="bg-surface0 rounded-3xl shadow-2xl border-4 border-surface2 p-8 mt-8">
+      <div className="bg-surface0 rounded-3xl shadow-2xl border-4 border-surface2 p-6 flex flex-col items-center justify-center relative">
+        <Image
+          src="/code_cat_fill.svg"
+          alt="Background Image"
+          width={320}
+          height={320}
+          style={{ opacity: 0.18 }}
+          className="absolute rounded-lg pointer-events-none dark:invert"
+        />
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-sapphire mb-4">About Our Company</h1>
+          <h1 className="text-3xl font-bold text-rosewater mb-4">About Our Company</h1>
           <p className="text-lg text-subtext1 max-w-3xl mx-auto">
-            We are a partnership of developers with a passion for code, coffee, and cats. With years of experience in software engineering, data analytics, and geospatial development, we're sure we can help you find a solution to your problem, no matter how big or small.
+            Code, coffee, and cats. With 10+ years experience, and our 3 C's fueling us, we're positive that we can deliver effective and simple web solutions for your everyday issues. Pittsburgh-based and proud, we strive to offer the best possible service in development to your needs, from creating a landing page for your newly created business that matches your personal vibes, to engineering a solution for that monotonous, repeatable task that’s driving you wild. Spreadsheet data entry and data crunching, generation of tailored PDF reports, we’re happy to chat about any problems you’re experiencing, and find a path forward, no overhead, no cattiness. We leave that to the actual cats in our lives!
           </p>
         </div>
       </div>
@@ -40,25 +52,6 @@ export default function AboutPage() {
           <p className="text-subtext1">
             To empower businesses through technology, enabling them to achieve their goals and make a positive impact in their industries and communities.
           </p>
-        </div>
-      </div>
-
-      {/* Company Stats */}
-      <div className="bg-surface0 rounded-3xl shadow-2xl border-4 border-surface2 p-6">
-        <h2 className="text-2xl font-semibold text-red mb-6 text-center">Our Impact</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-maroon mb-2">10+</div>
-            <div className="text-sm font-medium text-subtext1">Years of Combined Development Experience</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-peach mb-2">1000+</div>
-            <div className="text-sm font-medium text-subtext1">Cups of Coffee and Espresso Fueling Us</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-yellow mb-2">4</div>
-            <div className="text-sm font-medium text-subtext1">Collective Cats</div>
-          </div>
         </div>
       </div>
 
