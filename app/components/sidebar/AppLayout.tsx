@@ -3,7 +3,6 @@
 
 import {useState} from 'react';
 import Sidebar from './Sidebar';
-import Footer from "@/components/Footer";
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -12,7 +11,7 @@ interface AppLayoutProps {
 const AppLayout = ({children}: AppLayoutProps) => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
-    const [currentPageTitle, setCurrentPageTitle] = useState('Home');
+    const [currentPageTitle, setCurrentPageTitle] = useState('About Us');
 
     const toggleSidebar = () => {
         setSidebarOpen(!sidebarOpen);

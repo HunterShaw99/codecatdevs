@@ -12,10 +12,10 @@ export default function AboutPage() {
           alt="Background Image"
           width={320}
           height={320}
-          style={{ opacity: 0.18 }}
+          style={{ opacity: 0.25 }}
           className="absolute rounded-lg pointer-events-none dark:invert"
         />
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 z-10">
           <h1 className="text-3xl font-bold text-rosewater mb-4">About Our Company</h1>
           <p className="text-lg text-subtext1 max-w-3xl mx-auto">
             Code, coffee, and cats. With 10+ years experience, and our 3 C's fueling us, we're positive that we can deliver effective and simple web solutions for your everyday issues. Pittsburgh-based and proud, we strive to offer the best possible service in development to your needs, from creating a landing page for your newly created business that matches your personal vibes, to engineering a solution for that monotonous, repeatable task that’s driving you wild. Spreadsheet data entry and data crunching, generation of tailored PDF reports, we’re happy to chat about any problems you’re experiencing, and find a path forward, no overhead, no cattiness. We leave that to the actual cats in our lives!
