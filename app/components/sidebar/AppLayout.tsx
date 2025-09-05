@@ -1,76 +1,26 @@
-
 'use client';
-
-import {useState} from 'react';
-import Sidebar from './Sidebar';
 
 interface AppLayoutProps {
     children: React.ReactNode;
 }
 
 const AppLayout = ({children}: AppLayoutProps) => {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [sidebarExpanded, setSidebarExpanded] = useState(true);
-    const [currentPageTitle, setCurrentPageTitle] = useState('About Us');
-
-    const toggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen);
-    };
-
-    const toggleSidebarExpanded = () => {
-        setSidebarExpanded(!sidebarExpanded);
-    };
-
-    const handleActiveItemChange = (itemLabel: string) => {
-        setCurrentPageTitle(itemLabel);
-    };
-
     return (
-        <div className="flex h-screen bg-base">
-            <Sidebar
-                isOpen={sidebarOpen}
-                onToggle={toggleSidebar}
-                isExpanded={sidebarExpanded}
-                onToggleExpanded={toggleSidebarExpanded}
-                onActiveItemChange={handleActiveItemChange}
-            />
-
+        <div className="min-h-screen bg-base">
             {/* Main content area */}
-            <div className="flex-1 flex flex-col">
-                {/* Header */}
-                <header className="bg-surface0 shadow-sm border-b border-surface1 px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <button
-                                onClick={toggleSidebar}
-                                className="lg:hidden p-2 rounded-md hover:bg-surface1 mr-4 transition-colors"
-                                style={{ color: '#cdd6f4' }}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                          d="M4 6h16M4 12h16M4 18h16"/>
-                                </svg>
-                            </button>
-
-                            <h1 className="text-2xl font-semibold" style={{ color: '#cdd6f4' }}>{currentPageTitle}</h1>
-                        </div>
-
-                    </div>
-                </header>
-
+            <div className="flex flex-col min-h-screen">
                 {/* Main Content */}
-                <main className="flex-1 overflow-y-auto bg-base">
+                <main className="flex-1 bg-base">
                     {children}
                 </main>
 
                 <footer
-                    className="bg-surface0 shadow-sm border-t border-surface1 px-6 py-3 flex-col justify-center items-center mt-auto"
+                    className="bg-surface0 shadow-sm border-t border-surface1 px-6 py-3 flex-col justify-center items-center"
                     style={{ color: '#cdd6f4' }}
                 >
                     <div className={'flex justify-center items-center'} style={{ color: '#bac2de' }}>Proudly made by</div>
                     <div className={'flex justify-center items-center text-lg'}>⌨️ 🐱 ☕</div>
                 </footer>
-
             </div>
         </div>
     );

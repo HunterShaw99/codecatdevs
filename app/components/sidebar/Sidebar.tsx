@@ -1,9 +1,7 @@
-
 'use client';
 
 import {ReactNode, useState} from 'react';
-import Link from 'next/link';
-import CodeCatLine from '@/public/code_cat_line.svg';
+import CodeCatLine from "@/app/components/icons/CodeCatLine";
 
 interface MenuItem {
     id: string;
@@ -21,27 +19,70 @@ interface SidebarProps {
 }
 
 const Sidebar = ({isOpen = true, onToggle, isExpanded = true, onToggleExpanded, onActiveItemChange}: SidebarProps) => {
-    const [activeItem, setActiveItem] = useState('About Us');
+    const [activeItem, setActiveItem] = useState('about');
 
     const menuItems: MenuItem[] = [{
         id: 'about',
         label: 'About Us',
-        href: '/about',
-        icon: <CodeCatLine style={{strokeWidth:10, stroke:"currentColor", width:20, 
-            height:20, fill:"none", viewBox:"0 0 24 24"}}/>
+        href: '#about',
+        icon: <CodeCatLine
+            width={20}
+            height={20}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={10}
+        />
     },{
         id: 'solutions',
         label: 'Solutions',
-        href: '/solutions',
+        href: '#solutions',
         icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+    },{
+        id: 'mission-vision',
+        label: 'Mission & Vision',
+        href: '#mission-vision',
+        icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+    },{
+        id: 'values',
+        label: 'Values',
+        href: '#values',
+        icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+    },{
+        id: 'contact',
+        label: 'Contact',
+        href: '#contact',
+        icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
     }];
 
     const handleItemClick = (item: MenuItem) => {
         setActiveItem(item.id);
         onActiveItemChange?.(item.label);
+
+        // Smooth scroll to section
+        const element = document.querySelector(item.href);
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Close sidebar on mobile after navigation
+        if (window.innerWidth < 1024) {
+            onToggle?.();
+        }
     };
 
     return (<>
@@ -109,11 +150,10 @@ const Sidebar = ({isOpen = true, onToggle, isExpanded = true, onToggleExpanded, 
             <nav className={`transition-all duration-300 ease-in-out ${isExpanded ? 'p-4' : 'p-2'}`}>
                 <ul className="space-y-2">
                     {menuItems.map((item) => (<li key={item.id}>
-                        <Link
-                            href={item.href}
+                        <button
                             onClick={() => handleItemClick(item)}
                             className={`
-                    flex items-center rounded-lg transition-all duration-300 ease-in-out group relative
+                    w-full flex items-center rounded-lg transition-all duration-300 ease-in-out group relative text-left
                     ${isExpanded ? 'px-4 py-3' : 'px-3 py-3 justify-center'}
                     ${activeItem === item.id 
                         ? 'bg-blue/20 text-blue border-l-4 border-blue' + (isExpanded ? ' shadow-md' : '') 
@@ -145,7 +185,7 @@ const Sidebar = ({isOpen = true, onToggle, isExpanded = true, onToggleExpanded, 
                                 <div
                                     className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-surface2 rotate-45 border-l border-b border-surface1"></div>
                             </div>
-                        </Link>
+                        </button>
                     </li>))}
                 </ul>
             </nav>
