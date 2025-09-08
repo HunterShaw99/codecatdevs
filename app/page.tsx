@@ -115,18 +115,37 @@ export default function HomePage() {
 
   return (
     <div className="w-full">
+  {/* Test animated background - CORRECTED VERSION */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: -10,
+          top: '-50%',
+          left: '-50%',
+          width: '200%',
+          height: '200%',
+          background: 'repeating-linear-gradient(-45deg, #f5e0dc 0px, #f5e0dc 40px, #cba6f7 40px, #cba6f7 80px)',
+          opacity: 0.35,
+          animation: 'slide-diagonal 8s linear infinite',
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          transform: 'translate3d(0, 0, 0)'
+        }}
+      ></div>
+
+
+
       {/* Navigation Headers - Full width */}
       <Navigation items={navigationItems} />
 
-      {/* Page content with horizontal padding */}
-      <div className="px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-        <div className="main-container">
-          <h1 className="heading-main">Code Cat Developers</h1>
+      {/* Page content with consistent width for all sections */}
+      <div className="min-h-screen">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <div className="space-y-12 py-8">
+            <h1 className="heading-main text-center">Code Cat Developers</h1>
 
-          {/* About Section and Values in the same row */}
-          <Section id="about">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* About Our Company */}
+            {/* About Section */}
+            <Section id="about">
               <Card className="flex flex-col items-center justify-center relative">
                 <CodeCatLine
                   width={320}
@@ -136,17 +155,77 @@ export default function HomePage() {
                 />
                 <div className="text-center mb-8 z-10">
                   <h2 className="heading-section">About Our Company</h2>
-                  <p className="text-description max-w-3xl mx-auto">
+                  <p className="text-description max-w-4xl mx-auto">
                     Code, coffee, and cats. With over a decade of experience, and our 3 C's fueling us, we're positive that we can deliver effective and simple web solutions for your everyday issues. Pittsburgh-based and proud, we strive to offer the best possible service in development to your needs, from creating a landing page for your newly created business that matches your personal vibes, to engineering a solution for that monotonous, repeatable task that's driving you wild. Spreadsheet data entry and data crunching, generation of tailored PDF reports, we're happy to chat about any problems you're experiencing, and find a path forward, no overhead, no cattiness. We leave that to the actual cats in our lives!
                   </p>
                 </div>
               </Card>
+            </Section>
 
-              {/* Our Core Values */}
+            {/* Mission & Vision Section */}
+            <Section id="mission-vision">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <div className="flex items-center mb-4">
+                    <div className="icon-container bg-teal/20">
+                      <svg className="w-6 h-6 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <h2 className="heading-subsection text-teal">Our Mission</h2>
+                  </div>
+                  <p className="text-subtext1">
+                    To provide our clients with innovative and effective software solutions that enhance their business operations, while fostering a culture of collaboration, integrity, and continuous improvement.
+                  </p>
+                </Card>
+
+                <Card>
+                  <div className="flex items-center mb-4">
+                    <div className="icon-container bg-sky/20">
+                      <svg className="w-6 h-6 text-sky" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </div>
+                    <h2 className="heading-subsection text-sky">Our Vision</h2>
+                  </div>
+                  <p className="text-subtext1">
+                    To empower businesses through technology, enabling them to achieve their goals and make a positive impact in their industries and communities.
+                  </p>
+                </Card>
+              </div>
+            </Section>
+
+            {/* Solutions Section */}
+            <Section id="solutions">
               <Card>
-                <div id="values" className="section-spacing">
+                <h2 className="heading-section">Our Solutions</h2>
+                <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
+                  Discover our comprehensive suite of solutions designed to meet your business needs and drive your success forward.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {solutions.map((solution, index) => (
+                    <SolutionCard
+                      key={index}
+                      icon={solution.icon}
+                      title={solution.title}
+                      description={solution.description}
+                      variant={solution.variant}
+                      iconBgColor={solution.iconBgColor}
+                      iconColor={solution.iconColor}
+                    />
+                  ))}
+                </div>
+              </Card>
+            </Section>
+
+            {/* Values Section */}
+            <Section id="values">
+              <Card>
+                <div className="section-spacing">
                   <h2 className="heading-section">Our Core Values</h2>
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {coreValues.map((value, index) => (
                       <ValueItem
                         key={index}
@@ -160,81 +239,23 @@ export default function HomePage() {
                   </div>
                 </div>
               </Card>
-            </div>
-          </Section>
+            </Section>
 
-          {/* Mission & Vision */}
-          <Section id="mission-vision">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <div className="flex items-center mb-4">
-                  <div className="icon-container bg-teal/20">
-                    <svg className="w-6 h-6 text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <h2 className="heading-subsection text-teal">Our Mission</h2>
-                </div>
-                <p className="text-subtext1">
-                  To provide our clients with innovative and effective software solutions that enhance their business operations, while fostering a culture of collaboration, integrity, and continuous improvement.
+            {/* Contact CTA */}
+            <Section id="contact">
+              <div className="gradient-cta">
+                <h2 className="text-2xl font-bold text-mantle mb-4">Ready to Work Together?</h2>
+                <p className="text-base mb-6 max-w-3xl mx-auto">
+                  Let's discuss how we can help transform your business with innovative technology solutions
+                  tailored to your specific needs.
                 </p>
-              </Card>
-
-              <Card>
-                <div className="flex items-center mb-4">
-                  <div className="icon-container bg-sky/20">
-                    <svg className="w-6 h-6 text-sky" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  </div>
-                  <h2 className="heading-subsection text-sky">Our Vision</h2>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button variant="primary">Get In Touch</Button>
+                  <Button variant="secondary">View Our Work</Button>
                 </div>
-                <p className="text-subtext1">
-                  To empower businesses through technology, enabling them to achieve their goals and make a positive impact in their industries and communities.
-                </p>
-              </Card>
-            </div>
-          </Section>
-
-          {/* Solutions Section */}
-          <Section id="solutions">
-            <Card>
-              <h2 className="heading-section">Our Solutions</h2>
-              <p className="text-subtext1 mb-6 text-center max-w-3xl mx-auto">
-                Discover our comprehensive suite of solutions designed to meet your business needs and drive your success forward.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {solutions.map((solution, index) => (
-                  <SolutionCard
-                    key={index}
-                    icon={solution.icon}
-                    title={solution.title}
-                    description={solution.description}
-                    variant={solution.variant}
-                    iconBgColor={solution.iconBgColor}
-                    iconColor={solution.iconColor}
-                  />
-                ))}
               </div>
-            </Card>
-          </Section>
-
-          {/* Contact CTA */}
-          <Section id="contact">
-            <div className="gradient-cta">
-              <h2 className="text-2xl font-bold text-mantle mb-4">Ready to Work Together?</h2>
-              <p className="text-base mb-6 max-w-2xl mx-auto">
-                Let's discuss how we can help transform your business with innovative technology solutions
-                tailored to your specific needs.
-              </p>
-              <div className="space-x-4">
-                <Button variant="primary">Get In Touch</Button>
-                <Button variant="secondary">View Our Work</Button>
-              </div>
-            </div>
-          </Section>
+            </Section>
+          </div>
         </div>
       </div>
     </div>

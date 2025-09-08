@@ -2,6 +2,17 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Define keyframes animation at the root level */
+@keyframes slide-diagonal {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(113.14px, 113.14px, 0);
+  }
+}
+
+
 :root {
   /* Catppuccin Mocha Color Palette */
   --ctp-rosewater: #f5e0dc;
@@ -46,6 +57,7 @@
   --secondary: var(--ctp-surface1);
   --secondary-foreground: var(--ctp-text);
 }
+
 
 @theme inline {
   --color-background: var(--background);
@@ -92,7 +104,11 @@
   
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Define custom animation keyframes and utilities for Tailwind v4 */
+  --animate-slide-diagonal: slide-diagonal 20s linear infinite;
 }
+
 
 body {
   background: var(--background);
@@ -107,7 +123,7 @@ body {
   .nav-header {
     @apply sticky top-0 z-50 bg-surface0 shadow-md border-b border-surface1 px-4 py-3 mb-6 w-full;
   }
-  
+
   .nav-link {
     @apply text-sm font-medium text-subtext1 hover:text-blue transition-colors py-2 px-4 rounded-md hover:bg-surface1;
   }
@@ -185,6 +201,29 @@ body {
   .gradient-cta {
     @apply bg-gradient-to-r from-sapphire to-mauve rounded-3xl shadow-2xl p-8 text-center text-white mb-2;
   }
+
+  /* Animated Background using Tailwind v4 syntax */
+  .animated-strips-background {
+    @apply fixed inset-0 pointer-events-none;
+    z-index: -10;
+    background: repeating-linear-gradient(
+      -45deg,
+      #f5e0dc 0px,
+      #f5e0dc 40px,
+      #cba6f7 40px,
+      #cba6f7 80px
+    );
+    animation: slide-diagonal 8s linear infinite;
+    opacity: 0.35;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+  }
+
 
   /* Value Items */
   .value-item {
