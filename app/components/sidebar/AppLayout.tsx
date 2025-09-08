@@ -23,7 +23,7 @@ const AppLayout = ({children}: AppLayoutProps) => {
                 >
                     <div className={'flex justify-center items-center'} style={{ color: '#bac2de' }}>Proudly made by</div>
                     <div className={'flex justify-center items-center text-lg'}>⌨️ 🐱 ☕</div>
-                    <a className={'flex justify-center items-center'} href="https://www.flaticon.com/free-icons/cute" title="cute icons">Cute icons created by Whitevector - Flaticon</a>
+                    <a className={'flex justify-center items-center opacity-33'} href="https://www.flaticon.com/free-icons/cute" title="cute icons">Cute icons created by Whitevector - Flaticon</a>
                 </footer>
             </div>
         </div>
