@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Vibur&display=swap");
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -105,6 +106,8 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
+  --font-display: "Vibur", sans-serif; 
+
   /* Define custom animation keyframes and utilities for Tailwind v4 */
   --animate-slide-diagonal: slide-diagonal 20s linear infinite;
 }
@@ -169,7 +172,9 @@ body {
 
   /* Typography */
   .heading-main {
-    @apply text-6xl text-center font-bold items-center z-10 mb-6 p-6 text-lavender;
+    @apply text-8xl text-center font-bold font-display items-center z-10 mb-6 p-6 text-mauve 
+    [text-shadow:0px_0px_7px_white,0px_0px_10px_white,0px_0px_21px_white,0px_0px_42px_#cba6f7,0px_0px_82px_#cba6f7,0px_0px_92px_#cba6f7,0px_0px_102px_#cba6f7,0px_0px_151px_#cba6f7] 
+    animate-[pulsate_.11s_ease-in-out_infinite_alternate];
   }
 
   .heading-section {
@@ -214,7 +219,7 @@ body {
       #cba6f7 80px
     );
     animation: slide-diagonal 8s linear infinite;
-    opacity: 0.35;
+    opacity: 0.5;
     width: 200%;
     height: 200%;
     top: -50%;
@@ -233,4 +238,46 @@ body {
   .value-content {
     @apply text-lg font-semibold text-text mb-2;
   }
+}
+
+@keyframes pulsate {
+    
+  100% {
+
+      text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px #cba6f7,
+      0 0 80px #cba6f7,
+      0 0 90px #cba6f7,
+      0 0 100px #cba6f7,
+      0 0 150px #cba6f7;
+  
+  }
+
+    0% {
+
+    text-shadow:
+    0 0 4px #fff,
+    0 0 10px #fff,
+    0 0 18px #fff,
+    0 0 38px #cba6f7,
+    0 0 73px #cba6f7,
+    0 0 80px #cba6f7,
+    0 0 94px #cba6f7,
+    0 0 140px #cba6f7;
+}
+}  
+
+h1 {
+  border: 0.2rem solid #fff;
+  border-radius: 2rem;
+  padding: 0.4em;
+  box-shadow: 0 0 .2rem #fff,
+              0 0 .2rem #fff,
+              0 0 2rem #cba6f7,
+              0 0 0.8rem #cba6f7,
+              0 0 2.8rem #cba6f7,
+              inset 0 0 1.3rem #cba6f7;
 }

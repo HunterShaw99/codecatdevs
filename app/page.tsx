@@ -125,7 +125,7 @@ export default function HomePage() {
           width: '200%',
           height: '200%',
           background: 'repeating-linear-gradient(-45deg, #f5e0dc 0px, #f5e0dc 40px, #cba6f7 40px, #cba6f7 80px)',
-          opacity: 0.35,
+          opacity: 0.5,
           animation: 'slide-diagonal 8s linear infinite',
           willChange: 'transform',
           backfaceVisibility: 'hidden',
@@ -142,14 +142,14 @@ export default function HomePage() {
       <div className="min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
           <div className="space-y-12 py-8">
-            <h1 className="heading-main text-center">Code Cat Developers</h1>
+            <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
 
             {/* About Section */}
             <Section id="about">
               <Card className="flex flex-col items-center justify-center relative">
                 <CodeCatLine
-                  width={320}
-                  height={320}
+                  width={280}
+                  height={280}
                   className="absolute opacity-25 rounded-lg pointer-events-none dark:invert"
                   fill="--ctp-crust"
                 />
