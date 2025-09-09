@@ -157,8 +157,8 @@ body {
     @apply bg-mauve/10 rounded-lg p-6 border border-mauve/20 cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.1),_0_0_20px_rgba(203,166,247,0.3)];
   }
 
-  .card-solution-peach {
-    @apply bg-peach/10 rounded-lg p-6 border border-peach/20 cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.1),_0_0_20px_rgba(250,179,135,0.3)];
+  .card-solution-sky {
+    @apply bg-sky/10 rounded-lg p-6 border border-sky/20 cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.1),_0_0_20px_#89dceb];
   }
 
   /* Icons */

@@ -65,7 +65,7 @@ export default function HomePage() {
   const solutions = [
     {
       title: 'Fast Performance',
-      description: 'Lightning-fast solutions that deliver exceptional performance and user experience for your customers.',
+      description: 'Effeciency is at the core of our solutions. We optimize for speed and performance, ensuring your websites are snappy and responsive, your services process quickly and return outputs in a timely manner, and you\'re free to get back to what matters most to you.',
       variant: 'solution' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,8 +76,8 @@ export default function HomePage() {
       iconColor: 'text-blue'
     },
     {
-      title: 'Reliable Security',
-      description: 'Enterprise-grade security features to protect your data and maintain compliance with industry standards.',
+      title: 'No Maintenance',
+      description: 'We handle the heavy (and light) lifting, managing the code base and hosting so you can focus on your business. But, if you\'d rather own the output product than consume it as a service, we provide options for that as well.',
       variant: 'solution-green' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,8 +88,8 @@ export default function HomePage() {
       iconColor: 'text-green'
     },
     {
-      title: 'Scalable Architecture',
-      description: 'Built to scale with your business growth and evolving requirements, from startup to enterprise.',
+      title: 'Flexible Development',
+      description: 'Our focus is making sure you\'re comfortable with and included in our process as much as you want to be. Whether through an agile approach, with iterative and flexible cycling, or an agreed upon devirable up front, we\'re happy to work with you - however works best for you!',
       variant: 'solution-mauve' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,16 +100,16 @@ export default function HomePage() {
       iconColor: 'text-mauve'
     },
     {
-      title: 'Ongoing Support',
-      description: 'Comprehensive support to ensure your operations run smoothly and efficiently at all times.',
-      variant: 'solution-peach' as const,
+      title: 'Continuous Support',
+      description: 'We\'re here to help you every step of the way, from initial setup to ongoing support and enhancements. Have a question? Need help with something? We\'re just a message away.',
+      variant: 'solution-sky' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       ),
-      iconBgColor: 'bg-peach/20',
-      iconColor: 'text-peach'
+      iconBgColor: 'bg-sky/20',
+      iconColor: 'text-sky'
     }
   ];
 
@@ -201,7 +201,9 @@ export default function HomePage() {
               <Card>
                 <h2 className="heading-section">Our Solutions</h2>
                 <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
-                  Discover our comprehensive suite of solutions designed to meet your business needs and drive your success forward.
+                    Big or small, customer-facing or internal, front-end, back-end, full stack, we've done it all. 
+                    Our solutions are designed to meet the unique needs of your business, leveraging the latest 
+                    technologies and best practices to deliver exceptional results.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
