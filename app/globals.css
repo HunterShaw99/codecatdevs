@@ -74,7 +74,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  
+
   /* Catppuccin colors available as Tailwind classes */
   --color-rosewater: var(--ctp-rosewater);
   --color-flamingo: var(--ctp-flamingo);
@@ -102,11 +102,11 @@
   --color-base: var(--ctp-base);
   --color-mantle: var(--ctp-mantle);
   --color-crust: var(--ctp-crust);
-  
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --font-display: "Vibur", sans-serif; 
+  --font-display: "Vibur", sans-serif;
 
   /* Define custom animation keyframes and utilities for Tailwind v4 */
   --animate-slide-diagonal: slide-diagonal 20s linear infinite;
@@ -172,8 +172,8 @@ body {
 
   /* Typography */
   .heading-main {
-    @apply text-8xl text-center font-bold font-display items-center z-10 mb-6 p-6 text-mauve 
-    [text-shadow:0px_0px_7px_white,0px_0px_10px_white,0px_0px_21px_white,0px_0px_42px_#cba6f7,0px_0px_82px_#cba6f7,0px_0px_92px_#cba6f7,0px_0px_102px_#cba6f7,0px_0px_151px_#cba6f7] 
+    @apply text-8xl text-center font-bold font-display items-center z-10 mb-6 p-6
+    [text-shadow:0px_0px_7px_#b4befe,0px_0px_10px_#b4befe,0px_0px_21px_#b4befe,0px_0px_42px_#89b4fa,0px_0px_82px_#89b4fa,0px_0px_92px_#89b4fa,0px_0px_102px_#89b4fa,0px_0px_151px_#89b4fa] 
     animate-[pulsate_.11s_ease-in-out_infinite_alternate];
   }
 
@@ -215,7 +215,7 @@ body {
       -45deg,
       #f5e0dc 0px,
       #f5e0dc 40px,
-      #cba6f7 40px,
+        #cba6f7 40px,
       #cba6f7 80px
     );
     animation: slide-diagonal 8s linear infinite;
@@ -229,6 +229,25 @@ body {
     transform: translate3d(0, 0, 0);
   }
 
+  .gradient-backdrop {
+    @apply fixed inset-0 pointer-events-none;
+    z-index: -10;
+    background: linear-gradient(-45deg, #89b4fa, #f38ba8, #fab387, #a6e3a1);
+    background-size: 200% 200%;
+    animation: gradient 15s ease infinite;
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
 
   /* Value Items */
   .value-item {
@@ -241,43 +260,45 @@ body {
 }
 
 @keyframes pulsate {
-    
+
   100% {
 
-      text-shadow:
-      0 0 4px #fff,
-      0 0 11px #fff,
-      0 0 19px #fff,
-      0 0 40px #cba6f7,
-      0 0 80px #cba6f7,
-      0 0 90px #cba6f7,
-      0 0 100px #cba6f7,
-      0 0 150px #cba6f7;
-  
+    text-shadow:
+      0 0 4px #b4befe,
+      0 0 11px #b4befe,
+      0 0 19px #b4befe,
+      0 0 40px #89b4fa,
+      0 0 80px #89b4fa,
+      0 0 90px #89b4fa,
+      0 0 100px #89b4fa,
+      0 0 150px #89b4fa;
+
   }
 
-    0% {
+  0% {
 
     text-shadow:
-    0 0 4px #fff,
-    0 0 10px #fff,
-    0 0 18px #fff,
-    0 0 38px #cba6f7,
-    0 0 73px #cba6f7,
-    0 0 80px #cba6f7,
-    0 0 94px #cba6f7,
-    0 0 140px #cba6f7;
+      0 0 4px #b4befe,
+      0 0 10px #b4befe,
+      0 0 18px #b4befe,
+      0 0 38px #89b4fa,
+      0 0 73px #89b4fa,
+      0 0 80px #89b4fa,
+      0 0 94px #89b4fa,
+      0 0 140px #89b4fa;
+  }
 }
-}  
 
 h1 {
-  border: 0.2rem solid #fff;
+  border: 0.2rem solid #b4befe;
   border-radius: 2rem;
-  padding: 0.4em;
-  box-shadow: 0 0 .2rem #fff,
-              0 0 .2rem #fff,
-              0 0 2rem #cba6f7,
-              0 0 0.8rem #cba6f7,
-              0 0 2.8rem #cba6f7,
-              inset 0 0 1.3rem #cba6f7;
+  box-shadow: 0 0 .2rem #b4befe,
+    0 0 0.8rem #89b4fa,
+    0 0 2rem #89b4fa,
+    0 0 2.8rem #89b4fa,
+    inset 0 0 .2rem #b4befe,
+    inset 0 0 0.8rem #89b4fa,
+    inset 0 0 2rem #89b4fa,
+    inset 0 0 2.8rem #89b4fa;
 }
+

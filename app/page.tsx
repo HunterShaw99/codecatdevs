@@ -115,25 +115,7 @@ export default function HomePage() {
 
   return (
     <div className="w-full">
-  {/* Test animated background - CORRECTED VERSION */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          zIndex: -10,
-          top: '-50%',
-          left: '-50%',
-          width: '200%',
-          height: '200%',
-          background: 'repeating-linear-gradient(-45deg, #f5e0dc 0px, #f5e0dc 40px, #cba6f7 40px, #cba6f7 80px)',
-          opacity: 0.5,
-          animation: 'slide-diagonal 8s linear infinite',
-          willChange: 'transform',
-          backfaceVisibility: 'hidden',
-          transform: 'translate3d(0, 0, 0)'
-        }}
-      ></div>
-
-
+    <div className='gradient-backdrop'></div>
 
       {/* Navigation Headers - Full width */}
       <Navigation items={navigationItems} />
@@ -142,7 +124,9 @@ export default function HomePage() {
       <div className="min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
           <div className="space-y-12 py-8">
+            <Card className="flex items-center justify-center">
             <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
+            </Card>
 
             {/* About Section */}
             <Section id="about">
