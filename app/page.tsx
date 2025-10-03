@@ -5,6 +5,7 @@ import { ValueItem } from '@/app/components/ValueItem';
 import { SolutionCard } from '@/app/components/SolutionCard';
 import { Button } from '@/app/components/Button';
 import CodeCatLine from '@/app/components/icons/CodeCatLine';
+import CardMap from './components/map/Map';
 
 export default function HomePage() {
   const navigationItems = [
@@ -226,6 +227,11 @@ export default function HomePage() {
                 </div>
               </Card>
             </Section>
+            
+            <Card>
+              <div className="heading-section mb-4">Local Spots We Love</div>
+              <CardMap />
+            </Card>
 
             {/* Contact CTA */}
             <Section id="contact">
