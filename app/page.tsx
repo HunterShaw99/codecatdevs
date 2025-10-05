@@ -1,9 +1,12 @@
+'use client';
+
 import { Navigation } from '@/app/components/Navigation';
 import { Section } from '@/app/components/Section';
 import { Card } from '@/app/components/Card';
 import { ValueItem } from '@/app/components/ValueItem';
 import { SolutionCard } from '@/app/components/SolutionCard';
 import { Button } from '@/app/components/Button';
+import { ContactModal } from '@/app/components/ContactModal';
 import CodeCatLine from '@/app/components/icons/CodeCatLine';
 
 export default function HomePage() {
@@ -112,21 +115,18 @@ export default function HomePage() {
       iconColor: 'text-sky'
     }
   ];
-
+// <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
   return (
     <div className="w-full">
     <div className='gradient-backdrop'></div>
 
       {/* Navigation Headers - Full width */}
-      <Navigation items={navigationItems} />
+      <Navigation items={navigationItems} title={'Code Cat Developers LLC'} />
 
       {/* Page content with consistent width for all sections */}
       <div className="min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
           <div className="space-y-12 py-8">
-            <Card className="flex items-center justify-center">
-            <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
-            </Card>
 
             {/* About Section */}
             <Section id="about">
@@ -185,8 +185,8 @@ export default function HomePage() {
               <Card>
                 <h2 className="heading-section">Our Solutions</h2>
                 <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
-                    Big or small, customer-facing or internal, front-end, back-end, full stack, we've done it all. 
-                    Our solutions are designed to meet the unique needs of your business, leveraging the latest 
+                    Big or small, customer-facing or internal, front-end, back-end, full stack, we've done it all.
+                    Our solutions are designed to meet the unique needs of your business, leveraging the latest
                     technologies and best practices to deliver exceptional results.
                 </p>
 
@@ -236,7 +236,9 @@ export default function HomePage() {
                   tailored to your specific needs.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="primary">Get In Touch</Button>
+                  <ContactModal
+                    trigger={<Button variant="primary">Get In Touch</Button>}
+                  />
                   <Button variant="secondary">View Our Work</Button>
                 </div>
               </div>

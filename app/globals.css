@@ -1,5 +1,7 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Vibur&display=swap");
 @import "tailwindcss";
+@import "@radix-ui/themes/styles.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -13,6 +15,74 @@
   }
 }
 
+/* Radix UI Theme Overrides - Very Dark Gray Theme */
+.radix-themes {
+  --accent-1: #001d3d;
+  --accent-2: #003566;
+  --accent-3: #0077b6;
+  --accent-4: #0096c7;
+  --accent-5: #00b4d8;
+  --accent-6: #48cae4;
+  --accent-7: #90e0ef;
+  --accent-8: #ade8f4;
+  --accent-9: #caf0f8;
+  --accent-10: #e8f9fd;
+  --accent-11: #005577;
+  --accent-12: #003d5c;
+
+  --gray-1: #0a0a0b;
+  --gray-2: #111113;
+  --gray-3: #191919;
+  --gray-4: #212121;
+  --gray-5: #2a2a2a;
+  --gray-6: #323232;
+  --gray-7: #3c3c3c;
+  --gray-8: #484848;
+  --gray-9: #606060;
+  --gray-10: #6e6e6e;
+  --gray-11: #7c7c7c;
+  --gray-12: #ededed;
+
+  --color-background: var(--gray-1);
+  --color-panel-solid: var(--gray-2);
+  --color-panel-translucent: var(--gray-2);
+  --color-overlay: var(--gray-3);
+  --color-surface: var(--gray-4);
+
+  /* Custom hover effects with ocean blue */
+  --accent-a1: #001d3d10;
+  --accent-a2: #00356620;
+  --accent-a3: #0077b630;
+  --accent-a4: #0096c740;
+  --accent-a5: #00b4d850;
+  --accent-a6: #48cae460;
+  --accent-a7: #90e0ef70;
+  --accent-a8: #ade8f480;
+  --accent-a9: #caf0f890;
+  --accent-a10: #e8f9fda0;
+  --accent-a11: #005577b0;
+  --accent-a12: #003d5cc0;
+}
+
+/* Override hover states to use ocean blue */
+.radix-themes :where(.rt-Button):where(:not(.rt-variant-ghost)):where([data-accent-color="blue"]):hover {
+  background-color: #0077b6;
+  border-color: #00b4d8;
+}
+
+.radix-themes :where(.rt-Card):hover {
+  border-color: #48cae4;
+  box-shadow: 0 4px 12px rgba(72, 202, 228, 0.2);
+}
+
+.radix-themes :where(.rt-Link):hover {
+  color: #90e0ef;
+}
+
+.radix-themes :where([data-accent-color="blue"]):hover {
+  --accent-9: #48cae4;
+  --accent-10: #90e0ef;
+}
 
 :root {
   /* Catppuccin Mocha Color Palette */
@@ -43,22 +113,21 @@
   --ctp-mantle: #181825;
   --ctp-crust: #11111b;
 
-  /* Theme Variables */
-  --background: var(--ctp-base);
-  --foreground: var(--ctp-text);
-  --muted: var(--ctp-surface0);
-  --muted-foreground: var(--ctp-subtext0);
-  --card: var(--ctp-surface0);
-  --card-foreground: var(--ctp-text);
-  --border: var(--ctp-surface1);
-  --accent: var(--ctp-mauve);
-  --accent-foreground: var(--ctp-base);
-  --primary: var(--ctp-blue);
-  --primary-foreground: var(--ctp-base);
-  --secondary: var(--ctp-surface1);
-  --secondary-foreground: var(--ctp-text);
+/* Theme Variables - Updated to very dark grays */
+  --background: #050505;
+  --foreground: #ededed;
+  --muted: #191919;
+  --muted-foreground: #7c7c7c;
+  --card: #111113;
+  --card-foreground: #ededed;
+  --border: #212121;
+  --accent: #48cae4;
+  --accent-foreground: #0a0a0b;
+  --primary: #0077b6;
+  --primary-foreground: #e8f9fd;
+  --secondary: #2a2a2a;
+  --secondary-foreground: #ededed;
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -74,6 +143,25 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+
+  /* Ocean blue variations */
+  --color-ocean-blue-1: #001d3d;
+  --color-ocean-blue-2: #003566;
+  --color-ocean-blue-3: #0077b6;
+  --color-ocean-blue-4: #0096c7;
+  --color-ocean-blue-5: #00b4d8;
+  --color-ocean-blue-6: #48cae4;
+  --color-ocean-blue-7: #90e0ef;
+  --color-ocean-blue-8: #ade8f4;
+  --color-ocean-blue-9: #caf0f8;
+
+  /* Very dark grays */
+  --color-dark-gray-1: #050505;
+  --color-dark-gray-2: #111113;
+  --color-dark-gray-3: #191919;
+  --color-dark-gray-4: #212121;
+  --color-dark-gray-5: #2a2a2a;
+  --color-dark-gray-6: #323232;
 
   /* Catppuccin colors available as Tailwind classes */
   --color-rosewater: var(--ctp-rosewater);
@@ -112,7 +200,6 @@
   --animate-slide-diagonal: slide-diagonal 20s linear infinite;
 }
 
-
 body {
   background: var(--background);
   color: var(--foreground);
@@ -122,13 +209,23 @@ body {
 
 /* Component Classes */
 @layer components {
-  /* Navigation */
+  /* Navigation with ocean blue hover effects */
   .nav-header {
-    @apply sticky top-0 z-50 bg-surface0 shadow-md border-b border-surface1 px-4 py-3 mb-6 w-full;
+    @apply sticky top-0 z-50 shadow-md border-b px-4 py-3 mb-6 w-full;
+    background-color: var(--color-dark-gray-2);
+    border-color: var(--color-dark-gray-4);
   }
 
   .nav-link {
-    @apply text-sm font-medium text-subtext1 hover:text-blue transition-colors py-2 px-4 rounded-md hover:bg-surface1;
+    @apply text-sm font-medium py-2 px-4 rounded-md transition-all duration-300;
+    color: var(--color-foreground);
+  }
+
+  .nav-link:hover {
+    background-color: var(--color-ocean-blue-3);
+    color: var(--color-ocean-blue-9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(72, 202, 228, 0.3);
   }
 
   /* Layout */
@@ -140,25 +237,58 @@ body {
     @apply scroll-mt-24;
   }
 
-  /* Cards */
+  /* Cards with ocean blue hover effects */
   .card-primary {
-    @apply bg-surface0 rounded-3xl shadow-2xl border-4 border-surface2 p-6;
+    @apply rounded-3xl shadow-2xl p-6 transition-all duration-300;
+    border: 4px solid transparent;
   }
 
   .card-solution {
-    @apply bg-blue/10 rounded-lg p-6 border border-blue/20 cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.1),_0_0_20px_rgba(137,180,250,0.3)];
+    @apply rounded-lg p-6 cursor-pointer transition-all duration-300 ease-in-out;
+    border: 1px solid transparent;
+  }
+
+  .card-solution:hover {
+    background-color: #191919;
+    border-color: var(--color-ocean-blue-6);
+    transform: translateY(-0.5rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
   }
 
   .card-solution-green {
-    @apply bg-green/10 rounded-lg p-6 border border-green/20 cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.1),_0_0_20px_rgba(166,227,161,0.3)];
+    @apply rounded-lg p-6 cursor-pointer transition-all duration-300 ease-in-out;
+    border: 1px solid transparent;
+  }
+
+  .card-solution-green:hover {
+    background-color: #191919;
+    border-color: var(--color-ocean-blue-6);
+    transform: translateY(-0.5rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
   }
 
   .card-solution-mauve {
-    @apply bg-mauve/10 rounded-lg p-6 border border-mauve/20 cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.1),_0_0_20px_rgba(203,166,247,0.3)];
+    @apply rounded-lg p-6 cursor-pointer transition-all duration-300 ease-in-out;
+    border: 1px solid transparent;
+  }
+
+  .card-solution-mauve:hover {
+    background-color: #191919;
+    border-color: var(--color-ocean-blue-6);
+    transform: translateY(-0.5rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
   }
 
   .card-solution-sky {
-    @apply bg-sky/10 rounded-lg p-6 border border-sky/20 cursor-pointer transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.1),_0_0_20px_#89dceb];
+    @apply rounded-lg p-6 cursor-pointer transition-all duration-300 ease-in-out;
+    border: 1px solid transparent;
+  }
+
+  .card-solution-sky:hover {
+    background-color: #191919;
+    border-color: var(--color-ocean-blue-6);
+    transform: translateY(-0.5rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
   }
 
   /* Icons */
@@ -171,14 +301,15 @@ body {
   }
 
   /* Typography */
-  .heading-main {
-    @apply text-8xl text-center font-bold font-display items-center z-10 mb-6 p-6
-    [text-shadow:0px_0px_7px_#b4befe,0px_0px_10px_#b4befe,0px_0px_21px_#b4befe,0px_0px_42px_#89b4fa,0px_0px_82px_#89b4fa,0px_0px_92px_#89b4fa,0px_0px_102px_#89b4fa,0px_0px_151px_#89b4fa] 
+.heading-main {
+    @apply text-5xl text-center font-bold font-display items-center z-10 mb-6 py-3 px-2
+    [text-shadow:0px_0px_5px_#48cae4,0px_0px_8px_#48cae4,0px_0px_15px_#48cae4,0px_0px_30px_#0077b6,0px_0px_60px_#0077b6,0px_0px_70px_#0077b6,0px_0px_80px_#0077b6,0px_0px_120px_#0077b6]
     animate-[pulsate_.11s_ease-in-out_infinite_alternate];
   }
 
   .heading-section {
-    @apply text-3xl font-bold text-rosewater mb-4 text-center;
+    @apply text-3xl font-bold mb-4 text-center;
+    color: var(--color-ocean-blue-7);
   }
 
   .heading-subsection {
@@ -186,40 +317,63 @@ body {
   }
 
   .text-description {
-    @apply text-lg text-subtext1;
+    @apply text-lg;
+    color: var(--color-foreground);
   }
 
   .text-small {
-    @apply text-sm text-subtext1;
+    @apply text-sm;
+    color: var(--color-muted-foreground);
   }
 
-  /* Buttons */
+  /* Buttons with ocean blue hover effects */
   .btn-primary {
-    @apply bg-surface0 text-blue hover:bg-surface1 px-6 py-3 rounded-lg font-semibold transition-colors border-2 border-blue;
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 border-2;
+    background-color: var(--color-dark-gray-3);
+    color: var(--color-ocean-blue-6);
+    border-color: var(--color-ocean-blue-5);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-ocean-blue-3);
+    color: var(--color-ocean-blue-9);
+    border-color: var(--color-ocean-blue-6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(72, 202, 228, 0.3);
   }
 
   .btn-secondary {
-    @apply border-2 border-white text-white hover:bg-white hover:text-blue px-6 py-3 rounded-lg font-semibold transition-colors;
+    @apply border-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    border-color: var(--color-ocean-blue-5);
+    color: var(--color-ocean-blue-6);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--color-ocean-blue-6);
+    color: var(--color-dark-gray-1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(72, 202, 228, 0.3);
   }
 
   /* Gradients */
   .gradient-cta {
-    @apply bg-gradient-to-r from-sapphire to-mauve rounded-3xl shadow-2xl p-8 text-center text-white mb-2;
+    @apply rounded-3xl shadow-2xl p-8 text-center text-white mb-2;
+    background: linear-gradient(135deg, var(--color-ocean-blue-3), var(--color-ocean-blue-6));
   }
 
   /* Animated Background using Tailwind v4 syntax */
-  .animated-strips-background {
+.animated-strips-background {
     @apply fixed inset-0 pointer-events-none;
     z-index: -10;
     background: repeating-linear-gradient(
       -45deg,
-      #f5e0dc 0px,
-      #f5e0dc 40px,
-        #cba6f7 40px,
-      #cba6f7 80px
+      #0f0f10 0px,
+      #0f0f10 40px,
+      #151516 40px,
+      #151516 80px
     );
     animation: slide-diagonal 8s linear infinite;
-    opacity: 0.5;
+    opacity: 0.3;
     width: 200%;
     height: 200%;
     top: -50%;
@@ -229,13 +383,13 @@ body {
     transform: translate3d(0, 0, 0);
   }
 
-  .gradient-backdrop {
+.gradient-backdrop {
     @apply fixed inset-0 pointer-events-none;
     z-index: -10;
-    background: linear-gradient(-45deg, #89b4fa, #f38ba8, #fab387, #a6e3a1);
-    background-size: 200% 200%;
-    animation: gradient 15s ease infinite;
+    background: #050505;
+    opacity: 1;
   }
+
 
   @keyframes gradient {
     0% {
@@ -255,50 +409,103 @@ body {
   }
 
   .value-content {
-    @apply text-lg font-semibold text-text mb-2;
+    @apply text-lg font-semibold mb-2;
+    color: var(--color-foreground);
+  }
+
+  .value-content {
+    @apply text-lg font-semibold mb-2;
+    color: var(--color-foreground);
+  }
+
+  /* Contact Modal Form Styles */
+  .radix-themes :where(input[type="text"], input[type="email"], input[type="tel"], textarea):focus {
+    border-color: var(--color-ocean-blue-5) !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(72, 202, 228, 0.2);
+  }
+
+  .radix-themes :where(input[type="text"], input[type="email"], input[type="tel"], textarea):hover {
+    border-color: var(--color-ocean-blue-6);
+  }
+
+  .radix-themes :where(.rt-TextFieldRoot):focus-within {
+    border-color: var(--color-ocean-blue-5);
+    box-shadow: 0 0 0 2px rgba(72, 202, 228, 0.2);
+  }
+
+  .radix-themes :where(.rt-TextAreaRoot):focus-within {
+    border-color: var(--color-ocean-blue-5);
+    box-shadow: 0 0 0 2px rgba(72, 202, 228, 0.2);
+  }
+
+  .radix-themes :where(.rt-DialogContent) {
+    background-color: var(--color-dark-gray-2);
+    border: 2px solid var(--color-dark-gray-4);
+  }
+
+  .radix-themes :where(.rt-DialogOverlay) {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+
+.radix-themes :where(.rt-DialogTitle) {
+    outline: none !important;
+    border: none !important;
+  }
+
+  .radix-themes :where(.rt-DialogTitle):focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .radix-themes :where(.rt-DialogTitle):focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .radix-themes :where(.rt-DialogTitle)::before,
+  .radix-themes :where(.rt-DialogTitle)::after {
+    display: none !important;
   }
 }
 
 @keyframes pulsate {
-
   100% {
-
     text-shadow:
-      0 0 4px #b4befe,
-      0 0 11px #b4befe,
-      0 0 19px #b4befe,
-      0 0 40px #89b4fa,
-      0 0 80px #89b4fa,
-      0 0 90px #89b4fa,
-      0 0 100px #89b4fa,
-      0 0 150px #89b4fa;
-
+      0 0 3px #48cae4,
+      0 0 8px #48cae4,
+      0 0 14px #48cae4,
+      0 0 28px #0077b6,
+      0 0 55px #0077b6,
+      0 0 65px #0077b6,
+      0 0 75px #0077b6,
+      0 0 110px #0077b6;
   }
 
   0% {
-
     text-shadow:
-      0 0 4px #b4befe,
-      0 0 10px #b4befe,
-      0 0 18px #b4befe,
-      0 0 38px #89b4fa,
-      0 0 73px #89b4fa,
-      0 0 80px #89b4fa,
-      0 0 94px #89b4fa,
-      0 0 140px #89b4fa;
+      0 0 3px #48cae4,
+      0 0 7px #48cae4,
+      0 0 13px #48cae4,
+      0 0 26px #0077b6,
+      0 0 50px #0077b6,
+      0 0 60px #0077b6,
+      0 0 70px #0077b6,
+      0 0 105px #0077b6;
   }
 }
 
 h1 {
-  border: 0.2rem solid #b4befe;
-  border-radius: 2rem;
-  box-shadow: 0 0 .2rem #b4befe,
-    0 0 0.8rem #89b4fa,
-    0 0 2rem #89b4fa,
-    0 0 2.8rem #89b4fa,
-    inset 0 0 .2rem #b4befe,
-    inset 0 0 0.8rem #89b4fa,
-    inset 0 0 2rem #89b4fa,
-    inset 0 0 2.8rem #89b4fa;
+  border: 0.15rem solid #48cae4;
+  border-radius: 1.5rem;
+  box-shadow: 0 0 .15rem #48cae4,
+    0 0 0.6rem #0077b6,
+    0 0 1.5rem #0077b6,
+    0 0 2.2rem #0077b6,
+    inset 0 0 .15rem #48cae4,
+    inset 0 0 0.6rem #0077b6,
+    inset 0 0 1.5rem #0077b6,
+    inset 0 0 2.2rem #0077b6;
 }
-
