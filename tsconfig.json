@@ -19,7 +19,8 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@components/*": ["app/components/*"]
     },
     "target": "ES2017"
   },

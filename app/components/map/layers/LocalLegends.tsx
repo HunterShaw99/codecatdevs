@@ -1,16 +1,55 @@
 'use client';
 
-import { ScatterplotLayer } from '@deck.gl/layers';
+import { IconLayer, TextLayer } from '@deck.gl/layers';
+
+const coffeeBeanSVG = `
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" fill="none"/>
+  <ellipse cx="32" cy="32" rx="20" ry="30" fill="#6f4e37ff" />
+  <path d="M32 10 Q36 32 32 54" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+const svgToDataURL = () => { 
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(coffeeBeanSVG)}`;
+};
+
+export type CoffeeShop = {
+  coordinates: [longitude: number, latitude: number];
+  name: string,
+  address: string,
+  note?: string
+};
 
 const data = [
-  {position: [-80.08607, 40.40769], color: [255, 0, 0], radius: 100},
+  {coordinates: [-80.08607, 40.40769], 
+    name: 'Carnegie Coffee Company',
+    address: '132 E Main St, Carnegie, PA 15106',
+    note: 'Great espresso and cozy atmosphere in an old train station. LGBTQ+ friendly.'},
 ];
 
-const coffeeShopLayer = new ScatterplotLayer({
-  data: data,
-  getPosition: d => d.position,
-  getFillColor: d => d.color,
-  getRadius: d => d.radius
-});
-
-export default coffeeShopLayer;
+export const coffeeShopLayer = new IconLayer<CoffeeShop>({
+    id: 'IconLayer',
+    data: data,
+      getIcon: d => ({
+    url: svgToDataURL(),
+    width: 24,
+    height: 24
+  }),
+    sizeScale: 10,
+    getSize: 2.5,
+    getPosition: d => d.coordinates,
+    pickable: true
+  });
+  
+        // The labels
+export const coffeeShopText = new TextLayer<CoffeeShop>({
+        id: 'text-layer',
+        data : data,
+        getPosition : d => d.coordinates, 
+        getText : d => d.name,
+        getColor: [0, 0, 0, 255], // Black color
+        getSize: 10, 
+        getPixelOffset: [0, -20], // Example: offset text above the icon
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'bold'
+      });

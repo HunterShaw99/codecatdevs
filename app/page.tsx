@@ -1,9 +1,12 @@
+'use client';
+
 import { Navigation } from '@/app/components/Navigation';
 import { Section } from '@/app/components/Section';
 import { Card } from '@/app/components/Card';
 import { ValueItem } from '@/app/components/ValueItem';
 import { SolutionCard } from '@/app/components/SolutionCard';
 import { Button } from '@/app/components/Button';
+import { ContactModal } from '@/app/components/ContactModal';
 import CodeCatLine from '@/app/components/icons/CodeCatLine';
 import CardMap from './components/map/Map';
 
@@ -13,6 +16,7 @@ export default function HomePage() {
     { label: 'Mission & Vision', href: '#mission-vision' },
     { label: 'Solutions', href: '#solutions' },
     { label: 'Values', href: '#values' },
+    { label: 'Coffee Map', href: '#map' },
     { label: 'Contact', href: '#contact' }
   ];
 
@@ -90,7 +94,7 @@ export default function HomePage() {
     },
     {
       title: 'Flexible Development',
-      description: 'Our focus is making sure you\'re comfortable with and included in our process as much as you want to be. Whether through an agile approach, with iterative and flexible cycling, or an agreed upon devirable up front, we\'re happy to work with you - however works best for you!',
+      description: 'Our focus is making sure you\'re comfortable with and included in our process as much as you want to be. Whether through an agile approach, with iterative and flexible cycling, or an agreed upon deliverable up front, we\'re happy to work with you - however works best for you!',
       variant: 'solution-mauve' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,21 +117,18 @@ export default function HomePage() {
       iconColor: 'text-sky'
     }
   ];
-
+// <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
   return (
     <div className="w-full">
     <div className='gradient-backdrop'></div>
 
       {/* Navigation Headers - Full width */}
-      <Navigation items={navigationItems} />
+      <Navigation items={navigationItems} title={'Code Cat Developers LLC'} />
 
       {/* Page content with consistent width for all sections */}
       <div className="min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
           <div className="space-y-12 py-8">
-            <Card className="flex items-center justify-center">
-            <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
-            </Card>
 
             {/* About Section */}
             <Section id="about">
@@ -141,7 +142,27 @@ export default function HomePage() {
                 <div className="text-center mb-8 z-10">
                   <h2 className="heading-section">About Our Company</h2>
                   <p className="text-description max-w-4xl mx-auto">
-                    Code, coffee, and cats. With over a decade of experience, and our 3 C's fueling us, we're positive that we can deliver effective and simple web solutions for your everyday issues. Pittsburgh-based and proud, we strive to offer the best possible service in development to your needs, from creating a landing page for your newly created business that matches your personal vibes, to engineering a solution for that monotonous, repeatable task that's driving you wild. Spreadsheet data entry and data crunching, generation of tailored PDF reports, we're happy to chat about any problems you're experiencing, and find a path forward, no overhead, no cattiness. We leave that to the actual cats in our lives!
+                    With over a decade of experience in GIS and Software engineering, we've found a few things that keep us going.
+                     First and foremost, we love solving problems. Whether it's a complex technical challenge or a simple task that can be automated,
+                      we get a kick out of finding solutions that make life easier and more efficient. Secondly, we love working with people.
+                       Building strong relationships with our clients and colleagues has always been the key to our success, and we enjoy collaborating 
+                       to achieve shared wins.
+                        Finally, we love learning. The tech world is constantly evolving, and we thrive on staying up-to-date with the
+                         latest trends and technologies, bringing only the best and most sensible to the table.<br />
+                          <br />
+
+                    Pittsburgh-based and proud, we know what it's like to start out small. Our partnership is so strong because we both have
+                    the shared experience of being the little guy, both from small towns, both first-generation college students figuring it all out as we went.
+                      We understand the challenges that come with growing, and how rewarding it is after the fact to look back on how far you've come. Pittsburgh 
+                      makes a lot of sense as a home base in that regard - it's a city on the rise, with a thriving tech scene and a strong sense of community, one 
+                      that's changed and morphed over the years to become something new.<br />
+                       <br />                    
+                    In our personal lives, we love the 3 C's: Code, Coffee, and Cats. With a good cup of coffee or espresso, one of our furry friends 
+                    napping nearby, and some good tunes in the background, we're in our element. It's our not so secret weapon for staying focused and productive,
+                    delivering the best possible results for our clients.<br />
+                     <br />
+                    We're happy to chat about any problems you're experiencing, and find a path forward, no overhead, no cattiness. 
+                    We leave that to the actual cats in our lives!
                   </p>
                 </div>
               </Card>
@@ -160,7 +181,9 @@ export default function HomePage() {
                     <h2 className="heading-subsection text-teal">Our Mission</h2>
                   </div>
                   <p className="text-subtext1">
-                    To provide our clients with innovative and effective software solutions that enhance their business operations, while fostering a culture of collaboration, integrity, and continuous improvement.
+                    We believe in the combined power of technology and human ingenuity to solve problems and empower businesses, 
+                    but more importantly the people that run those businesses, to thrive. Our mission is to work with you to find those solutions,
+                    leveraging our shared experience and expertise to create tools that make your life easier, your business more efficient, and your goals more attainable.
                   </p>
                 </Card>
 
@@ -175,7 +198,9 @@ export default function HomePage() {
                     <h2 className="heading-subsection text-sky">Our Vision</h2>
                   </div>
                   <p className="text-subtext1">
-                    To empower businesses through technology, enabling them to achieve their goals and make a positive impact in their industries and communities.
+                    We want to be a catalyst for the small to become the large, the scary and unattainable to become the manageable and achievable.
+                    By providing accessible, affordable, and effective technology solutions, we aim to empower businesses of all sizes to compete and succeed in an increasingly digital world.
+                    We envision a future where technology is a tool for growth and innovation, not a barrier to entry.
                   </p>
                 </Card>
               </div>
@@ -186,8 +211,8 @@ export default function HomePage() {
               <Card>
                 <h2 className="heading-section">Our Solutions</h2>
                 <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
-                    Big or small, customer-facing or internal, front-end, back-end, full stack, we've done it all. 
-                    Our solutions are designed to meet the unique needs of your business, leveraging the latest 
+                    Big or small, customer-facing or internal, front-end, back-end, full stack, we've done it all.
+                    Our solutions are designed to meet the unique needs of your business, leveraging the latest
                     technologies and best practices to deliver exceptional results.
                 </p>
 
@@ -228,10 +253,12 @@ export default function HomePage() {
               </Card>
             </Section>
             
-            <Card>
-              <div className="heading-section mb-4">Local Spots We Love</div>
-              <CardMap />
-            </Card>
+            <Section id="map">
+              <Card>
+                <div className="heading-section mb-4">Our Local Caffeine Haunts</div>
+                <CardMap />
+              </Card>
+            </Section>
 
             {/* Contact CTA */}
             <Section id="contact">
@@ -242,7 +269,9 @@ export default function HomePage() {
                   tailored to your specific needs.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="primary">Get In Touch</Button>
+                  <ContactModal
+                    trigger={<Button variant="primary">Get In Touch</Button>}
+                  />
                   <Button variant="secondary">View Our Work</Button>
                 </div>
               </div>
