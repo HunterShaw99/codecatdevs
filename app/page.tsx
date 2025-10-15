@@ -81,7 +81,7 @@ export default function HomePage() {
     {
       title: 'No Maintenance',
       description: 'We handle the heavy (and light) lifting, managing the code base and hosting so you can focus on your business. But, if you\'d rather own the output product than consume it as a service, we provide options for that as well.',
-      variant: 'solution-green' as const,
+      variant: 'solution' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -93,7 +93,7 @@ export default function HomePage() {
     {
       title: 'Flexible Development',
       description: 'Our focus is making sure you\'re comfortable with and included in our process as much as you want to be. Whether through an agile approach, with iterative and flexible cycling, or an agreed upon devirable up front, we\'re happy to work with you - however works best for you!',
-      variant: 'solution-mauve' as const,
+      variant: 'solution' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
@@ -105,7 +105,7 @@ export default function HomePage() {
     {
       title: 'Continuous Support',
       description: 'We\'re here to help you every step of the way, from initial setup to ongoing support and enhancements. Have a question? Need help with something? We\'re just a message away.',
-      variant: 'solution-sky' as const,
+      variant: 'solution' as const,
       icon: (
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -130,7 +130,7 @@ export default function HomePage() {
 
             {/* About Section */}
             <Section id="about">
-              <Card className="flex flex-col items-center justify-center relative">
+              <div className="flex flex-col items-center justify-center relative">
                 <CodeCatLine
                   width={280}
                   height={280}
@@ -143,7 +143,7 @@ export default function HomePage() {
                     Code, coffee, and cats. With over a decade of experience, and our 3 C's fueling us, we're positive that we can deliver effective and simple web solutions for your everyday issues. Pittsburgh-based and proud, we strive to offer the best possible service in development to your needs, from creating a landing page for your newly created business that matches your personal vibes, to engineering a solution for that monotonous, repeatable task that's driving you wild. Spreadsheet data entry and data crunching, generation of tailored PDF reports, we're happy to chat about any problems you're experiencing, and find a path forward, no overhead, no cattiness. We leave that to the actual cats in our lives!
                   </p>
                 </div>
-              </Card>
+              </div>
             </Section>
 
             {/* Mission & Vision Section */}
@@ -182,7 +182,7 @@ export default function HomePage() {
 
             {/* Solutions Section */}
             <Section id="solutions">
-              <Card>
+              <div>
                 <h2 className="heading-section">Our Solutions</h2>
                 <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
                     Big or small, customer-facing or internal, front-end, back-end, full stack, we've done it all.
@@ -203,12 +203,12 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-              </Card>
+              </div>
             </Section>
 
             {/* Values Section */}
             <Section id="values">
-              <Card>
+              <div>
                 <div className="section-spacing">
                   <h2 className="heading-section">Our Core Values</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -224,7 +224,7 @@ export default function HomePage() {
                     ))}
                   </div>
                 </div>
-              </Card>
+              </div>
             </Section>
 
             {/* Contact CTA */}
@@ -239,7 +239,6 @@ export default function HomePage() {
                   <ContactModal
                     trigger={<Button variant="primary">Get In Touch</Button>}
                   />
-                  <Button variant="secondary">View Our Work</Button>
                 </div>
               </div>
             </Section>

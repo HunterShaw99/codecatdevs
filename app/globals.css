@@ -240,7 +240,14 @@ body {
   /* Cards with ocean blue hover effects */
   .card-primary {
     @apply rounded-3xl shadow-2xl p-6 transition-all duration-300;
-    border: 4px solid transparent;
+    border: 1px solid transparent;
+  }
+
+      .card-primary:hover {
+    background-color: #191919;
+    border-color: var(--color-ocean-blue-6);
+    transform: translateY(-0.5rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
   }
 
   .card-solution {
@@ -405,7 +412,15 @@ body {
 
   /* Value Items */
   .value-item {
-    @apply flex items-start space-x-4;
+    @apply flex items-start space-x-4 rounded-lg p-6 transition-all duration-300 ease-in-out;
+    border: 1px solid transparent;
+  }
+
+    .value-item:hover {
+    background-color: #191919;
+    border-color: var(--color-ocean-blue-6);
+    transform: translateY(-0.5rem);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
   }
 
   .value-content {
@@ -413,10 +428,6 @@ body {
     color: var(--color-foreground);
   }
 
-  .value-content {
-    @apply text-lg font-semibold mb-2;
-    color: var(--color-foreground);
-  }
 
   /* Contact Modal Form Styles */
   .radix-themes :where(input[type="text"], input[type="email"], input[type="tel"], textarea):focus {
