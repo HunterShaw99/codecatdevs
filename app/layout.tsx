@@ -1,9 +1,7 @@
-
 import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import AppLayout from "./components/sidebar/AppLayout";
-import Head from "next/head";
 import { Theme } from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
 
@@ -20,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
     title: "Code Cat Developers",
     description: "",
+    icons: {
+        icon: "/code_cat_white.svg",
+    },
 };
 
 export default function RootLayout({
@@ -29,9 +30,6 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <Head>
-            <link rel="icon" href="/code_cat_white.svg" type="image/svg+xml" />
-        </Head>
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
