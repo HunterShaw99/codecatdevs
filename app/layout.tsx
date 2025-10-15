@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     title: "Code Cat Developers",
     description: "",
     icons: {
-        icon: "/code_cat_white.svg",
     },
 };
 
