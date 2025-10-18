@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod';
+import nodemailer from 'nodemailer';
 
 const contactFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -39,17 +40,29 @@ function escapeHtml(str: string): string {
   return str.replace(/[<>&"']/g, (char) => htmlEntities[char] || char);
 }
 
+// Create Nodemailer transporter
+function createTransporter() {
+  // Validate required environment variables
+  const requiredVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
+  const missingVars = requiredVars.filter(varName => !process.env[varName]);
+
+  if (missingVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+  }
+
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+}
+
 export async function submitContactForm(data: ContactFormData): Promise<ContactFormResult> {
   try {
-    // Validate required environment variables
-    if (!process.env.EMAIL_API_ENDPOINT || !process.env.EMAIL_API_KEY) {
-      console.error('Email service not configured: Missing EMAIL_API_ENDPOINT or EMAIL_API_KEY');
-      return {
-        success: false,
-        message: 'Email service is not configured. Please contact the administrator.',
-      };
-    }
-
     // Validate the form data
     const validatedData = contactFormSchema.parse(data);
 
@@ -85,27 +98,18 @@ ${sanitizedComments}
       <p>${escapeHtml(sanitizedComments).replace(/\n/g, '<br>')}</p>
     `.trim();
 
-    // Send email via API endpoint
-    const response = await fetch(process.env.EMAIL_API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.EMAIL_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'noreply@codecatdevs.com',
-        to: process.env.EMAIL_TO || 'contact@codecatdevs.com',
-        subject: `New Contact Form Submission from ${sanitizedFirstName} ${sanitizedLastName}`,
-        text: emailContent,
-        html: htmlContent,
-      }),
-    });
+    // Create transporter
+    const transporter = createTransporter();
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error');
-      console.error(`Email API error: ${response.status} - ${errorText}`);
-      throw new Error(`Failed to send email: ${response.status}`);
-    }
+    // Send email using Nodemailer
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || 'noreply@codecatdevs.com',
+      to: process.env.EMAIL_TO || 'contact@codecatdevs.com',
+      subject: `New Contact Form Submission from ${sanitizedFirstName} ${sanitizedLastName}`,
+      text: emailContent,
+      html: htmlContent,
+      replyTo: sanitizedEmail, // Allow easy reply to the submitter
+    });
 
     return {
       success: true,
@@ -114,7 +118,7 @@ ${sanitizedComments}
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string[]> = {};
-      error.issues.forEach((err:any) => {
+      error.issues.forEach((err: any) => {
         const path = err.path[0];
         if (path && typeof path === 'string') {
           errors[path] = [err.message];
@@ -128,6 +132,15 @@ ${sanitizedComments}
     }
 
     console.error('Contact form submission error:', error);
+
+    // Check if it's a transporter configuration error
+    if (error instanceof Error && error.message.includes('Missing required environment variables')) {
+      return {
+        success: false,
+        message: 'Email service is not configured. Please contact the administrator.',
+      };
+    }
+
     return {
       success: false,
       message: 'An error occurred while submitting your form. Please try again later.',
