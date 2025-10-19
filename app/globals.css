@@ -48,19 +48,6 @@
   --color-overlay: var(--gray-3);
   --color-surface: var(--gray-4);
 
-  /* Custom hover effects with ocean blue */
-  --accent-a1: #001d3d10;
-  --accent-a2: #00356620;
-  --accent-a3: #0077b630;
-  --accent-a4: #0096c740;
-  --accent-a5: #00b4d850;
-  --accent-a6: #48cae460;
-  --accent-a7: #90e0ef70;
-  --accent-a8: #ade8f480;
-  --accent-a9: #caf0f890;
-  --accent-a10: #e8f9fda0;
-  --accent-a11: #005577b0;
-  --accent-a12: #003d5cc0;
 }
 
 /* Override hover states to use ocean blue */
@@ -71,7 +58,7 @@
 
 .radix-themes :where(.rt-Card):hover {
   border-color: #fab387;
-  box-shadow: 0 4px 12px rgba(72, 202, 228, 0.2);
+  box-shadow: 0 4px 12px rgba(250, 179, 135, 0.6);
 }
 
 .radix-themes :where(.rt-Link):hover {
@@ -142,17 +129,6 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
-  /* Ocean blue variations */
-  --color-ocean-blue-1: #001d3d;
-  --color-ocean-blue-2: #003566;
-  --color-ocean-blue-3: #0077b6;
-  --color-ocean-blue-4: #0096c7;
-  --color-ocean-blue-5: #00b4d8;
-  --color-ocean-blue-6: #48cae4;
-  --color-ocean-blue-7: #90e0ef;
-  --color-ocean-blue-8: #ade8f4;
-  --color-ocean-blue-9: #caf0f8;
 
     /* Peach variations (from dark -> light) */
   --color-peach-1: #5a2f1a;
@@ -274,7 +250,7 @@ body {
     background-color: #191919;
     border-color: var(--color-peach-6);
     transform: translateY(-0.5rem);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
+    box-shadow: 0 4px 12px rgba(250, 179, 135, 0.6);
   }
 
   .card-solution {
@@ -286,7 +262,7 @@ body {
     background-color: #191919;
     border-color: var(--color-peach-6);
     transform: translateY(-0.5rem);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
+    box-shadow: 0 4px 12px rgba(250, 179, 135, 0.6);
   }
 
   /* Icons */
@@ -337,7 +313,7 @@ body {
     color: var(--color-peach-9);
     border-color: var(--color-peach-6);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(72, 202, 228, 0.3);
+    box-shadow: 0 4px 12px rgba(250, 179, 135, 0.3);
   }
 
   .btn-secondary {
@@ -350,7 +326,7 @@ body {
     background-color: var(--color-peach-6);
     color: var(--color-dark-gray-1);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(72, 202, 228, 0.3);
+    box-shadow: 0 4px 12px rgba(250, 179, 135, 0.3);
   }
 
   /* Gradients */
@@ -411,7 +387,7 @@ body {
     background-color: #191919;
     border-color: var(--color-peach-6);
     transform: translateY(-0.5rem);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 202, 228, 0.4);
+    box-shadow: 0 4px 12px rgba(250, 179, 135, 0.6);
   }
 
   .value-content {
@@ -420,34 +396,39 @@ body {
   }
 
 
-  /* Contact Modal Form Styles */
-  .radix-themes :where(input[type="text"], input[type="email"], input[type="tel"], textarea):focus {
-    border-color: var(--color-peach-6) !important;
-    box-shadow: 0 0 0 3px rgba(250, 179, 135, 0.12) !important;
-    outline: none;
+/* Contact Modal Form Styles */
+  .radix-themes :where(.rt-TextFieldRoot) input:focus {
+    border-color: var(--color-peach-8) !important;
+    outline: none !important;
   }
 
-  .radix-themes :where(input[type="text"], input[type="email"], input[type="tel"], textarea):hover {
-    border-color: var(--color-peach-6);
+  .radix-themes :where(.rt-TextAreaRoot) textarea:focus {
+    border-color: var(--color-peach-8) !important;
+    outline: none !important;
   }
 
   .radix-themes :where(.rt-TextFieldRoot):focus-within {
-    border-color: var(--color-peach-5);
-    box-shadow: 0 0 0 2px rgba(72, 202, 228, 0.2);
+    border-color: var(--color-peach-8) !important;
   }
 
   .radix-themes :where(.rt-TextAreaRoot):focus-within {
-    border-color: var(--color-peach-5);
-    box-shadow: 0 0 0 2px rgba(72, 202, 228, 0.2);
+    border-color: var(--color-peach-8) !important;
+  }
+
+  .radix-themes :where([data-accent-color]) input:focus,
+  .radix-themes :where([data-accent-color]) textarea:focus {
+    border-color: var(--color-peach-8) !important;
   }
 
   .radix-themes :where(.rt-DialogContent) {
     background-color: var(--color-dark-gray-2);
-    border: 2px solid var(--color-dark-gray-4);
+    border-color: var(--ctp-peach);
+    border: 2px solid;
   }
 
   .radix-themes :where(.rt-DialogOverlay) {
     background-color: rgba(0, 0, 0, 0.7);
+    border-color: var(--ctp-peach);
   }
 
 .radix-themes :where(.rt-DialogTitle) {
