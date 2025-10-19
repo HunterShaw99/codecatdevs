@@ -140,9 +140,9 @@ export default function HomePage() {
                         <Section id="about">
                             <div className="flex flex-col items-center justify-center relative">
                                 <CodeCatLine
-                                    width={280}
-                                    height={280}
-                                    className="absolute opacity-25 rounded-lg pointer-events-none dark:invert"
+                                    width={350}
+                                    height={350}
+                                    className="absolute opacity-20 rounded-lg pointer-events-none dark:invert"
                                     fill="--ctp-crust"
                                 />
                                 <div className="text-center mb-8 z-10">
