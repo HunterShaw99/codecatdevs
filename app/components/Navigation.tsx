@@ -18,7 +18,7 @@ export const Navigation = ({ items, className = "", title }: NavigationProps) =>
   return (
     <div className={`nav-header ${className}`}>
       {title && (
-        <div className="px-1 sm:px-1 lg:px-2 xl:px-4 2xl:px-8 mx-auto max-w-6xl">
+        <div className="px-1 sm:px-1 lg:px-2 xl:px-4 2xl:px-8 mx-auto flex justify-center">
           <h1 className="heading-main text-center items-center justify-center">{title}</h1>
         </div>
       )}

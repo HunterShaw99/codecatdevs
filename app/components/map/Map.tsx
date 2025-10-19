@@ -7,13 +7,14 @@ import Map, { useControl } from 'react-map-gl/maplibre';
 import { AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { coffeeShopLayer, coffeeShopText, CoffeeShop } from './layers/LocalLegends';
+import { coffeeShopLayer, coffeeShopText, Point } from './layers/CoffeeShops';
+import { restaurantLayer, restaurantText } from './layers/Restaurants';
 
 // Map bounds and zoom constraints
 const MAP_CONSTRAINTS = {
-  LONGITUDE: { MIN: -80.3, MAX: -79.9 },
-  LATITUDE: { MIN: 40.2, MAX: 40.6 },
-  ZOOM: { MIN: 8, MAX: 15 }
+  LONGITUDE: { MIN: -80.1, MAX: -79.95 },
+  LATITUDE: { MIN: 40.3, MAX: 40.5 },
+  ZOOM: { MIN: 10, MAX: 15 }
 } as const;
 
 const INITIAL_VIEW_STATE = {
@@ -32,9 +33,11 @@ const CustomAttribution = ({ position = 'bottom-right' }: CustomAttributionProps
   return null;
 };
 
+
 const CardMap = () => {
   // Memoize layers to prevent unnecessary re-renders
-  const layers = useMemo(() => [coffeeShopLayer, coffeeShopText], []);
+  const layers = useMemo(() => [
+    coffeeShopLayer, coffeeShopText, restaurantLayer, restaurantText], []);
 
   // Constrain view state to keep map within bounds
   const onViewStateChange = useCallback(({ viewState }: { viewState: MapViewState }) => {
@@ -60,18 +63,48 @@ const CardMap = () => {
   }, []);
 
   // Memoize tooltip getter
-  const getTooltip = useCallback(({ object }: PickingInfo<CoffeeShop>) => {
+  const getTooltip = useCallback(({ object }: PickingInfo<Point>) => {
     if (!object) return null;
 
+    // Inline-styled HTML so sizes don't depend on global CSS (works reliably when Deck.gl injects)
+    const html = `
+      <div style="
+        box-sizing: border-box;
+        max-width: 240px;
+        max-height: 160px;
+        overflow: auto;
+        white-space: normal;
+        word-break: break-word;
+        padding: 8px 12px;
+      ">
+        <div style="font-size:13px; font-weight:600; margin:0 0 6px 0; color:var(--ctp-text);">
+          ${object.name}
+        </div>
+        <div style="font-size:12px; color:var(--ctp-subtext, rgba(255,255,255,0.8)); margin:0;">
+          ${object.address}
+        </div>
+        <div style="font-size:10px; color:var(--ctp-subtext, rgba(255,255,255,0.8)); margin:0;">
+          ${object.note}
+        </div>
+      </div>
+    `;
+
     return {
-      html: `<h2>${object.address}</h2><div>${object.note}</div>`,
+      html,
+      // Tooltip container styles applied by Deck.gl — keep it compact and prevent overflow
       style: {
         backgroundColor: 'var(--ctp-mantle)',
         color: 'var(--ctp-text)',
-        padding: '8px 12px',
+        padding: 0, // inner padding handled in HTML above
         borderRadius: '8px',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
         border: '1px solid var(--ctp-surface0)',
+        // ensure tooltip stays visually on top without escaping layout
+        maxWidth: '240px',
+        maxHeight: '160px',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        zIndex: 9999,
       }
     };
   }, []);

@@ -5,7 +5,7 @@ import { cn } from '@/app/utils/cn';
 
 interface CardProps {
   children: ReactNode;
-  variant?: 'primary' | 'solution' | 'solution-green' | 'solution-mauve' | 'solution-sky';
+  variant?: 'primary' | 'solution' ;
   className?: string;
   asChild?: boolean;
   onClick?: () => void;
@@ -20,10 +20,7 @@ export const Card = ({
 }: CardProps) => {
   const cardClasses = {
     primary: 'card-primary',
-    solution: 'card-solution',
-    'solution-green': 'card-solution-green',
-    'solution-mauve': 'card-solution-mauve',
-    'solution-sky': 'card-solution-sky'
+    solution: 'card-solution'
   };
 
   const Component = asChild ? 'div' : 'div';

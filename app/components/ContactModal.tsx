@@ -117,7 +117,7 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
       >
         <Dialog.Title
           style={{
-            color: 'var(--color-ocean-blue-7)',
+            color: 'var(--color-peach-7)',
             fontSize: '1.5rem',
             fontWeight: 'bold',
             marginBottom: '0.5rem',
@@ -175,7 +175,7 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
                     color: 'var(--color-foreground)'
                   }}
                 >
-                  First Name <span style={{ color: 'var(--color-ocean-blue-5)' }}>*</span>
+                  First Name <span style={{ color: 'var(--color-peach-5)' }}>*</span>
                 </label>
                 <TextField.Root
                   id="firstName"
@@ -205,7 +205,7 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
                     color: 'var(--color-foreground)'
                   }}
                 >
-                  Last Name <span style={{ color: 'var(--color-ocean-blue-5)' }}>*</span>
+                  Last Name <span style={{ color: 'var(--color-peach-5)' }}>*</span>
                 </label>
                 <TextField.Root
                   id="lastName"
@@ -237,7 +237,7 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
                   color: 'var(--color-foreground)'
                 }}
               >
-                Email <span style={{ color: 'var(--color-ocean-blue-5)' }}>*</span>
+                Email <span style={{ color: 'var(--color-peach-5)' }}>*</span>
               </label>
               <TextField.Root
                 id="email"
@@ -269,7 +269,7 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
                   color: 'var(--color-foreground)'
                 }}
               >
-                Phone Number <span style={{ color: 'var(--color-ocean-blue-5)' }}>*</span>
+                Phone Number <span style={{ color: 'var(--color-peach-5)' }}>*</span>
               </label>
               <TextField.Root
                 id="phone"
@@ -327,7 +327,7 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
                   color: 'var(--color-foreground)'
                 }}
               >
-                Comments <span style={{ color: 'var(--color-ocean-blue-5)' }}>*</span>
+                Comments <span style={{ color: 'var(--color-peach-5)' }}>*</span>
               </label>
               <TextArea
                 id="comments"
@@ -374,13 +374,13 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
                 type="submit"
                 disabled={isSubmitting}
                 style={{
-                  backgroundColor: 'var(--color-ocean-blue-3)',
-                  color: 'var(--color-ocean-blue-9)',
+                  backgroundColor: 'var(--color-peach-3)',
+                  color: 'var(--color-peach-9)',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  border: '2px solid var(--color-ocean-blue-5)',
+                  border: '2px solid var(--color-peach-5)',
                   opacity: isSubmitting ? 0.6 : 1,
                 }}
-                className="hover:bg-[var(--color-ocean-blue-4)]"
+                className="hover:bg-[var(--color-peach-4)]"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </Button>

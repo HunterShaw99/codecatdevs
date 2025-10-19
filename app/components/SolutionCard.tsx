@@ -7,7 +7,7 @@ interface SolutionCardProps {
   icon: ReactNode;
   title: string;
   description: string;
-  variant?: 'solution' | 'solution-green' | 'solution-mauve' | 'solution-sky';
+  variant?: 'solution';
   iconBgColor?: string;
   iconColor?: string;
 }

@@ -16,7 +16,7 @@ export default function HomePage() {
         {label: 'Mission & Vision', href: '#mission-vision'},
         {label: 'Solutions', href: '#solutions'},
         {label: 'Values', href: '#values'},
-        {label: 'Coffee Map', href: '#map'},
+        {label: 'Map', href: '#map'},
         {label: 'Contact', href: '#contact'}
     ];
 
@@ -125,7 +125,7 @@ export default function HomePage() {
     ];
 // <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
     return (
-        <div className="w-full">
+        <div className="w-full justify-center items-center">
             <div className='gradient-backdrop'></div>
 
             {/* Navigation Headers - Full width */}
@@ -173,7 +173,7 @@ export default function HomePage() {
                                         with a thriving tech scene and a strong sense of community, one
                                         that's changed and morphed over the years to become something new.<br/>
                                         <br/>
-                                        In our personal lives, we love the 3 C's: Code, Coffee, and Cats. With a good
+                                        In our personal lives, we love the 3 C's: Code, Cats, and Coffee. With a good
                                         cup of coffee or espresso, one of our furry friends
                                         napping nearby, and some good tunes in the background, we're in our element.
                                         It's our not so secret weapon for staying focused and productive,
@@ -287,7 +287,11 @@ export default function HomePage() {
                         </Section>
                         <Section id="map">
                             <div>
-                                <div className="heading-section mb-4">Our Local Caffeine Haunts</div>
+                                <div className="heading-section mb-4">Our Local Haunts</div>
+                                <h2 className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
+                                    The map below not only highlights some of our favorite local spots around Pittsburgh, but also
+                                    serves to demonstrate our capabilities in creating custom embedded mapping solutions.
+                                </h2>
                                 <CardMap/>
                             </div>
                         </Section>
