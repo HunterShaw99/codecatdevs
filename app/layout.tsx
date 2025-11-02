@@ -17,8 +17,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
     title: "Code Cat Developers",
-    description: "",
+    description: "Pittsburgh-based software development company specializing in GIS, web applications, and custom technology solutions. We solve problems with innovative, efficient, and collaborative approaches.",
     icons: {
+        icon: '/favicon.ico',
+        shortcut: '/favicon.ico',
+        apple: '/favicon.ico',
     },
 };
 
