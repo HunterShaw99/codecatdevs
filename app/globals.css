@@ -277,8 +277,23 @@ body {
   /* Typography */
 .heading-main {
     @apply text-5xl text-center font-bold font-display items-center justify-center z-10 mb-6 py-3 px-2 w-150
-    [text-shadow:0px_0px_5px_#f9e2af,0px_0px_8px_#f9e2af,0px_0px_15px_#f9e2af,0px_0px_30px_#fab387,0px_0px_60px_#fab387,0px_0px_70px_#fab387,0px_0px_80px_#fab387,0px_0px_120px_#fab387]
-    animate-[pulsate_.11s_ease-in-out_infinite_alternate];
+    [text-shadow:0px_0px_5px_#f9e2af,0px_0px_8px_#f9e2af,0px_0px_15px_#f9e2af,0px_0px_30px_#fab387,0px_0px_60px_#fab387,0px_0px_80px_#fab387]
+    /* changed to pulsate-pacity from pulsate to avoid render issue on safari */
+    animate-[pulsate-opacity_2.4s_ease-in-out_infinite_alternate];
+
+    
+    /* avoid iOS font scaling */
+    -webkit-text-size-adjust: 100%;
+
+    /* improve font rendering on WebKit */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
+    /* ensure text isn't rasterized by transforms on this element */
+    transform: none !important;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .heading-section {
@@ -335,29 +350,7 @@ body {
     background: linear-gradient(135deg, var(--color-peach-3), var(--color-peach-6));
   }
 
-  /* Animated Background using Tailwind v4 syntax */
-.animated-strips-background {
-    @apply fixed inset-0 pointer-events-none;
-    z-index: -10;
-    background: repeating-linear-gradient(
-      -45deg,
-      #0f0f10 0px,
-      #0f0f10 40px,
-      #151516 40px,
-      #151516 80px
-    );
-    animation: slide-diagonal 8s linear infinite;
-    opacity: 0.3;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
-    will-change: transform;
-    backface-visibility: hidden;
-    transform: translate3d(0, 0, 0);
-  }
-
-.gradient-backdrop {
+.nav-backdrop {
     @apply fixed inset-0 pointer-events-none;
     z-index: -10;
     background: #050505;
@@ -462,9 +455,7 @@ body {
       0 0 14px #f9e2af,
       0 0 28px #fab387,
       0 0 55px #fab387,
-      0 0 65px #fab387,
-      0 0 75px #fab387,
-      0 0 110px #fab387;
+      0 0 5px #fab387,
   }
 
   0% {
@@ -474,9 +465,19 @@ body {
       0 0 13px #f9e2af,
       0 0 26px #fab387,
       0 0 50px #fab387,
-      0 0 60px #fab387,
       0 0 70px #fab387,
-      0 0 105px #fab387;
+  }
+}
+
+@keyframes pulsate-opacity {
+  0% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.95;
   }
 }
 
@@ -486,9 +487,9 @@ h1 {
   box-shadow: 0 0 .15rem #f9e2af,
     0 0 0.6rem #fab387,
     0 0 1.5rem #fab387,
-    0 0 2.2rem #fab387,
+    0 0 1.9rem #fab387,
     inset 0 0 .15rem #f9e2af,
     inset 0 0 0.6rem #fab387,
     inset 0 0 1.5rem #fab387,
-    inset 0 0 2.2rem #fab387;
+    inset 0 0 1.9rem #fab387;
 }

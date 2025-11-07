@@ -123,10 +123,10 @@ export default function HomePage() {
             iconColor: 'text-sky'
         }
     ];
-// <h1 className="heading-main text-center">Code Cat Developers LLC</h1>
+
     return (
         <div className="w-full justify-center items-center">
-            <div className='gradient-backdrop'></div>
+            <div className='nav-backdrop'></div>
 
             {/* Navigation Headers - Full width */}
             <Navigation items={navigationItems} title={'Code Cat Developers LLC'}/>
