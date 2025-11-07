@@ -471,13 +471,13 @@ body {
 
 @keyframes pulsate-opacity {
   0% {
-    opacity: 0.85;
+    opacity: 0.95;
   }
   50% {
     opacity: 1;
   }
   100% {
-    opacity: 0.85;
+    opacity: 0.95;
   }
 }
 
