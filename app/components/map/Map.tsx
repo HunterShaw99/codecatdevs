@@ -39,7 +39,7 @@ const CardMap = () => {
     [coffeeShopLayer, coffeeShopText, restaurantLayer, restaurantText]
   );
 
-  const onViewStateChange = useCallback(({ viewState }: { viewState: MapViewState }) => {
+  const onViewStateChange = useCallback(({ viewState }: { viewState: any }) => {
     return {
       ...viewState,
       longitude: Math.max(
