@@ -2,6 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+# Build the image
+```docker build -t codecatdevs:latest .```
+
+```podman build -t codecatdevs:latest .```
+
+# Run the container
+```docker run -p 3000:3000 codecatdevs:latest```
+
+```podman run -p 3000:3000 codecatdevs:latest```
+
 First, run the development server:
 
 ```bash
