@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { cn } from '@/app/utils/cn';
 
 interface CardProps {
   children: ReactNode;

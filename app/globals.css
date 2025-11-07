@@ -279,6 +279,19 @@ body {
     @apply text-5xl text-center font-bold font-display items-center justify-center z-10 mb-6 py-3 px-2 w-150
     [text-shadow:0px_0px_5px_#f9e2af,0px_0px_8px_#f9e2af,0px_0px_15px_#f9e2af,0px_0px_30px_#fab387,0px_0px_60px_#fab387,0px_0px_70px_#fab387,0px_0px_80px_#fab387,0px_0px_120px_#fab387]
     animate-[pulsate_.11s_ease-in-out_infinite_alternate];
+    
+    /* avoid iOS font scaling */
+    -webkit-text-size-adjust: 100%;
+    
+    /* improve font rendering on WebKit */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
+    /* ensure text isn't rasterized by transforms on this element */
+    transform: none !important;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .heading-section {
@@ -357,7 +370,7 @@ body {
     transform: translate3d(0, 0, 0);
   }
 
-.gradient-backdrop {
+.nav-backdrop {
     @apply fixed inset-0 pointer-events-none;
     z-index: -10;
     background: #050505;
