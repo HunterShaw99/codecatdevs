@@ -73,7 +73,7 @@ export default function HomePage() {
     const solutions = [
         {
             title: 'Fast Performance',
-            description: 'Effeciency is at the core of our solutions. We optimize for speed and performance, ensuring your websites are snappy and responsive, your services process quickly and return outputs in a timely manner, and you\'re free to get back to what matters most to you.',
+            description: 'Efficiency is at the core of our solutions. We optimize for speed and performance, ensuring your websites are snappy and responsive, your services process quickly and return outputs in a timely manner, and you\'re free to get back to what matters most to you.',
             variant: 'solution' as const,
             icon: (
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -256,7 +256,6 @@ export default function HomePage() {
                                             icon={solution.icon}
                                             title={solution.title}
                                             description={solution.description}
-                                            variant={solution.variant}
                                             iconBgColor={solution.iconBgColor}
                                             iconColor={solution.iconColor}
                                         />

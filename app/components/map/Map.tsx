@@ -72,10 +72,10 @@ const CardMap = () => {
         <div style="font-size:13px; font-weight:600; margin:0 0 6px 0; color:var(--ctp-text);">
           ${object.name}
         </div>
-        <div style="font-size:12px; color:var(--ctp-subtext, rgba(255,255,255,0.8)); margin:0;">
+        <div style="font-size:12px; color:var(--ctp-subtext0, rgba(255,255,255,0.8)); margin:0;">
           ${object.address}
         </div>
-        <div style="font-size:10px; color:var(--ctp-subtext, rgba(255,255,255,0.8)); margin:0;">
+        <div style="font-size:10px; color:var(--ctp-subtext0, rgba(255,255,255,0.8)); margin:0;">
           ${object.note}
         </div>
       </div>
