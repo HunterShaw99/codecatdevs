@@ -474,6 +474,13 @@ body {
     drop-shadow(0 0 .2rem #fab387);
     opacity: .95;
   }
+  50% {
+    filter: drop-shadow(0 0 .04rem #f9e2af) 
+    drop-shadow(0 0 .09rem #f9e2af) 
+    drop-shadow(0 0 .14rem #fab387) 
+    drop-shadow(0 0 .19rem #fab387);
+    opacity: .92;
+  }
   100% {
     filter: drop-shadow(0 0 .03rem #f9e2af) 
     drop-shadow(0 0 .08rem #f9e2af) 
