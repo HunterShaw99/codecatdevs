@@ -1,7 +1,7 @@
 'use client';
 
 import { IconLayer, TextLayer } from '@deck.gl/layers';
-import {coffeeBeanSVG, Point} from './CoffeeShops';
+import {Point} from './CoffeeShops';
 
 export const forkSVG = `
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128" version="1.1" xml:space="preserve" style="fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
