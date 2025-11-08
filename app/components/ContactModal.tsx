@@ -381,7 +381,7 @@ export const ContactModal = ({ trigger, open, onOpenChange }: ContactModalProps)
                       border: '2px solid var(--color-peach-5)',
                       opacity: isSubmitting ? 0.6 : 1,
                     }}
-                    className="hover:bg-[var(--color-peach-4)]"
+                    className="hover:bg-peach-4"
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit'}
                   </Button>
