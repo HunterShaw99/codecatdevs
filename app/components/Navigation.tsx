@@ -1,4 +1,3 @@
-/* Navigation.tsx */
 'use client';
 
 import { useState } from 'react';
@@ -17,9 +16,7 @@ import * as NavigationMenu from '@radix-ui/react-navigation-menu';
  * />
  */
 interface NavigationItem {
-  /** Visible text for the link. */
   label: string;
-  /** Destination URL (can be an absolute or relative path). */
   href: string;
 }
 
@@ -45,7 +42,6 @@ export const Navigation = ({
   // Tracks whether the mobile menu overlay is visible.
   const [isOpen, setIsOpen] = useState(false);
 
-  /** Close the overlay when a link (or close button) is clicked. */
   const handleClose = () => setIsOpen(false);
 
   return (
@@ -90,13 +86,11 @@ export const Navigation = ({
             strokeLinejoin="round"
           >
             {isOpen ? (
-              // X icon
               <>
                 <line x1={18} y1={6} x2={6} y2={18} />
                 <line x1={6} y1={6} x2={18} y2={18} />
               </>
             ) : (
-              // Hamburger icon
               <>
                 <line x1={3} y1={12} x2={21} y2={12} />
                 <line x1={3} y1={6} x2={21} y2={6} />
@@ -109,14 +103,11 @@ export const Navigation = ({
 
       {/* --- Mobile overlay menu (visible when isOpen === true) --- */}
       {isOpen && (
-  /* Full‑screen overlay that blurs the background */
   <nav
     className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60"
     aria-label="Mobile navigation"
   >
-    {/* Panel that holds the links */}
     <div className="relative w-full max-w-xs mx-auto rounded-lg shadow-xl p-6">
-      {/* Close button (top‑right corner of panel) */}
       <button
         type="button"
         aria-label="Close menu"
@@ -137,7 +128,6 @@ export const Navigation = ({
         </svg>
       </button>
 
-      {/* Navigation links */}
       {items.map((item) => (
         <a
           key={item.href}
