@@ -277,8 +277,7 @@ body {
   /* Typography */
 .heading-main {
     @apply text-5xl text-center font-bold font-display items-center justify-center z-10 mb-6 py-3 px-2 w-150
-    animate-[pulsate-opacity_4.8s_ease-in-out_infinite_alternate]
-    -webkit-animate-[pulsate-opacity_4.8s_ease-in-out_infinite_alternate];
+    animate-[pulsate-opacity_4.8s_ease-in-out_infinite_alternate];
     
     /* avoid iOS font scaling */
     -webkit-text-size-adjust: 100%;
@@ -474,6 +473,13 @@ body {
     drop-shadow(0 0 .15rem #fab387) 
     drop-shadow(0 0 .2rem #fab387);
     opacity: .95;
+  }
+  50% {
+    filter: drop-shadow(0 0 .04rem #f9e2af) 
+    drop-shadow(0 0 .09rem #f9e2af) 
+    drop-shadow(0 0 .14rem #fab387) 
+    drop-shadow(0 0 .19rem #fab387);
+    opacity: .92;
   }
   100% {
     filter: drop-shadow(0 0 .03rem #f9e2af) 
