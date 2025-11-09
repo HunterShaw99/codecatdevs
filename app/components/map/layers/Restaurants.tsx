@@ -68,9 +68,9 @@ export const restaurantProxyLayer = new ScatterplotLayer<Point>({
   opacity: 0,
   stroked: false,
   filled: true,
-  radiusScale: 15,
-  radiusMinPixels: 8,
-  radiusMaxPixels: 30,
+  radiusScale: 6,
+  radiusMinPixels: 12,
+  radiusMaxPixels: 18,
   getPosition: d => d.coordinates,
   getFillColor: [0, 0, 0, 0],  // transparent
 });
