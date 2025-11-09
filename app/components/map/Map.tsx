@@ -7,7 +7,7 @@ import Map, { useControl } from 'react-map-gl/maplibre';
 import { AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { coffeeShopLayer, coffeeShopText, Point } from './layers/CoffeeShops';
+import {coffeeLayers, Point} from './layers/CoffeeShops';
 import { restaurantLayers } from './layers/Restaurants';
 
 const MAP_CONSTRAINTS = {
@@ -35,8 +35,8 @@ const CardMap = () => {
   const [tooltipHtml, setTooltipHtml] = useState<string | null>(null);
 
   const layers = useMemo(
-    () => [coffeeShopLayer, coffeeShopText, ...restaurantLayers],
-    [coffeeShopLayer, coffeeShopText, ...restaurantLayers]
+    () => [...coffeeLayers, ...restaurantLayers],
+    [...coffeeLayers, ...restaurantLayers]
   );
 
   const onViewStateChange = useCallback(({ viewState }: { viewState: any }) => {

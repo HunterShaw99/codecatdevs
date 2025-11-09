@@ -1,6 +1,6 @@
 'use client';
 
-import { IconLayer, TextLayer } from '@deck.gl/layers';
+import {IconLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 
 export const coffeeBeanSVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
@@ -44,6 +44,20 @@ const iconMapping = {
   anchorY: 128
 };
 
+export const coffeeProxyLayer = new ScatterplotLayer<Point>({
+  id: 'coffee-proxy',
+  data: data,
+  pickable: true,
+  opacity: 0,
+  stroked: false,
+  filled: true,
+  radiusScale: 6,
+  radiusMinPixels: 12,
+  radiusMaxPixels: 18,
+  getPosition: d => d.coordinates,
+  getFillColor: [0, 0, 0, 0],  // transparent
+});
+
 export const coffeeShopLayer = new IconLayer<Point>({
     id: 'coffeeShopLayer',
     data: data,
@@ -51,7 +65,7 @@ export const coffeeShopLayer = new IconLayer<Point>({
     sizeScale: 10,
     getSize: 2.5,
     getPosition: d => d.coordinates,
-    pickable: true
+    pickable: false
   });
 
 export const coffeeShopText = new TextLayer<Point>({
@@ -68,3 +82,9 @@ export const coffeeShopText = new TextLayer<Point>({
         fontFamily: 'Arial, sans-serif',
         fontWeight: 'bold'
       });
+
+export const coffeeLayers = [
+  coffeeProxyLayer,
+  coffeeShopLayer,
+  coffeeShopText
+];
