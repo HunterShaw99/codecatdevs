@@ -65,7 +65,7 @@ export const coffeeShopLayer = new IconLayer<Point>({
     sizeScale: 10,
     getSize: 2.5,
     getPosition: d => d.coordinates,
-    pickable: true
+    pickable: false
   });
 
 export const coffeeShopText = new TextLayer<Point>({
