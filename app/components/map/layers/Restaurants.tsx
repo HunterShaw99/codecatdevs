@@ -1,6 +1,6 @@
 'use client';
 
-import {IconLayer, TextLayer} from '@deck.gl/layers';
+import {IconLayer, TextLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {Point} from './CoffeeShops';
 
 export const forkSVG = `
@@ -60,6 +60,22 @@ const data = [
     },
 ];
 
+// Add proxy layer for better hover detection
+export const restaurantProxyLayer = new ScatterplotLayer<Point>({
+  id: 'restaurant-proxy',
+  data: data,
+  pickable: true,
+  opacity: 0,
+  stroked: false,
+  filled: true,
+  radiusScale: 15,
+  radiusMinPixels: 8,
+  radiusMaxPixels: 30,
+  getPosition: d => d.coordinates,
+  getFillColor: [0, 0, 0, 0],  // transparent
+});
+
+// Update existing restaurant layer to not be pickable
 export const restaurantLayer = new IconLayer<Point>({
     id: 'restaurantLayer',
     data: data,
@@ -67,8 +83,8 @@ export const restaurantLayer = new IconLayer<Point>({
     sizeScale: 10,
     getSize: 2.5,
     getPosition: d => d.coordinates,
-    pickable: true
-  });
+    pickable: false  // changed to false since proxy handles picking
+});
 
 export const restaurantText = new TextLayer<Point>({
         id: 'restaurantText',
@@ -84,3 +100,10 @@ export const restaurantText = new TextLayer<Point>({
         fontFamily: 'Arial, sans-serif',
         fontWeight: 'bold'
       });
+
+// Export layers in correct render order
+export const restaurantLayers = [
+  restaurantProxyLayer,
+  restaurantLayer,
+  restaurantText
+];
