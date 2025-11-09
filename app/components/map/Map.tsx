@@ -2,13 +2,13 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import DeckGL from '@deck.gl/react';
-import { PickingInfo, MapViewState } from '@deck.gl/core';
+import { PickingInfo } from '@deck.gl/core';
 import Map, { useControl } from 'react-map-gl/maplibre';
 import { AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { coffeeShopLayer, coffeeShopText, Point } from './layers/CoffeeShops';
-import { restaurantLayer, restaurantText } from './layers/Restaurants';
+import { restaurantLayers } from './layers/Restaurants';
 
 const MAP_CONSTRAINTS = {
   LONGITUDE: { MIN: -80.1, MAX: -79.76 },
@@ -35,8 +35,8 @@ const CardMap = () => {
   const [tooltipHtml, setTooltipHtml] = useState<string | null>(null);
 
   const layers = useMemo(
-    () => [coffeeShopLayer, coffeeShopText, restaurantLayer, restaurantText],
-    [coffeeShopLayer, coffeeShopText, restaurantLayer, restaurantText]
+    () => [coffeeShopLayer, coffeeShopText, ...restaurantLayers],
+    [coffeeShopLayer, coffeeShopText, ...restaurantLayers]
   );
 
   const onViewStateChange = useCallback(({ viewState }: { viewState: any }) => {
