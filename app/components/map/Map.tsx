@@ -7,8 +7,15 @@ import Map, { useControl } from 'react-map-gl/maplibre';
 import { AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import {coffeeLayers, Point} from './layers/CoffeeShops';
-import { restaurantLayers } from './layers/Restaurants';
+import dataArray from '@map/data/data';
+import type { ClusterObject, Point, } from '@map/utils/LayerSettings';
+import {
+  createIconLayer, 
+  createTextLayer, 
+  createClusteredLayer,
+  createProxyLayer } from '@map/utils/LayerSettings';
+
+const iconAtlas = '/location-icon-atlas.png';
 
 const MAP_CONSTRAINTS = {
   LONGITUDE: { MIN: -80.1, MAX: -79.76 },
@@ -32,15 +39,19 @@ const CustomAttribution = ({ position = 'bottom-right' }: CustomAttributionProps
 };
 
 const CardMap = () => {
-  const [tooltipHtml, setTooltipHtml] = useState<string | null>(null);
+  const [tooltipHtml, setTooltipHtml] = useState<any | null>(null);
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
 
-  const layers = useMemo(
-    () => [...coffeeLayers, ...restaurantLayers],
-    [...coffeeLayers, ...restaurantLayers]
-  );
+  // Define layers
+  const proxyLayer = createProxyLayer(dataArray, viewState);
+  const textLayer = createTextLayer(dataArray, viewState);
+  const iconLayer = createIconLayer(dataArray, viewState);
+  const clusterLayer = createClusteredLayer(dataArray, iconAtlas, viewState);
+
+  const layers = [clusterLayer, proxyLayer, iconLayer, textLayer];
 
   const onViewStateChange = useCallback(({ viewState }: { viewState: any }) => {
-    return {
+    const newViewState = {
       ...viewState,
       longitude: Math.max(
         MAP_CONSTRAINTS.LONGITUDE.MIN,
@@ -55,36 +66,88 @@ const CardMap = () => {
         Math.min(MAP_CONSTRAINTS.ZOOM.MAX, viewState.zoom)
       )
     };
+    setViewState(newViewState); // Store current view state
+    return newViewState;
   }, []);
 
-  const buildTooltipHtml = useCallback((object: Point) => {
+  const buildTooltipHtml = useCallback((object: Point | ClusterObject) => {
     if (!object) return null;
-    return `
-      <div style="
-        box-sizing: border-box;
-        max-width: 240px;
-        max-height: 160px;
-        overflow: auto;
-        white-space: normal;
-        word-break: break-word;
-        padding: 8px 12px;
-      ">
-        <div style="font-size:13px; font-weight:600; margin:0 0 6px 0; color:var(--ctp-text);">
-          ${object.name}
+
+    if ('cluster' in object && object.cluster) {
+      return (
+        <div
+          style={{
+            boxSizing: 'border-box',
+            maxWidth: 240,
+            maxHeight: 160,
+            overflow: 'auto',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            padding: '8px 12px'
+          }}
+        >
+          <div style={{
+            fontSize: 13,
+            fontWeight: 600,
+            margin: '0 0 6px 0',
+            color: 'var(--ctp-text)'
+          }}>
+            {object.point_count} Locations
+          </div>
+          <div style={{
+            fontSize: 12,
+            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
+            margin: 0
+          }}>
+            Zoom in to see individual locations.
+          </div>
         </div>
-        <div style="font-size:12px; color:var(--ctp-subtext0, rgba(255,255,255,0.8)); margin:0;">
-          ${object.address}
+      );
+    }
+
+    if ('name' in object) {
+      return (
+        <div
+          style={{
+            boxSizing: 'border-box',
+            maxWidth: 240,
+            maxHeight: 160,
+            overflow: 'auto',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            padding: '8px 12px'
+          }}
+        >
+          <div style={{
+            fontSize: 13,
+            fontWeight: 600,
+            margin: '0 0 6px 0',
+            color: 'var(--ctp-text)'
+          }}>
+            {object.name}
+          </div>
+          <div style={{
+            fontSize: 12,
+            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
+            margin: 0
+          }}>
+            {object.address}
+          </div>
+          <div style={{
+            fontSize: 10,
+            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
+            margin: 0
+          }}>
+            {object.note}
+          </div>
         </div>
-        <div style="font-size:10px; color:var(--ctp-subtext0, rgba(255,255,255,0.8)); margin:0;">
-          ${object.note}
-        </div>
-      </div>
-    `;
+      );
+    }
   }, []);
 
   const handleHover = useCallback(({ object }: PickingInfo<Point>) => {
     if (object) {
-      setTooltipHtml(buildTooltipHtml(object) as string);
+      setTooltipHtml(buildTooltipHtml(object));
     } else {
       setTooltipHtml(null);
     }
@@ -111,7 +174,6 @@ const CardMap = () => {
         </Map>
       </DeckGL>
 
-      {tooltipHtml && (
         <div
           className="absolute top-3 right-3 z-50"
           style={{
@@ -125,11 +187,10 @@ const CardMap = () => {
             background: 'var(--ctp-mantle)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             padding: 0,
-          }}
-          dangerouslySetInnerHTML={{ __html: tooltipHtml }}
-        />
-      )}
+          }}>
+        {tooltipHtml}
     </div>
+  </div>
   );
 };
 

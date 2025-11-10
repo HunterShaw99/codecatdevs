@@ -1,7 +1,5 @@
 'use client';
 
-import {IconLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
-
 export const coffeeBeanSVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
 <style>.st0{fill:#000000;}</style>
@@ -10,81 +8,20 @@ export const coffeeBeanSVG = `
 </g>
 </svg>`;
 
-const svgToDataURL = (svgText : string) => {
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
-};
-
-export type Point = {
-  coordinates: [longitude: number, latitude: number];
-  name: string,
-  address: string,
-  note?: string
-};
-
-const data = [
-    {
-    coordinates: [-80.08607, 40.40769],
-    name: 'Carnegie Coffee Company',
-    address: '132 E Main St, Carnegie, PA 15106',
-    note: 'Great espresso and cozy atmosphere in an old train station. LGBTQ+ friendly.'
-  },
-    {
-    coordinates: [-79.95576333959663, 40.465756466484],
-    name: 'Constellation Coffee',
-    address: '4059 Penn Ave, Pittsburgh, PA 15224',
-    note: 'Wonderful local cafe with a great atmosphere and even better espresso.'
-  },
-];
-
-const iconMapping = {
-  url: svgToDataURL(coffeeBeanSVG),
-  width: 256,
-  height: 256,
-  anchorX: 128,
-  anchorY: 128
-};
-
-export const coffeeProxyLayer = new ScatterplotLayer<Point>({
-  id: 'coffee-proxy',
-  data: data,
-  pickable: true,
-  opacity: 0,
-  stroked: false,
-  filled: true,
-  radiusScale: 6,
-  radiusMinPixels: 12,
-  radiusMaxPixels: 18,
-  getPosition: d => d.coordinates,
-  getFillColor: [0, 0, 0, 0],  // transparent
-});
-
-export const coffeeShopLayer = new IconLayer<Point>({
-    id: 'coffeeShopLayer',
-    data: data,
-    getIcon: d => iconMapping,
-    sizeScale: 10,
-    getSize: 2.5,
-    getPosition: d => d.coordinates,
-    pickable: false
-  });
-
-export const coffeeShopText = new TextLayer<Point>({
-        id: 'coffeeShopText',
-        data : data,
-        getPosition : d => d.coordinates,
-        getText : d => d.name,
-        getColor: [0, 0, 0, 255],
-        outlineWidth: 2,
-        outlineColor: [255, 255, 255, 200],
-        getSize: 10,
-        getPixelOffset: [0, -20],
-        fontSettings: {sdf : true, cutoff: 0.15, smoothing: 0.5},
-        fontFamily: 'Arial, sans-serif',
-        fontWeight: 'bold'
-      });
-
-export const coffeeLayers = [
-  coffeeProxyLayer,
-  coffeeShopLayer,
-  coffeeShopText
-];
+export const forkSVG = `
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+    width="800px" height="800px" viewBox="0 0 512 512"  xml:space="preserve">
+    <g>
+        <path class="st0" d="M50.57,55.239C27.758,29.036-13.992,53.833,4.68,95.145c12.438,27.563,36.469,94.922,70.016,143.438
+        c33.563,48.516,69.328,43.328,105.453,55.078l25.953,13.422l177.547,204.204l35.906-31.234l0.188-0.156
+        c-5.25-6.047-166.719-191.782-230.563-265.204C125.992,142.02,61.664,68.004,50.57,55.239z"/>
+        <path class="st0" d="M476.664,93.551l-61.938,71.266c-3.969,4.563-10.859,5.031-15.422,1.063l-2.203-1.906
+        c-4.531-3.953-5.031-10.844-1.063-15.406l62.234-71.594c10.219-11.734,5.375-22.125-2.219-28.719
+        c-7.578-6.578-18.531-9.938-28.75,1.813l-62.234,71.594c-3.953,4.547-10.859,5.031-15.406,1.063l-2.188-1.906
+        c-4.563-3.953-5.047-10.859-1.094-15.406l61.953-71.266c18.297-21.031-12.297-46.375-30.156-25.828
+        c-21.391,24.594-59.156,68.031-59.156,68.031c-33,37.688-32.5,55.344-27.844,80.078c3.781,19.938,9.328,34.281-11.156,57.844
+        l-30.234,34.781l31.719,36.453l34.641-39.844c20.469-23.547,35.453-20.047,55.719-19.094c25.156,1.203,42.703-0.766,75.422-38.672
+        c0,0,37.766-43.469,59.156-68.063C524.305,99.286,494.945,72.536,476.664,93.551z"/>
+        <polygon class="st0" points="185.758,322.692 49.102,479.88 85.211,511.286 219.055,357.348 191.508,325.661 \t"/>
+    </g>
+</svg>`;
