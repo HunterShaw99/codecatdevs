@@ -25,8 +25,8 @@ export const ValueItem = ({
         </div>
       </div>
       <div>
-        <h3 className="value-content">{title}</h3>
-        <p className="text-small">{description}</p>
+        <h3 className="value-content text-text">{title}</h3>
+        <p className="text-small text-subtext1">{description}</p>
       </div>
     </div>
   );
