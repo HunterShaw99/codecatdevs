@@ -61,7 +61,7 @@ export class LabelledPointLayer extends CompositeLayer<{data?: Point[]; viewStat
         data : this.props.data,
         getPosition : d => d.coordinates,
         getText : d => d.name,
-        visible: (this.props.viewState?.zoom ?? 0) > 11.5,
+        visible: (this.props.viewState?.zoom ?? 0) > 12,
         getColor: [0, 0, 0, 255],
         outlineWidth: 2,
         outlineColor: [255, 255, 255, 200],

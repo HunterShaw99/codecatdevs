@@ -51,7 +51,7 @@ const CardMap = () => {
     raw.forEach((feature) => {
       const props = feature && feature.properties;
       // Cluster feature: fetch leaves (original points) and read their properties
-      if (props && props.cluster && viewState.zoom <= 11.2) {
+      if (props && props.cluster && viewState.zoom <= 11.5) {
         const pointCount = props.point_count ?? 0;
         if (pointCount > 1) {
           const clusterId = props.cluster_id;
