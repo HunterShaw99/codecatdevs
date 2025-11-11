@@ -18,28 +18,8 @@ export type Point = {
     type: 'cafe' | 'restaurant';
 };
 
-export const createTextLayer = (data: any, viewState: any) => { 
-
-    return new TextLayer<Point>({
-        id: 'label-layer',
-        data : data,
-        getPosition : d => d.coordinates,
-        getText : d => d.name,
-        visible: viewState.zoom > 11.5,
-        getColor: [0, 0, 0, 255],
-        outlineWidth: 2,
-        outlineColor: [255, 255, 255, 200],
-        getSize: 10,
-        getPixelOffset: [0, -20],
-        fontSettings: {sdf : true, cutoff: 0.15, smoothing: 0.5},
-        fontFamily: 'Arial, sans-serif',
-        fontWeight: 'bold'
-      });
-};
-
-export const createIconLayer = (data: any, viewState: any) => {
-    // For each data point, set the icon based on type
-    const iconMapping = {
+export class LabelledPointLayer extends CompositeLayer<{data?: Point[]; viewState?: {zoom: number};}> {
+    iconMapping = {
         cafe: {
             url: svgToDataURL(coffeeBeanSVG),
             width: 128,
@@ -52,23 +32,11 @@ export const createIconLayer = (data: any, viewState: any) => {
         }
     };
 
-    return new IconLayer<Point>({
-        id: 'icon-layer',
-        data: data,
-        visible: viewState.zoom > 11.2,
-        getIcon: d => iconMapping[d.type],
-        sizeScale: 10,
-        getSize: 2.5,
-        getPosition: d => d.coordinates,
-        pickable: false
-    });
-};
-
-export const createProxyLayer = (data: any, viewState: any) => {
-    return new ScatterplotLayer<Point>({
+  renderLayers() {
+    return [
+      new ScatterplotLayer<Point>({
     id: 'proxy-layer',
-    data: data,
-    visible: viewState.zoom > 11.2,
+    data: this.props.data,
     pickable: true,
     opacity: 0,
     stroked: false,
@@ -78,7 +46,33 @@ export const createProxyLayer = (data: any, viewState: any) => {
     radiusMaxPixels: 18,
     getPosition: d => d.coordinates,
     getFillColor: [0, 0, 0, 0],  // transparent
-    });
+    }),
+      new IconLayer<Point>({
+        id: 'icon-layer',
+        data: this.props.data,
+        getIcon: d => this.iconMapping[d.type],
+        sizeScale: 10,
+        getSize: 2.5,
+        getPosition: d => d.coordinates,
+        pickable: false
+      }),
+      new TextLayer<Point>({
+        id: 'label-layer',
+        data : this.props.data,
+        getPosition : d => d.coordinates,
+        getText : d => d.name,
+        visible: (this.props.viewState?.zoom ?? 0) > 11.5,
+        getColor: [0, 0, 0, 255],
+        outlineWidth: 2,
+        outlineColor: [255, 255, 255, 200],
+        getSize: 10,
+        getPixelOffset: [0, -20],
+        fontSettings: {sdf : true, cutoff: 0.15, smoothing: 0.5},
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'bold'
+      })
+    ];
+  }
 };
 
 export type IconClusterLayerPickingInfo<DataT> = PickingInfo<
@@ -103,7 +97,24 @@ function getIconSize(size: number): number {
   return Math.min(100, size) / 100 + 1;
 }
 
-export default class IconClusterLayer<
+export const getIndexClusters = (data: any, sizeScale: number) => {
+    const index = new Supercluster({
+        maxZoom: 16,
+        radius: sizeScale * Math.sqrt(2)
+      });
+
+      index.load(
+        // @ts-ignore Supercluster expects proper GeoJSON feature
+        (data as DataT[]).map(d => ({
+          geometry: {coordinates: d.coordinates},
+          properties: d
+        }))
+      )
+
+      return index
+    };
+
+export class IconClusterLayer<
   DataT extends {[key: string]: any} = any,
   ExtraProps extends {} = {}
 > extends CompositeLayer<Required<IconLayerProps<DataT>> & ExtraProps> {
@@ -121,19 +132,8 @@ export default class IconClusterLayer<
     const rebuildIndex = changeFlags.dataChanged || props.sizeScale !== oldProps.sizeScale;
 
     if (rebuildIndex) {
-      const index = new Supercluster<DataT, DataT>({
-        maxZoom: 16,
-        radius: props.sizeScale * Math.sqrt(2)
-      });
-      index.load(
-        // @ts-ignore Supercluster expects proper GeoJSON feature
-        (props.data as DataT[]).map(d => ({
-          geometry: {coordinates: (props.getPosition as Function)(d)},
-          properties: d
-        }))
-      );
+      const index = getIndexClusters(this.props.data, this.props.sizeScale);
       this.setState({index});
-    }
 
     const z = Math.floor(this.context.viewport.zoom);
     if (rebuildIndex || z !== this.state.z) {
@@ -143,6 +143,7 @@ export default class IconClusterLayer<
       });
     }
   }
+}
 
   getPickingInfo({
     info,
@@ -194,19 +195,38 @@ const clusterIconMapping = {
 };
 
 
-export const createClusteredLayer = (data: any, iconAtlas: string, viewState: any) => {
+export const createClusteredLayer = (data: any, iconAtlas: string, viewState: any, clustered_names: any) => {
 
-  return new IconClusterLayer({
-    id: 'clusters',
-    visible: viewState.zoom <= 11.2,
-    data,
-    iconAtlas,
-    iconMapping: clusterIconMapping,
-    sizeScale: 40,
-    getPosition: (d: Point) => d.coordinates,
-    pickable: true,
-  });
+  // Local interfaces for typings
+  interface ClusteredLayerData extends Point {}
+  interface ClusteredViewState { zoom: number }
+  type ClusteredNames = Set<string>;
+
+  const filteredData: ClusteredLayerData[] = (data as ClusteredLayerData[]).filter(
+    (point) => (clustered_names as ClusteredNames).has(point.name)
+  );
+
+  return new IconClusterLayer<ClusteredLayerData, {}>(
+    {
+      id: 'clusters',
+      data: filteredData,
+      iconAtlas: iconAtlas as string,
+      iconMapping: clusterIconMapping,
+      sizeScale: 40,
+      getPosition: (d: ClusteredLayerData) => d.coordinates,
+      pickable: true,
+    } as unknown as Required<IconLayerProps<ClusteredLayerData>> & {}
+  );
 };
+
+export const createIconLayer = (data: any, viewState: any) => {
+
+  return new LabelledPointLayer({
+    id: 'icons',
+    data,
+    viewState,
+  });
+}
 
 export interface ClusterObject {
   cluster: boolean;
