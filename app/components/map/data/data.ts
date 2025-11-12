@@ -53,7 +53,7 @@ export const dataArray = [
     "type": "restaurant",
     "name": "El Pollon Carnegie",
     "address": "335 E Main St, Carnegie, PA 15106",
-    "note": "A Peruvian spot, solid for takeout. Their rotisserie chicken is flavorful and juicy."
+    "note": "A Peruvian spot, a perfect choice for takeout. Their rotisserie chicken is a great deal."
   },
   {
     "coordinates": [-80.09130341184967, 40.404338269531436],

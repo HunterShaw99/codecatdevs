@@ -16,11 +16,10 @@ import {
 
 const iconAtlas = '/location-icon-atlas.png';
 
-const MAP_CONSTRAINTS = {
-  LONGITUDE: { MIN: -80.1, MAX: -79.76 },
-  LATITUDE: { MIN: 40.3, MAX: 40.5 },
-  ZOOM: { MIN: 10, MAX: 15 }
-} as const;
+const bounds = [
+  [-80.1, 40.3], 
+  [-79.8, 40.6]
+];
 
 const INITIAL_VIEW_STATE = {
   longitude: -79.9915,
@@ -79,26 +78,15 @@ const CardMap = () => {
 
   const layers = [clusterLayer, iconLayer];
 
-  const onViewStateChange = useCallback(({ viewState }: { viewState: any }) => {
-    const newViewState = {
-      ...viewState,
-      longitude: Math.max(
-        MAP_CONSTRAINTS.LONGITUDE.MIN,
-        Math.min(MAP_CONSTRAINTS.LONGITUDE.MAX, viewState.longitude)
-      ),
-      latitude: Math.max(
-        MAP_CONSTRAINTS.LATITUDE.MIN,
-        Math.min(MAP_CONSTRAINTS.LATITUDE.MAX, viewState.latitude)
-      ),
-      zoom: Math.max(
-        MAP_CONSTRAINTS.ZOOM.MIN,
-        Math.min(MAP_CONSTRAINTS.ZOOM.MAX, viewState.zoom)
-      )
-    };
-    setViewState(newViewState); // Store current view state
-    return newViewState;
-  }, []);
-
+  const onViewStateChange = ({ viewState }: { viewState: any }) => {
+      const newViewState = {
+        ...viewState,
+        longitude: Math.max(Math.min(viewState.longitude, bounds[1][0]), bounds[0][0]),
+        latitude: Math.max(Math.min(viewState.latitude, bounds[1][1]), bounds[0][1]),
+      };
+      setViewState(newViewState);
+      return newViewState;
+    }
   const buildTooltipHtml = useCallback((object: Point | ClusterObject) => {
     if (!object) return null;
 
@@ -189,13 +177,16 @@ const CardMap = () => {
     >
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
+        controller={{inertia: false}}
         layers={layers}
         onViewStateChange={onViewStateChange}
         onHover={handleHover}
       >
         <Map
           attributionControl={false}
+          maxPitch={0}
+          minZoom={8}
+          maxZoom={15}
           mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
           reuseMaps
         >

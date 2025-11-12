@@ -100,7 +100,7 @@ function getIconSize(size: number): number {
 export const getIndexClusters = (data: any, sizeScale: number) => {
     const index = new Supercluster({
         maxZoom: 16,
-        radius: sizeScale * Math.sqrt(2)
+        radius: sizeScale/2,
       });
 
       index.load(
@@ -191,7 +191,11 @@ const clusterIconMapping = {
   'marker-3': {x: 256, y: 0, width: 128, height: 128, anchorY: 128},
   'marker-4': {x: 384, y: 0, width: 128, height: 128, anchorY: 128},
   'marker-5': {x: 0, y: 128, width: 128, height: 128, anchorY: 128},
-  'marker-10': {x: 128, y: 128, width: 128, height: 128, anchorY: 128},
+  'marker-6': {x: 128, y: 128, width: 128, height: 128, anchorY: 128},
+  'marker-7': {x: 256, y: 128, width: 128, height: 128, anchorY: 128},
+  'marker-8': {x: 384, y: 128, width: 128, height: 128, anchorY: 128},
+  'marker-9': {x: 0, y: 256, width: 128, height: 128, anchorY: 128},
+  'marker-10': {x: 128, y: 256, width: 128, height: 128, anchorY: 128},
 };
 
 
