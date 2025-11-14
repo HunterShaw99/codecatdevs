@@ -63,7 +63,7 @@ export default function HomePage() {
         },
         {
             title: 'No Maintenance',
-            description: 'We handle the heavy (and light) lifting, managing the code base and hosting so you can focus on your business. But, if you\'d rather own the output product than consume it as a service, we provide options for that as well.',
+            description: 'We handle the heavy (and light) lifting, managing the code base and hosting details so you can focus on your business. But, if you\'d rather own the output product than consume it as a service, we provide options for that as well.',
             variant: 'solution' as const,
             icon: <GearIcon className={'w-6 h-6'}/>,
             iconBgColor: 'bg-green/20',
@@ -111,8 +111,11 @@ export default function HomePage() {
                                 <div className="text-center mb-8 z-10">
                                     <h2 className="heading-section">About Our Company</h2>
                                     <p className="text-description max-w-4xl mx-auto text-text">
-                                        With over a decade of experience in GIS and Software engineering, we've found a
-                                        few things that keep us going.
+                                        We're Code Cat Developers, a partnership with over a decade of experience in GIS 
+                                        and Software engineering. <br/>
+                                        <br/>
+                                        
+                                        A few things about us:
                                         First and foremost, we love solving problems. Whether it's a complex technical
                                         challenge or a simple task that can be automated,
                                         we get a kick out of finding solutions that make life easier and more efficient.
@@ -122,8 +125,8 @@ export default function HomePage() {
                                         to achieve shared wins.
                                         Finally, we love learning. The tech world is constantly evolving, and we thrive
                                         on staying up-to-date with the
-                                        latest trends and technologies, bringing only the best and most sensible to the
-                                        table.<br/>
+                                        latest trends and technologies, bringing only the best to the table 
+                                        and filtering out the noise.<br/>
                                         <br/>
 
                                         Pittsburgh-based and proud, we know what it's like to start out small. Our
@@ -136,12 +139,14 @@ export default function HomePage() {
                                         with a thriving tech scene and a strong sense of community, one
                                         that's changed and morphed over the years to become something new.<br/>
                                         <br/>
-                                        In our personal lives, we love the 3 C's: Code, Cats, and Coffee. With a good
-                                        cup of coffee or espresso, one of our furry friends
+
+                                        We love our 3 C's: Code, Cats, and Coffee. With a good
+                                        frsh cup of coffee (or espresso), one of our furry friends
                                         napping nearby, and some good tunes in the background, we're in our element.
-                                        It's our not so secret weapon for staying focused and productive,
-                                        delivering the best possible results for our clients.<br/>
+                                        It's our not-so-secret weapon for staying focused and productive,
+                                        delivering the best possible results for you.<br/>
                                         <br/>
+
                                         We're happy to chat about any problems you're experiencing, and find a path
                                         forward, no overhead, no cattiness.
                                         We leave that to the actual cats in our lives!
@@ -166,9 +171,8 @@ export default function HomePage() {
                                     </div>
                                     <p className="text-subtext1">
                                         We believe in the combined power of technology and human ingenuity to solve
-                                        problems and empower businesses,
-                                        but more importantly the people that run those businesses, to thrive. Our
-                                        mission is to work with you to find those solutions,
+                                        problems and empower businesses, allowing the people behind those businesses to thrive and 
+                                        their unique ideas to flourish. Our mission is to work with you to find those solutions,
                                         leveraging our shared experience and expertise to create tools that make your
                                         life easier, your business more efficient, and your goals more attainable.
                                     </p>
@@ -199,11 +203,8 @@ export default function HomePage() {
                             <div>
                                 <h2 className="heading-section">Our Solutions</h2>
                                 <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
-                                    Big or small, customer-facing or internal, front-end, back-end, full stack, we've
-                                    done it all.
-                                    Our solutions are designed to meet the unique needs of your business, leveraging the
-                                    latest
-                                    technologies and best practices to deliver exceptional results.
+                                    From a simple landing page for your blossoming business to a custom-built full-stack GIS Application
+                                    to manage assets or visualize data, we can handle those and everything in between. We focus on:
                                 </p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -257,9 +258,8 @@ export default function HomePage() {
                             <div className="gradient-cta">
                                 <h2 className="text-2xl font-bold text-mantle mb-4">Ready to Work Together?</h2>
                                 <p className="text-base mb-6 max-w-3xl mx-auto">
-                                    Let's discuss how we can help transform your business with innovative technology
-                                    solutions
-                                    tailored to your specific needs.
+                                    Click the button below and fill out our contact form. We'll get back to you as soon
+                                     as possible to discuss your needs and how we can help. Looking forward to hearing from you!
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <ContactModal
