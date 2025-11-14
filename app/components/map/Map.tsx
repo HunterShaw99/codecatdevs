@@ -8,11 +8,10 @@ import { AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import dataArray from '@map/data/data';
-import type { ClusterObject, Point } from '@map/utils/LayerSettings';
-import {
-  createIconLayer, 
-  createClusteredLayer,
-  getIndexClusters } from '@map/utils/LayerSettings';
+import type { Point, ClusterObject } from '@map/utils/LayerTypes';
+import { createClusteredLayer } from '@map/layers/clusterLayer';
+import { createIconLayer } from '@map/layers/iconLayer';
+import { getIndexClusters } from '@map/utils/ClusterSettings';
 
 const iconAtlas = '/location-icon-atlas.png';
 
@@ -39,18 +38,18 @@ const CustomAttribution = ({ position = 'bottom-right' }: CustomAttributionProps
 const CardMap = () => {
   const [tooltipHtml, setTooltipHtml] = useState<any | null>(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [cluster, setCluster] = useState<any>(null);
 
   const hiddenPointNames = useMemo(() => {
     const index = getIndexClusters(dataArray, 40);
-    // getClusters returns GeoJSON features (either cluster features or single-point features).
-    // We need to inspect cluster features and fetch their leaves to access original point properties.
     const raw = index.getClusters([-180, -90, 180, 90], viewState.zoom) as any[];
+    setCluster(raw);
 
     const names = new Set<string>();
     raw.forEach((feature) => {
       const props = feature && feature.properties;
       // Cluster feature: fetch leaves (original points) and read their properties
-      if (props && props.cluster && viewState.zoom <= 11.5) {
+      if (props && props.cluster) {
         const pointCount = props.point_count ?? 0;
         if (pointCount > 1) {
           const clusterId = props.cluster_id;
@@ -74,7 +73,7 @@ const CardMap = () => {
 
   // 3. Pass filtered data to layers
   const iconLayer = createIconLayer(visiblePoints, viewState);
-  const clusterLayer = createClusteredLayer(dataArray, iconAtlas, viewState, hiddenPointNames);
+  const clusterLayer = createClusteredLayer(cluster, iconAtlas);
 
   const layers = [clusterLayer, iconLayer];
 
