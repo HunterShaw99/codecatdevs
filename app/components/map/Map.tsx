@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import DeckGL from '@deck.gl/react';
 import { PickingInfo } from '@deck.gl/core';
 import Map, { useControl } from 'react-map-gl/maplibre';
@@ -11,7 +11,6 @@ import dataArray from '@map/data/data';
 import type { Point, ClusterObject } from '@map/utils/LayerTypes';
 import { createClusteredLayer } from '@map/layers/clusterLayer';
 import { createIconLayer } from '@map/layers/iconLayer';
-import { getIndexClusters } from '@map/utils/ClusterSettings';
 
 const iconAtlas = '/location-icon-atlas.png';
 
@@ -39,39 +38,71 @@ const CardMap = () => {
   const [tooltipHtml, setTooltipHtml] = useState<any | null>(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [cluster, setCluster] = useState<any>(null);
+  const [hiddenPointNames, setHiddenPointNames] = useState<Set<string>>(new Set());
 
-  const hiddenPointNames = useMemo(() => {
-    const index = getIndexClusters(dataArray, 40);
-    const raw = index.getClusters([-180, -90, 180, 90], viewState.zoom) as any[];
-    setCluster(raw);
+ useEffect(() => {
+    if (window.Worker) {
+      const myWorker: Worker = new Worker(
+        new URL("workers/hiddenPointNamesWorker.ts", import.meta.url),
+        { type: "module" }
+      );
 
-    const names = new Set<string>();
-    raw.forEach((feature) => {
-      const props = feature && feature.properties;
-      // Cluster feature: fetch leaves (original points) and read their properties
-      if (props && props.cluster) {
-        const pointCount = props.point_count ?? 0;
-        if (pointCount > 1) {
-          const clusterId = props.cluster_id;
-          const leaves = index.getLeaves(clusterId, Infinity) || [];
-          leaves.forEach((leaf: any) => {
-            const p = leaf && leaf.properties;
-            if (p && 'name' in p) names.add(p.name);
-          });
+      const updateHiddenPoints = (zoomLevel: number) => {
+        myWorker.postMessage({ command: 'getHiddenPointNames', dataArray, zoomLevel });
+
+        myWorker.onmessage = (e: MessageEvent<{ result?: Set<string>; error?: string }>) => {
+          if (e.data?.error) {
+            console.error(`Worker reported error: ${e.data.error}`);
+          } else if (typeof e.data?.result === 'object') {
+            setHiddenPointNames(e.data.result);
+          } else {
+            console.warn("Received unexpected data format:", e.data);
+          }
+        };
+
+        myWorker.onerror = (error: Event) => {
+          console.error("Worker error:", error);
+        };
+      };
+
+      updateHiddenPoints(viewState.zoom);
+
+      return () => {
+        myWorker.terminate();
+      };
+    }
+  }, [viewState.zoom, dataArray]);
+
+  useEffect(() => {
+    if (window.Worker) {
+      const worker = new Worker(
+        new URL("workers/hiddenPointNamesWorker.ts", import.meta.url),
+        { type: "module" }
+      );
+
+      worker.onmessage = (e: MessageEvent<{ result?: Set<string>; error?: string }>) => {
+        if (e.data?.error) {
+          console.error(`Worker reported error: ${e.data.error}`);
+        } else if (typeof e.data?.result === 'object') {
+          setHiddenPointNames(e.data.result);
+        } else {
+          console.warn("Received unexpected data format:", e.data);
         }
-      }
-      // Non-cluster (single point) features are ignored for hiding since they are not clustered
-    });
-    return names;
-  },[dataArray, viewState.zoom]);
+      };
 
-  // 2. Filter data for icon layer (hide points in clusters)
+      worker.postMessage({ command: 'getHiddenPointNames', dataArray, zoomLevel: viewState.zoom });
+
+      return () => {
+        worker.terminate();
+      };
+    }
+  }, [viewState.zoom]);
+
   const visiblePoints = useMemo(
     () => dataArray.filter(point => !hiddenPointNames.has(point.name)),
     [dataArray, hiddenPointNames]
   );
 
-  // 3. Pass filtered data to layers
   const iconLayer = createIconLayer(visiblePoints, viewState);
   const clusterLayer = createClusteredLayer(cluster, iconAtlas);
 
