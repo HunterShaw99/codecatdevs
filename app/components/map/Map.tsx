@@ -7,19 +7,23 @@ import Map, { useControl } from 'react-map-gl/maplibre';
 import { AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import {coffeeLayers, Point} from './layers/CoffeeShops';
-import { restaurantLayers } from './layers/Restaurants';
+import dataArray from '@map/data/data';
+import type { Point, ClusterObject } from '@map/utils/LayerTypes';
+import { createClusteredLayer } from '@map/layers/clusterLayer';
+import { createIconLayer } from '@map/layers/iconLayer';
+import { getIndexClusters } from '@map/utils/ClusterSettings';
 
-const MAP_CONSTRAINTS = {
-  LONGITUDE: { MIN: -80.1, MAX: -79.76 },
-  LATITUDE: { MIN: 40.3, MAX: 40.5 },
-  ZOOM: { MIN: 10, MAX: 15 }
-} as const;
+const ICON_ATLAS = '/location-icon-atlas.png';
+
+const BOUNDS = [
+  [-80.1, 40.3], 
+  [-79.8, 40.6]
+];
 
 const INITIAL_VIEW_STATE = {
   longitude: -79.9915,
   latitude: 40.4419,
-  zoom: 11,
+  zoom: 10.5,
 } as const;
 
 type CustomAttributionProps = {
@@ -32,59 +36,136 @@ const CustomAttribution = ({ position = 'bottom-right' }: CustomAttributionProps
 };
 
 const CardMap = () => {
-  const [tooltipHtml, setTooltipHtml] = useState<string | null>(null);
+  const [tooltipHtml, setTooltipHtml] = useState<any | null>(null);
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [cluster, setCluster] = useState<any>(null);
+  const [prevZoom, setPrevZoom] = useState<number>(INITIAL_VIEW_STATE.zoom);
 
-  const layers = useMemo(
-    () => [...coffeeLayers, ...restaurantLayers],
-    [...coffeeLayers, ...restaurantLayers]
+  const hiddenPointNames = useMemo(() => {
+    const index = getIndexClusters(dataArray, 40);
+    const raw = index.getClusters([-180, -90, 180, 90], viewState.zoom) as any[];
+    setCluster(raw);
+
+    const names = new Set<string>();
+    raw.forEach((feature) => {
+      const props = feature && feature.properties;
+      // Cluster feature: fetch leaves (original points) and read their properties
+      if (props && props.cluster) {
+        const pointCount = props.point_count ?? 0;
+        if (pointCount > 1) {
+          const clusterId = props.cluster_id;
+          const leaves = index.getLeaves(clusterId, Infinity) || [];
+          leaves.forEach((leaf: any) => {
+            const p = leaf && leaf.properties;
+            if (p && 'name' in p) names.add(p.name);
+          });
+        }
+      }
+      // Non-cluster (single point) features are ignored for hiding since they are not clustered
+    });
+    return names;
+  },[dataArray, viewState.zoom]);
+
+  // 2. Filter data for icon layer (hide points in clusters)
+  const visiblePoints = useMemo(
+    () => dataArray.filter(point => !hiddenPointNames.has(point.name)),
+    [dataArray, hiddenPointNames]
   );
 
-  const onViewStateChange = useCallback(({ viewState }: { viewState: any }) => {
-    return {
-      ...viewState,
-      longitude: Math.max(
-        MAP_CONSTRAINTS.LONGITUDE.MIN,
-        Math.min(MAP_CONSTRAINTS.LONGITUDE.MAX, viewState.longitude)
-      ),
-      latitude: Math.max(
-        MAP_CONSTRAINTS.LATITUDE.MIN,
-        Math.min(MAP_CONSTRAINTS.LATITUDE.MAX, viewState.latitude)
-      ),
-      zoom: Math.max(
-        MAP_CONSTRAINTS.ZOOM.MIN,
-        Math.min(MAP_CONSTRAINTS.ZOOM.MAX, viewState.zoom)
-      )
-    };
-  }, []);
+  // 3. Pass filtered data to layers
+  const iconLayer = createIconLayer(visiblePoints, viewState);
+  const clusterLayer = createClusteredLayer(cluster, ICON_ATLAS);
 
-  const buildTooltipHtml = useCallback((object: Point) => {
+  const layers = [clusterLayer, iconLayer];
+
+  const onViewStateChange = ({ viewState }: { viewState: any }) => {
+      const newViewState = {
+        ...viewState,
+        longitude: Math.max(Math.min(viewState.longitude, BOUNDS[1][0]), BOUNDS[0][0]),
+        latitude: Math.max(Math.min(viewState.latitude, BOUNDS[1][1]), BOUNDS[0][1]),
+      };
+      setViewState(newViewState);
+      return newViewState;
+    }
+
+  const buildTooltipHtml = useCallback((object: Point | ClusterObject) => {
     if (!object) return null;
-    return `
-      <div style="
-        box-sizing: border-box;
-        max-width: 240px;
-        max-height: 160px;
-        overflow: auto;
-        white-space: normal;
-        word-break: break-word;
-        padding: 8px 12px;
-      ">
-        <div style="font-size:13px; font-weight:600; margin:0 0 6px 0; color:var(--ctp-text);">
-          ${object.name}
+
+    if ('cluster' in object && object.cluster) {
+      return (
+        <div
+          style={{
+            boxSizing: 'border-box',
+            maxWidth: 240,
+            maxHeight: 160,
+            overflow: 'auto',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            padding: '8px 12px'
+          }}
+        >
+          <div style={{
+            fontSize: 13,
+            fontWeight: 600,
+            margin: '0 0 6px 0',
+            color: 'var(--ctp-text)'
+          }}>
+            {object.point_count} Locations
+          </div>
+          <div style={{
+            fontSize: 12,
+            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
+            margin: 0
+          }}>
+            Zoom in to see individual locations.
+          </div>
         </div>
-        <div style="font-size:12px; color:var(--ctp-subtext0, rgba(255,255,255,0.8)); margin:0;">
-          ${object.address}
+      );
+    }
+
+    if ('name' in object) {
+      return (
+        <div
+          style={{
+            boxSizing: 'border-box',
+            maxWidth: 240,
+            maxHeight: 160,
+            overflow: 'auto',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            padding: '8px 12px'
+          }}
+        >
+          <div style={{
+            fontSize: 13,
+            fontWeight: 600,
+            margin: '0 0 6px 0',
+            color: 'var(--ctp-text)'
+          }}>
+            {object.name}
+          </div>
+          <div style={{
+            fontSize: 12,
+            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
+            margin: 0
+          }}>
+            {object.address}
+          </div>
+          <div style={{
+            fontSize: 10,
+            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
+            margin: 0
+          }}>
+            {object.note}
+          </div>
         </div>
-        <div style="font-size:10px; color:var(--ctp-subtext0, rgba(255,255,255,0.8)); margin:0;">
-          ${object.note}
-        </div>
-      </div>
-    `;
+      );
+    }
   }, []);
 
   const handleHover = useCallback(({ object }: PickingInfo<Point>) => {
     if (object) {
-      setTooltipHtml(buildTooltipHtml(object) as string);
+      setTooltipHtml(buildTooltipHtml(object));
     } else {
       setTooltipHtml(null);
     }
@@ -97,13 +178,16 @@ const CardMap = () => {
     >
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
+        controller={{inertia: false}}
         layers={layers}
         onViewStateChange={onViewStateChange}
         onHover={handleHover}
       >
         <Map
           attributionControl={false}
+          maxPitch={0}
+          minZoom={8}
+          maxZoom={15}
           mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
           reuseMaps
         >
@@ -111,7 +195,6 @@ const CardMap = () => {
         </Map>
       </DeckGL>
 
-      {tooltipHtml && (
         <div
           className="absolute top-3 right-3 z-50"
           style={{
@@ -125,11 +208,10 @@ const CardMap = () => {
             background: 'var(--ctp-mantle)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
             padding: 0,
-          }}
-          dangerouslySetInnerHTML={{ __html: tooltipHtml }}
-        />
-      )}
+          }}>
+        {tooltipHtml}
     </div>
+  </div>
   );
 };
 

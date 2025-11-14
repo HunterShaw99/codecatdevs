@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@components/*": ["app/components/*"]
+      "@components/*": ["app/components/*"],
+      "@map/*": ["app/components/map/*"],
     },
     "target": "ES2017"
   },
