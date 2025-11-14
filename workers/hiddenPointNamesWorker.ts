@@ -1,49 +1,69 @@
 // workers/hiddenPointNamesWorker.ts
-import { getIndexClusters } from '@map/utils/ClusterSettings';
-import type { ClusterFeature } from 'supercluster';
-import type { Point } from '@map/utils/LayerTypes';
+import {getIndexClusters} from '@map/utils/ClusterSettings';
+import type {ClusterFeature} from 'supercluster';
+import type {Point} from '@map/utils/LayerTypes';
 
 interface HiddenPointsCommand {
-  command: 'getHiddenPointNames',
-  dataArray: Point[],
-  zoomLevel: number,
+    command: 'getHiddenPointNames',
+    dataArray: Point[],
+    zoomLevel: number,
+    taskId?: number,
+    signal?: AbortSignal;
 }
 
 interface HiddenPointsResponse {
-  result?: Set<string>;
-  error?: string;
+    result?: { hiddenNames: Set<string>, clusters: ClusterFeature<any>[] };
+    error?: string;
+    taskId?: number;
 }
 
-addEventListener('message', (event: MessageEvent<HiddenPointsCommand>) => {
-  try {
-    const { dataArray, zoomLevel } = event.data;
+addEventListener('message', async (event: MessageEvent<HiddenPointsCommand>) => {
+    const {dataArray, zoomLevel, taskId} = event.data;
 
     if (!dataArray || typeof zoomLevel !== 'number') {
-      throw new Error('Invalid input');
+        postMessage({error: 'Invalid input', taskId} as HiddenPointsResponse);
+        return;
     }
 
-    const index = getIndexClusters(dataArray, 40);
-    const raw = index.getClusters([-180, -90, 180, 90], zoomLevel) as ClusterFeature<any>[];
+    try {
+        const index = getIndexClusters(dataArray, 40);
 
-    const names = new Set<string>();
-    raw.forEach((feature) => {
-      const props = feature && feature.properties;
-      if (props && props.cluster) {
-        const pointCount = props.point_count ?? 0;
-        if (pointCount > 1) {
-          const clusterId = props.cluster_id;
-          const leaves = index.getLeaves(clusterId, Infinity) || [];
-          leaves.forEach((leaf: any) => {
-            const p = leaf && leaf.properties;
-            if (p && 'name' in p) names.add(p.name);
-          });
+        let raw: ClusterFeature<any>[];
+
+        try {
+            raw = index.getClusters([-180, -90, 180, 90], zoomLevel) as ClusterFeature<any>[];
+        } catch (error) {
+            postMessage({error: 'Failed to get clusters', taskId} as HiddenPointsResponse);
+            return;
         }
-      }
-    });
 
-    postMessage({ result: names } as HiddenPointsResponse);
+        const names = new Set<string>();
 
-  } catch (error) {
-    postMessage({ error: (error as Error).message } as HiddenPointsResponse);
-  }
+        for (const feature of raw) {
+            const props = feature && feature.properties;
+            if (props && props.cluster) {
+                const pointCount = props.point_count ?? 0;
+                if (pointCount > 1) {
+                    const clusterId = props.cluster_id;
+                    let leaves: any[];
+
+                    try {
+                        leaves = index.getLeaves(clusterId, Infinity) || [];
+                    } catch (error) {
+                        console.error('Failed to get leaves:', error);
+                        continue;
+                    }
+                    for (const leaf of leaves) {
+                        const p = leaf && leaf.properties;
+                        if (p && 'name' in p) names.add(p.name);
+                    }
+                }
+            }
+        }
+
+        postMessage({result: {hiddenNames: names, clusters: raw}, taskId} as HiddenPointsResponse);
+
+    } catch (error) {
+        postMessage({error: (error as Error).message, taskId} as HiddenPointsResponse);
+    }
 });
