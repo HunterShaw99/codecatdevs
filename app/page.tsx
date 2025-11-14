@@ -247,8 +247,14 @@ export default function HomePage() {
                                 <div className="heading-section mb-4">Our Local Haunts</div>
                                 <h2 className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
                                     The map below not only highlights some of our favorite local spots around Pittsburgh, but also
-                                    serves to demonstrate our capabilities in creating custom embedded mapping solutions.
+                                    serves to demonstrate some of our basic capabilities in creating custom embedded mapping solutions, such as: 
                                 </h2>
+                                  <ul className="list-disc list-inside mb-6 text-subtext1 text-center max-w-4xl mx-auto">
+                                    <li>Dynamic rendering of labels based on zoom.</li>
+                                    <li>Customizable pop-ups when hovered over a feature.</li>
+                                    <li>Clustering based on spatial proximity.</li>
+                                    <li>Zoom and Panning limits.</li>
+                                </ul>
                                 <CardMap/>
                             </div>
                         </Section>

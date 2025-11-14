@@ -23,7 +23,7 @@ const bounds = [
 const INITIAL_VIEW_STATE = {
   longitude: -79.9915,
   latitude: 40.4419,
-  zoom: 11,
+  zoom: 10.5,
 } as const;
 
 type CustomAttributionProps = {
