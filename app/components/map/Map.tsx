@@ -13,9 +13,9 @@ import { createClusteredLayer } from '@map/layers/clusterLayer';
 import { createIconLayer } from '@map/layers/iconLayer';
 import { getIndexClusters } from '@map/utils/ClusterSettings';
 
-const iconAtlas = '/location-icon-atlas.png';
+const ICON_ATLAS = '/location-icon-atlas.png';
 
-const bounds = [
+const BOUNDS = [
   [-80.1, 40.3], 
   [-79.8, 40.6]
 ];
@@ -39,6 +39,7 @@ const CardMap = () => {
   const [tooltipHtml, setTooltipHtml] = useState<any | null>(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [cluster, setCluster] = useState<any>(null);
+  const [prevZoom, setPrevZoom] = useState<number>(INITIAL_VIEW_STATE.zoom);
 
   const hiddenPointNames = useMemo(() => {
     const index = getIndexClusters(dataArray, 40);
@@ -73,19 +74,20 @@ const CardMap = () => {
 
   // 3. Pass filtered data to layers
   const iconLayer = createIconLayer(visiblePoints, viewState);
-  const clusterLayer = createClusteredLayer(cluster, iconAtlas);
+  const clusterLayer = createClusteredLayer(cluster, ICON_ATLAS);
 
   const layers = [clusterLayer, iconLayer];
 
   const onViewStateChange = ({ viewState }: { viewState: any }) => {
       const newViewState = {
         ...viewState,
-        longitude: Math.max(Math.min(viewState.longitude, bounds[1][0]), bounds[0][0]),
-        latitude: Math.max(Math.min(viewState.latitude, bounds[1][1]), bounds[0][1]),
+        longitude: Math.max(Math.min(viewState.longitude, BOUNDS[1][0]), BOUNDS[0][0]),
+        latitude: Math.max(Math.min(viewState.latitude, BOUNDS[1][1]), BOUNDS[0][1]),
       };
       setViewState(newViewState);
       return newViewState;
     }
+
   const buildTooltipHtml = useCallback((object: Point | ClusterObject) => {
     if (!object) return null;
 
