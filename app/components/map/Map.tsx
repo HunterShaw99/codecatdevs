@@ -60,8 +60,6 @@ const CardMap = () => {
                     await new Promise<void>((resolve, reject) => {
                         myWorker.onmessage = (e: MessageEvent<{ result?: Set<string>; error?: string }>) => {
                             // @ts-ignore
-                            if (signal.aborted || !e.data?.taskId || e.data.taskId !== taskId) return;
-                            // @ts-ignore
                             const receivedTaskId = e.data.taskId;
                             if (receivedTaskId === taskId && typeof e.data?.result === 'object') {
                                 // @ts-ignore
