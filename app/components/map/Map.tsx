@@ -11,6 +11,7 @@ import dataArray from '@map/data/data';
 import type {ClusterObject, Point} from '@map/utils/LayerTypes';
 import {createClusteredLayer} from '@map/layers/clusterLayer';
 import {createIconLayer} from '@map/layers/iconLayer';
+import {debounce} from "lodash";
 
 const iconAtlas = '/location-icon-atlas.png';
 
@@ -41,69 +42,48 @@ const CardMap = () => {
     const [hiddenPointNames, setHiddenPointNames] = useState<Set<string>>(new Set());
     const [prevHoveredObject, setPrevHoveredObject] = useState<any>(null);
 
-    const abortControllerRef = useRef(new AbortController());
+    const workerRef = useRef<Worker | null>(null);
+    if (typeof window !== 'undefined' && !workerRef.current && window.Worker) {
+        workerRef.current = new Worker(
+            new URL("workers/hiddenPointNamesWorker.ts", import.meta.url),
+            { type: "module" }
+        );
+    }
+
+    const debouncedUpdateHiddenPoints = useCallback(debounce((zoomLevel: number) => {
+        if (workerRef.current) {
+            workerRef.current.postMessage({ command: 'getHiddenPointNames', dataArray, zoomLevel });
+        }
+    }, 10), []);
 
     useEffect(() => {
-        if (window.Worker) {
-            const myWorker: Worker = new Worker(
-                new URL("workers/hiddenPointNamesWorker.ts", import.meta.url),
-                {type: "module"}
-            );
+        const currentWorker = workerRef.current;
 
-            const updateHiddenPoints = async (zoomLevel: number, signal: AbortSignal) => {
-                // Generate a unique task ID for each request
-                const taskId = Date.now();
+        if (!currentWorker) return;
 
-                myWorker.postMessage({command: 'getHiddenPointNames', dataArray, zoomLevel, taskId});
+        const onMessage = (event: MessageEvent) => {
+            if (event) {
+                setHiddenPointNames(new Set(event.data.result.hiddenNames));
+                setCluster(event.data.result.clusters)
+            }
+        };
 
-                try {
-                    await new Promise<void>((resolve, reject) => {
-                        myWorker.onmessage = (e: MessageEvent<{ result?: Set<string>; error?: string }>) => {
-                            // @ts-ignore
-                            const receivedTaskId = e.data.taskId;
-                            if (receivedTaskId === taskId && typeof e.data?.result === 'object') {
-                                // @ts-ignore
-                                setHiddenPointNames(e.data.result.hiddenNames);
-                                // @ts-ignore
-                                setCluster(e.data.result.clusters);
-                                resolve();
-                            } else if (e.data?.error) {
-                                console.error(`Worker reported error: ${e.data.error}`);
-                                reject(new Error(e.data.error));
-                            }
-                        };
+        currentWorker.addEventListener('message', onMessage);
 
-                        myWorker.onerror = (error: Event) => {
-                            reject(error);
-                        };
+        return () => {
+            if (currentWorker) {
+                currentWorker.removeEventListener('message', onMessage);
+                currentWorker.terminate();
+            }
+        };
+    }, []);
 
-                        signal.addEventListener('abort', () => {
-                            reject(new DOMException("Aborted", "AbortError"));
-                        }, {once: true});
-                    });
-                } catch (err) {
-                    // @ts-ignore
-                    if (err.name === 'AbortError') {
-                        console.log("Request aborted");
-                    }
-                }
-            };
-
-            // Clear the previous abort controller and create a new one
-            const currentSignal = abortControllerRef.current.signal;
-            abortControllerRef.current = new AbortController();
-
-            updateHiddenPoints(viewState.zoom, currentSignal);
-
-            return () => {
-                myWorker.terminate();
-                if (abortControllerRef.current) {
-                    abortControllerRef.current.abort();
-                }
-            };
+    useEffect(() => {
+        const currentWorker = workerRef.current;
+        if (viewState.zoom && currentWorker) {
+            debouncedUpdateHiddenPoints(viewState.zoom);
         }
-
-    }, [viewState.zoom, dataArray]);
+    }, [viewState.zoom, debouncedUpdateHiddenPoints]);
 
     const visiblePoints = useMemo(
         () => dataArray.filter(point => !hiddenPointNames.has(point.name)),
