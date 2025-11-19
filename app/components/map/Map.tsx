@@ -54,7 +54,7 @@ const CardMap = () => {
         if (workerRef.current) {
             workerRef.current.postMessage({ command: 'getHiddenPointNames', dataArray, zoomLevel });
         }
-    }, 10), []);
+    }, 0), []);
 
     useEffect(() => {
         const currentWorker = workerRef.current;
@@ -126,7 +126,6 @@ const CardMap = () => {
         };
 
         if ('cluster' in object && object.cluster) {
-            console.log('inside of buildTooltipHtml cluster', object);
             return (
                 <div style={baseStyle}>
                     <div style={{...textStyle, fontSize: 13, fontWeight: 600}}>

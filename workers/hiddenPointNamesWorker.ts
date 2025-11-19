@@ -1,11 +1,10 @@
-// workers/hiddenPointNamesWorker.ts
 import {getIndexClusters} from '@map/utils/ClusterSettings';
 import type {ClusterFeature} from 'supercluster';
 import type {Point} from '@map/utils/LayerTypes';
 
 interface HiddenPointsCommand {
     command: 'getHiddenPointNames',
-    dataArray: Point[],
+    dataArray?: Point[],
     zoomLevel: number,
     taskId?: number,
     signal?: AbortSignal;
@@ -41,6 +40,7 @@ addEventListener('message', async (event: MessageEvent<HiddenPointsCommand>) => 
 
         for (const feature of raw) {
             const props = feature && feature.properties;
+
             if (props && props.cluster) {
                 const pointCount = props.point_count ?? 0;
                 if (pointCount > 1) {
@@ -53,9 +53,12 @@ addEventListener('message', async (event: MessageEvent<HiddenPointsCommand>) => 
                         console.error('Failed to get leaves:', error);
                         continue;
                     }
+
                     for (const leaf of leaves) {
                         const p = leaf && leaf.properties;
-                        if (p && 'name' in p) names.add(p.name);
+                        if (p && 'name' in p) {
+                            names.add(p.name);
+                        }
                     }
                 }
             }
