@@ -3,8 +3,7 @@ import CardMap from "@map/Map";
 
 export default function MapPage() {
   return (
-    <div>
-      <h1>Map View</h1>
+    <div className={'max-w-full max-h-full'}>
       <CardMap />
     </div>
   );

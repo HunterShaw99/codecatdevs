@@ -18,6 +18,7 @@ import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 interface NavigationItem {
   label: string;
   href: string;
+  target?: string | undefined;
 }
 
 export interface NavigationProps {
@@ -58,7 +59,7 @@ export const Navigation = ({
         <NavigationMenu.List className="flex space-x-6">
           {items.map((item) => (
             <NavigationMenu.Item key={item.href}>
-              <NavigationMenu.Link href={item.href} className="nav-link">
+              <NavigationMenu.Link href={item.href} className="nav-link" target={item.target} >
                 {item.label}
               </NavigationMenu.Link>
             </NavigationMenu.Item>
@@ -134,6 +135,7 @@ export const Navigation = ({
           href={item.href}
           onClick={handleClose}
           className="block text-xl font-medium text--ctp-text mb-4"
+          target={item.target}
         >
           {item.label}
         </a>
