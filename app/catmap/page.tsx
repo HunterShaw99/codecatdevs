@@ -4,7 +4,6 @@ import DeckGL from "@deck.gl/react";
 import { useState, useRef } from 'react';
 import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 import { StackIcon, CursorArrowIcon} from "@radix-ui/react-icons"
-import { is, vi } from "zod/locales";
 
 export default function MapPage() {
   const INITIAL_VIEW_STATE = {
