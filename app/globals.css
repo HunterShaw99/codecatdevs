@@ -491,3 +491,23 @@ h1 {
   border: 0.15rem solid peachpuff;
   border-radius: 1.5rem;
 }
+
+.subdomain-btn {
+  @apply p-2 h-10 w-10 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950;
+}
+
+.legend-container {
+  @apply p-2 border shadow-md hover:shadow-lg transition-shadow bg-zinc-950;
+  overflow: hidden;
+  transition: max-height 0.5s max-width 0.5s ease-in-out padding 0.5s;
+  height: 100%; 
+  width: 100%;
+}
+
+.expanded {
+  @apply rounded-lg max-h-fit max-w-fit;
+}
+
+.collapsed {
+  @apply rounded-full max-h-fit max-w-fit;
+}
