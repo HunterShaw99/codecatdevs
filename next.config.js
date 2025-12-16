@@ -18,7 +18,7 @@ const nextConfig = {
             value: 'map.localhost',
           },
         ],
-        destination: '/map',
+        destination: '/catmap',
         permanent: true,
       },
     ];

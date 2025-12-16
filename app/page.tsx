@@ -19,7 +19,7 @@ export default function HomePage() {
         {label: 'Values', href: '#values'},
         {label: 'Map', href: '#map'},
         {label: 'Contact', href: '#contact'},
-        {label: 'Explore our App', href: 'http://map.localhost:3000/map', target: '_blank'},
+        {label: 'Explore our App', href: 'http://map.localhost:3000/catmap', target: '_blank'},
     ];
 
     const coreValues = [
