@@ -18,7 +18,7 @@ export default function MapPage() {
   const [isClicked, setIsClicked] = useState(false);
   const [uploadedPoints, setUploadedPoints] = useState<any[]>([]);
 
-  console.log(isClicked);
+  console.log(uploadedPoints);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -33,19 +33,19 @@ export default function MapPage() {
         const [, , name, state] = row.split(',');
         return { longitude: lng, latitude: lat, name, state };
       });
-      setUploadedPoints(points);
+      setUploadedPoints(uploadedPoints => [...uploadedPoints, ...points]);
     };
     reader.readAsText(file);
   };
 
   const handleCursorClick = (event: any) => {
     const deck = deckRef.current.deck;
-    const viewport = deck.getViewports()[0]; // Assumes a single viewport like MapView
-      
-    setUploadedPoints(uploadedPoints => [...uploadedPoints, { latitude: viewport.latitude, longtiude: viewport.longitude, 
-      name: `${viewport.longitude}, ${viewport.latitude}`, state: '' }]);
+    const viewport = deck.getViewports()[0]; // Assumes a single viewport like MapView  
 
-    console.log(uploadedPoints);
+    const [lng, lat] = viewport.unproject([event.x, event.y]);
+    setUploadedPoints(uploadedPoints => [...uploadedPoints, { latitude: lat, longitude: lng, 
+      name: `${(lng).toFixed(2)}, ${(lat).toFixed(2)}`, state: '' }]);
+
     setIsClicked(false);
   };
 
@@ -97,8 +97,7 @@ export default function MapPage() {
         initialViewState={INITIAL_VIEW_STATE}
         controller={{inertia: false}}
         onClick={isClicked ? handleCursorClick : undefined}
-        layers={uploadedPoints.length > 0 ? [
-            new ScatterplotLayer({
+        layers={[new ScatterplotLayer({
                 id: 'uploaded-points',
                 data: uploadedPoints,
                 getPosition: (d: any) => [d.longitude, d.latitude],
@@ -123,7 +122,7 @@ export default function MapPage() {
               updateTriggers: 
                   {getPosition: [uploadedPoints]}
             })
-        ] : []}
+          ]}
       >
         <Map
           attributionControl={false}
