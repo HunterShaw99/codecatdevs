@@ -2,8 +2,8 @@
 import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
 import { useState } from 'react';
-import { Button } from '@radix-ui/themes';
 import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+import { StackIcon} from "@radix-ui/react-icons"
 
 export default function MapPage() {
   const INITIAL_VIEW_STATE = {
@@ -35,16 +35,16 @@ export default function MapPage() {
 
   return (
     <div className={'max-w-full max-h-full'}>
-      <div className="p-4 bg-white rounded-lg shadow-md mb-4 z-100 flex absolute top-[30%] left-0">
-        <Button
+      <div className="p-4 rounded-lg mb-4 z-100 flex absolute top-[30%] left-0">
+        <button
           onClick={() => setIsUploadExpanded(!isUploadExpanded)}
-          className="mb-2"
+          className="absolute p-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950"
         >
-          {isUploadExpanded ? 'Hide Upload' : 'Upload Data'}
-        </Button>
+          <StackIcon className={'w-6 h-6 rounded-full'}/>
+        </button>
 
         {isUploadExpanded && (
-          <div className="mt-4 p-4 border rounded-lg">
+          <div className="mt-4 p-4 bg-white border rounded-lg ml-[10%]">
             <input
               type="file"
               accept=".csv,.xlsx,.xls"
