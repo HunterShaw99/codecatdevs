@@ -15,11 +15,10 @@ export default function HomePage() {
     const navigationItems = [
         {label: 'About', href: '#about'},
         {label: 'Mission & Vision', href: '#mission-vision'},
-        {label: 'Solutions', href: '#solutions'},
+        {label: 'Our Solutions', href: '#solutions'},
         {label: 'Values', href: '#values'},
-        {label: 'Map', href: '#map'},
+        {label: 'Mapping Example', href: '#map'},
         {label: 'Contact', href: '#contact'},
-        {label: 'Explore our App', href: 'http://map.localhost:3000/catmap', target: '_blank'},
     ];
 
     const coreValues = [
@@ -220,6 +219,24 @@ export default function HomePage() {
                                         />
                                     ))}
                                 </div>
+                            </div>
+                            <div className='m-6 flex-col items-center justify-center text-center'>
+                                <Card>
+                                    <p className="heading-subsection">
+                                        Looking for an example of what we can build? Check out our custom Cat Map application, built
+                                        to showcase some of our mapping capabilities and give you a feel for what we can do!
+                                    </p>
+                                    <ul className="list-disc list-inside m-6 text-subtext1 text-center max-w-4xl mx-auto">
+                                        <li>Create layers to house your data using our Layer Manager.</li>
+                                        <li>Add points from a CSV or Excel Spredsheet, or simply with a click.</li>
+                                        <li>Customize the look and feel of your map with different basemaps and styles.</li>
+                                    </ul>
+                                    <div className="m-4 flex-col items-center justify-center text-center">
+                                        <Button variant="app-launcher" onClick={() => window.open('/catmap', '_blank', 'noopener,noreferrer')}>
+                                            Launch the Cat Map Application
+                                        </Button>
+                                    </div>
+                                </Card>
                             </div>
                         </Section>
 

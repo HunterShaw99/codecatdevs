@@ -338,6 +338,21 @@ body {
     box-shadow: 0 4px 12px rgba(250, 179, 135, 0.3);
   }
 
+  .btn-app-launcher {
+    @apply px-6 py-3 rounded-lg text-2xl font-bold transition-all duration-300 border-2;
+    background: linear-gradient(135deg, var(--color-peach-3), var(--color-peach-6));
+    color: var(--color-peach-8);
+    border-color: var(--color-peach-5);
+  }
+
+  .btn-app-launcher:hover {
+    background:linear-gradient(135deg, var(--color-peach-6), var(--color-peach-3));
+    color: var(--color-peach-9);
+    border-color: var(--color-peach-6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(250, 179, 135, 0.3);
+  }
+
   /* Gradients */
   .gradient-cta {
     @apply rounded-3xl shadow-2xl p-8 text-center text-white mb-2;

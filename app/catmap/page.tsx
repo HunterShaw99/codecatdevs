@@ -134,7 +134,7 @@ export default function MapPage() {
           </button>
 
           {isUploadExpanded && !isClicked && (
-            <div className="p-4 bg-white border rounded-lg ml-2 flex-shrink-0">
+            <div className="p-4 bg-white border rounded-lg ml-2 shrink-0">
               <input
                 type="file"
                 accept=".csv,.xlsx,.xls"
