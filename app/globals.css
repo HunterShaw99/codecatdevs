@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Vibur&display=swap");
 @import "tailwindcss";
 @import "@radix-ui/themes/styles.css";
-
+@tailwind utilities;
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Define keyframes animation at the root level */
@@ -114,6 +114,15 @@
   --secondary: #2a2a2a;
   --secondary-foreground: #ededed;
 }
+
+@layer base {
+  .cursor-pointer-custom {
+    cursor: pointer;
+  }
+
+  .cursor-crosshair-custom {
+    cursor: crosshair;
+  }}
 
 @theme inline {
   --color-background: var(--background);
