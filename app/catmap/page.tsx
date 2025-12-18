@@ -92,6 +92,7 @@ export default function MapPage() {
     })
 
   const measureLayer = new EditableGeoJsonLayer({
+    id: 'measure-layer',
     data: measurementFeatures,
     mode,
     modeConfig: { centerTooltipsOnLine : true, 
@@ -190,7 +191,7 @@ export default function MapPage() {
         <h3 className="font-bold text-m mb-2 underline">Legend</h3>
         <div></div>
         <ul className="text-xs space-y-1">
-          {legendItems.map((layer: any) => (
+          {legendItems.filter((layer : any) => layer.id !== 'measure-layer').map((layer: any) => (
             <li key={layer.id} className="mb-1 flex items-center">
               {getLegendColor([255, 0, 0])}
               <span>{layer.id}</span>
@@ -362,7 +363,8 @@ export default function MapPage() {
           inertia: false
         }}
         onClick={isClicked ? handleCursorClick :  undefined}
-        layers={mode === MeasureDistanceMode ? [measureLayer,
+        layers={mode === MeasureDistanceMode ? 
+          [measureLayer,
           ...layerManager.filter(layer => layer.visible)
           .map(l => {
             if (l.type === 'scatterplot') {
