@@ -3,13 +3,15 @@ import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
 import { useRef, useState } from 'react';
 import { ScatterplotLayer, TextLayer } from '@deck.gl/layers';
+import { ViewMode, MeasureDistanceMode, EditableGeoJsonLayer, FeatureCollection } from '@deck.gl-community/editable-layers';
 import {
   CursorArrowIcon,
   LayersIcon,
   ListBulletIcon,
   MixerHorizontalIcon,
   PlusIcon,
-  UploadIcon
+  UploadIcon,
+  RulerHorizontalIcon
 } from "@radix-ui/react-icons"
 import { CompositeLayer } from '@deck.gl/core';
 import * as RadioGroup from '@radix-ui/react-radio-group';
@@ -83,6 +85,26 @@ export default function MapPage() {
   const [selectedLayerName, setSelectedLayerName] = useState('Default');
   const [layerManagerClicked, setLayerManagerClicked] = useState(false);
   const [layerName, setLayerName] = useState('');
+  const [mode, setMode] = useState<any>(() => ViewMode);
+  const [measurementFeatures,setMeasurementFeatures] = useState<FeatureCollection>({
+      type: 'FeatureCollection',
+      features: []
+    })
+
+  const measureLayer = new EditableGeoJsonLayer({
+    data: measurementFeatures,
+    mode,
+    modeConfig: { centerTooltipsOnLine : true, 
+      turfOptions: 
+        {units: 'miles'}
+    },
+    getTentativeLineColor: [250, 179, 135, 200],
+    getEditHandlePointColor: [250, 179, 135, 255],
+    getEditHandlePointOutlineColor: [250, 179, 135, 200],
+    onEdit: ({ updatedData }) => {
+      setMeasurementFeatures(updatedData);
+    },
+  });
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -288,6 +310,13 @@ export default function MapPage() {
           </div>}
         <div className="flex items-start space-x-2">
           <button
+            onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
+            className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950 ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+            <RulerHorizontalIcon className={'w-8 h-8 rounded-full'} />
+          </button>
+        </div>
+        <div className="flex items-start space-x-2">
+          <button
             onClick={() => setIsBaseMapExpanded(!isBaseMapExpanded)}
             className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950 ${isBaseMapExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}
           >
@@ -328,9 +357,20 @@ export default function MapPage() {
       <DeckGL
         ref={deckRef}
         initialViewState={INITIAL_VIEW_STATE}
-        controller={{ inertia: false }}
-        onClick={isClicked ? handleCursorClick : undefined}
-        layers={[...layerManager.filter(layer => layer.visible)
+        controller={{
+          doubleClickZoom: false,
+          inertia: false
+        }}
+        onClick={isClicked ? handleCursorClick :  undefined}
+        layers={mode === MeasureDistanceMode ? [measureLayer,
+          ...layerManager.filter(layer => layer.visible)
+          .map(l => {
+            if (l.type === 'scatterplot') {
+              return new LabelledLayer({ id: l.name, data: l.data, color: l.colors.fill })
+            }
+          }
+          )
+        ] : [...layerManager.filter(layer => layer.visible)
           .map(l => {
             if (l.type === 'scatterplot') {
               return new LabelledLayer({ id: l.name, data: l.data, color: l.colors.fill })
