@@ -49,6 +49,22 @@ export default function MapPage() {
         visible: boolean;
     }
 
+    const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
+        let timeoutId: NodeJS.Timeout | null;
+
+        return (...args: Parameters<T>) => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+
+            timeoutId = setTimeout(() => {
+      callback(...args);
+    }, delay);
+        };
+    };
+
+
+
     class LabelledLayer extends CompositeLayer<{ data: any[], color?: any }> {
         renderLayers() {
             return [new ScatterplotLayer({
@@ -214,6 +230,8 @@ export default function MapPage() {
         );
     };
 
+    const updateLayerColorDebounced = debounce(updateLayerColor, 300);
+
     const getLegendList = () => {
         const legendItems = layerManager.filter(layer => layer.visible);
 
@@ -288,7 +306,7 @@ export default function MapPage() {
                                             value={layer.colors.fill || '#ff0000'}
                                             onChange={(e) => {
                                                 const newColor = e.target.value;
-                                                updateLayerColor(layer.name, {fill: newColor});
+                                                updateLayerColorDebounced(layer.name, {fill: newColor});
                                             }}
                                             className="w-12 p-1 rounded"
                                         />
