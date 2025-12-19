@@ -11,14 +11,14 @@ import {
 } from '@deck.gl-community/editable-layers';
 import {
     CursorArrowIcon,
+    EyeNoneIcon,
+    EyeOpenIcon,
     LayersIcon,
     ListBulletIcon,
     MixerHorizontalIcon,
     PlusIcon,
     RulerHorizontalIcon,
-    UploadIcon,
-    EyeOpenIcon,
-    EyeNoneIcon
+    UploadIcon
 } from "@radix-ui/react-icons"
 import {CompositeLayer} from '@deck.gl/core';
 import * as RadioGroup from '@radix-ui/react-radio-group';
@@ -28,11 +28,11 @@ import {Separator} from "radix-ui";
 import {BASEMAP_KEYS, BASEMAPS} from './constants';
 
 const hexToRGB = (hex: string): [number, number, number] => {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return [r, g, b];
-    };
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return [r, g, b];
+};
 
 export default function MapPage() {
     const INITIAL_VIEW_STATE = {
@@ -191,7 +191,6 @@ export default function MapPage() {
     };
 
 
-
     const getLegendColor = (color: any) => {
         const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
         return (<span
@@ -216,22 +215,22 @@ export default function MapPage() {
     };
 
     const getLegendList = () => {
-    const legendItems = layerManager.filter(layer => layer.visible);
+        const legendItems = layerManager.filter(layer => layer.visible);
 
-    return (
-        <div className="p-2 text-left text-gray-600 bg-white border rounded-lg">
-            <h3 className="font-bold text-m mb-2 underline">Legend</h3>
-            <ul className="text-xs space-y-1">
-                {legendItems.map((layer: any) => (
-                    <li key={layer.name} className="mb-1 flex items-center">
-                        {getLegendColor(hexToRGB(layer.colors.fill || '#ff0000'))}
-                        <span>{layer.name}</span>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-};
+        return (
+            <div className="p-2 text-left text-gray-600 bg-white border rounded-lg">
+                <h3 className="font-bold text-m mb-2 underline">Legend</h3>
+                <ul className="text-xs space-y-1">
+                    {legendItems.map((layer: any) => (
+                        <li key={layer.name} className="mb-1 flex items-center">
+                            {getLegendColor(hexToRGB(layer.colors.fill || '#ff0000'))}
+                            <span>{layer.name}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
+    };
 
     return (
         <div className={'max-w-full max-h-full'}>
@@ -282,29 +281,29 @@ export default function MapPage() {
                                             decorative/>
                             <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
                                 {layerManager.map(layer => (
-        <div key={layer.name} className="flex items-center justify-between mb-1 space-x-4">
-            <span className="mr-2 w-20">{layer.name}</span>
-            <input
-                type="color"
-                value={layer.colors.fill || '#ff0000'}
-                onChange={(e) => {
-                    const newColor = e.target.value;
-                    updateLayerColor(layer.name, {fill: newColor});
-                }}
-                className="w-12 p-1 rounded"
-            />
-            <button
-                onClick={() => toggleLayerVisibility(layer.name)}
-                className="p-1 w-6 h-6 rounded bg-zinc-300 text-zinc-800 focus:outline-none"
-            >
-                {layer.visible ? (
-                    <EyeOpenIcon className="w-full h-full" />
-                ) : (
-                    <EyeNoneIcon className="w-full h-full" />
-                )}
-            </button>
-        </div>
-    ))}
+                                    <div key={layer.name} className="flex items-center justify-between mb-1 space-x-4">
+                                        <span className="mr-2 w-20">{layer.name}</span>
+                                        <input
+                                            type="color"
+                                            value={layer.colors.fill || '#ff0000'}
+                                            onChange={(e) => {
+                                                const newColor = e.target.value;
+                                                updateLayerColor(layer.name, {fill: newColor});
+                                            }}
+                                            className="w-12 p-1 rounded"
+                                        />
+                                        <button
+                                            onClick={() => toggleLayerVisibility(layer.name)}
+                                            className="p-1 w-6 h-6 rounded bg-zinc-950 text-stone-100 focus:outline-none"
+                                        >
+                                            {layer.visible ? (
+                                                <EyeOpenIcon className="w-full h-full"/>
+                                            ) : (
+                                                <EyeNoneIcon className="w-full h-full"/>
+                                            )}
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
