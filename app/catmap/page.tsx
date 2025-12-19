@@ -219,6 +219,7 @@ export default function MapPage() {
         <div className="flex items-start relative">
           <button
             onClick={() => setLayerManagerClicked(!layerManagerClicked)}
+            title="Layers"
             className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950 ${layerManagerClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
             <LayersIcon className={'w-8 h-8 rounded-full'} />
           </button>
@@ -263,9 +264,10 @@ export default function MapPage() {
             </div>
           )}
         </div>
-        <div className="flex items-start space-x-2">
+        <div className="flex items-start relative">
           <button
             onClick={() => setIsUploadExpanded(!isUploadExpanded)}
+            title={"Upload Data"}
             className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950 ${isUploadExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
             <UploadIcon className={'w-8 h-8 rounded-full'} />
           </button>
@@ -288,8 +290,10 @@ export default function MapPage() {
             </div>
           )}
         </div>
-        <button
+        <div className="flex items-start relative">
+          <button
           onClick={() => setIsClicked(!isClicked)}
+          title={'Add Points'}
           className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950 ${isClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
           <CursorArrowIcon className={'w-8 h-8 rounded-full'} />
         </button>
@@ -309,16 +313,19 @@ export default function MapPage() {
                   ))}
               </select>
           </div>}
-        <div className="flex items-start space-x-2">
+        </div>
+        <div className="flex items-start relative">
           <button
             onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
+            title={'Measure Tool'}
             className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950 ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
             <RulerHorizontalIcon className={'w-8 h-8 rounded-full'} />
           </button>
         </div>
-        <div className="flex items-start space-x-2">
+        <div className="flex items-start relative">
           <button
             onClick={() => setIsBaseMapExpanded(!isBaseMapExpanded)}
+            title={'Preferences'}
             className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950 ${isBaseMapExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}
           >
             <MixerHorizontalIcon className={'w-8 h-8 rounded-full'} />
