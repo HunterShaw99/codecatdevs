@@ -579,3 +579,9 @@ h1 {
 	line-height: 1;
 	padding-left: 15px;
 }
+
+/* Table */
+table, th, td, tr {
+  border: 1px solid lightgray;
+  padding: 4px
+}
