@@ -1,7 +1,7 @@
 'use client';
 import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
-import {useRef, useState, useMemo, useCallback} from 'react';
+import {useCallback, useMemo, useRef, useState} from 'react';
 import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 import {
     EditableGeoJsonLayer,
@@ -19,6 +19,7 @@ import {
     PlusIcon,
     RulerHorizontalIcon,
     TableIcon,
+    TrashIcon,
     UploadIcon
 } from "@radix-ui/react-icons"
 import {CompositeLayer, PickingInfo} from '@deck.gl/core';
@@ -26,8 +27,8 @@ import * as RadioGroup from '@radix-ui/react-radio-group';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {Separator} from "radix-ui";
 
-import { PopUpWindow } from "@/app/components/popup/PopUp";
-import AttributeTable, { ScatterPoint } from "@/app/components/table/AttributeTable";
+import {PopUpWindow} from "@/app/components/popup/PopUp";
+import AttributeTable, {ScatterPoint} from "@/app/components/table/AttributeTable";
 import {BASEMAP_KEYS, BASEMAPS} from './constants';
 
 const hexToRGB = (hex: string): [number, number, number] => {
@@ -37,10 +38,9 @@ const hexToRGB = (hex: string): [number, number, number] => {
     return [r, g, b];
 };
 const randomHex = () => {
-  return `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0")}`;
+    return `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0")}`;
 };
 
-// debounce moved to module scope to avoid recreating on every render
 const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
     let timeoutId: NodeJS.Timeout | null;
 
@@ -55,7 +55,6 @@ const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number
     };
 };
 
-// LabelledLayer moved to module scope to avoid class recreation on each render
 class LabelledLayer extends CompositeLayer<{ data: any[], color?: any }> {
     renderLayers() {
         return [new ScatterplotLayer({
@@ -87,10 +86,10 @@ class LabelledLayer extends CompositeLayer<{ data: any[], color?: any }> {
             })
         ]
     };
-} 
+}
 
 export default function MapPage() {
-  // set minZoom and MaxZoom for both Map and Deck component
+    // set minZoom and MaxZoom for both Map and Deck component
     const INITIAL_VIEW_STATE = {
         longitude: -79.9915,
         latitude: 40.4419,
@@ -107,7 +106,6 @@ export default function MapPage() {
         visible: boolean;
     }
 
-    // debounce moved to module scope to keep the function stable across renders
 
     const deckRef = useRef<any>(null);
     const [isUploadExpanded, setIsUploadExpanded] = useState(false);
@@ -116,7 +114,7 @@ export default function MapPage() {
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
     const [isBaseMapExpanded, setIsBaseMapExpanded] = useState(false);
     const [isTableExpanded, setIsTableExpanded] = useState(false);
-    
+
     // layer state
     const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
         name: 'Default',
@@ -137,7 +135,6 @@ export default function MapPage() {
         features: []
     })
 
-    // LabelledLayer moved to module scope to avoid expensive class recreation on every render
 
     const measureLayer = useMemo(() => new EditableGeoJsonLayer({
         id: 'measure-layer',
@@ -154,20 +151,19 @@ export default function MapPage() {
         getEditHandlePointOutlineColor: [250, 179, 135, 200],
         // color and style of tooltips
         _subLayerProps: {
-            tooltips : {
-              getColor: [30, 30, 46],
-              sizeScale: 1.2,
-              sizeMinPixels: 12,
-              sizeMaxPixels: 18,
-              getSize: 16,
-              fontFamily: 'Arial, Helvetica, sans-serif',
-              fontWeight: 750,
-              fontSettings: {sdf: true},
-              outlineColor: [255, 255, 255, 200],
-              outlineWidth: 3,
+            tooltips: {
+                getColor: [30, 30, 46],
+                sizeScale: 1.2,
+                sizeMinPixels: 12,
+                sizeMaxPixels: 18,
+                getSize: 16,
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                fontWeight: 750,
+                fontSettings: {sdf: true},
+                outlineColor: [255, 255, 255, 200],
+                outlineWidth: 3,
             }
         },
-        // allows for double click to retain drawn features
         onEdit: ({updatedData}) => {
             setMeasurementFeatures(updatedData);
         },
@@ -204,7 +200,7 @@ export default function MapPage() {
         setLayerManager(prevLayers => [...prevLayers, {
             name: newLayer.name,
             type: newLayer.type || 'scatterplot',
-            colors: { fill: newLayer.colors?.fill ?? randomHex() },
+            colors: {fill: newLayer.colors?.fill ?? randomHex()},
             data: newLayer.data || [],
             visible: true
         }]);
@@ -217,6 +213,12 @@ export default function MapPage() {
             )
         );
     };
+
+    const deleteLayer = useCallback((name: string) => {
+        setLayerManager(prev =>
+            prev.filter(l => l.name !== name)
+        );
+    }, []);
 
     const handleCursorClick = (event: any) => {
         const deck = deckRef.current.deck;
@@ -285,15 +287,17 @@ export default function MapPage() {
         );
     };
 
-    // memoize table data to avoid re-computing large arrays on every render
     const tableData = useMemo(() => layerManager.filter(layer => layer.visible).flatMap(l => l.data), [layerManager]);
 
-    // memoize layers to avoid recreating deck layers on every render (expensive)
     const layers = useMemo(() => {
         const visible = layerManager.filter(layer => layer.visible);
-        const labelled = visible.flatMap(l => l.type === 'scatterplot' ? [new LabelledLayer({id: l.name, data: l.data, color: l.colors.fill})] : []);
+        const labelled = visible.flatMap(l => l.type === 'scatterplot' ? [new LabelledLayer({
+            id: l.name,
+            data: l.data,
+            color: l.colors.fill
+        })] : []);
         return mode === MeasureDistanceMode ? [measureLayer, ...labelled] : labelled;
-    }, [mode, layerManager, measureLayer]); 
+    }, [mode, layerManager, measureLayer]);
 
     return (
         <div className={'max-w-full max-h-full'}>
@@ -318,14 +322,15 @@ export default function MapPage() {
                     onClick={() => setIsTableExpanded(!isTableExpanded)}
                     className={`legend-container ${isTableExpanded ? 'expanded' : 'collapsed'}`}
                 >
-                    <TableIcon className={'w-6 h-6'} />
+                    <TableIcon className={'w-6 h-6'}/>
                 </button>
 
                 {isTableExpanded && (
-                  <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 z-50 max-w-120 max-h-[60vh] overflow-auto grid place-items-center">
-                    <AttributeTable layer={tableData} />
-                  </div>
-                )} 
+                    <div
+                        className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 z-50 max-w-120 max-h-[60vh] overflow-auto grid place-items-center">
+                        <AttributeTable layer={tableData}/>
+                    </div>
+                )}
             </div>
 
             {/* Widgets Section */}
@@ -339,14 +344,19 @@ export default function MapPage() {
                     </button>
                     {layerManagerClicked && (
                         <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                            <label className="layer-select text-stone-500">Layer Manager:</label>
+                            <label className="layer-select text-stone-700">Layer Manager:</label>
                             <div className={"flex flex-row items-center justify-between gap-4"}>
                                 <input
                                     type={'text'}
-                                    className={"px-2 border border-zinc-500 text-stone-500 rounded-lg max-w-48 max-h-6"}
+                                    className={"px-2 border border-zinc-500 text-stone-500 bg-stone-100 rounded-md max-w-48 max-h-6"}
                                     id={'layer-name-input'}
                                     value={layerName}
                                     onChange={(e) => {
+                                        const exists = layerManager.some(l => l.name === e.target.value);
+                                        if (exists) {
+                                            alert('Layer name already taken');
+                                            return;
+                                        }
                                         setLayerName(e.target.value);
                                     }}
                                 />
@@ -369,19 +379,29 @@ export default function MapPage() {
                                         <input
                                             type="color"
                                             value={layer.colors.fill}
-                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: e.target.value })}
+                                            onChange={(e) => updateLayerColorDebounced(layer.name, {fill: e.target.value})}
                                             className="w-12 p-1 rounded"
                                         />
-                                        <button
-                                            onClick={() => toggleLayerVisibility(layer.name)}
-                                            className="p-1 w-6 h-6 rounded bg-base text-stone-100 focus:outline-none"
-                                        >
-                                            {layer.visible ? (
-                                                <EyeOpenIcon className="w-full h-full"/>
-                                            ) : (
-                                                <EyeNoneIcon className="w-full h-full"/>
-                                            )}
-                                        </button>
+                                        <div className={'flex flex-row gap-2'}>
+                                            <button
+                                                onClick={() => toggleLayerVisibility(layer.name)}
+                                                className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
+                                            >
+                                                {layer.visible ? (
+                                                    <EyeOpenIcon className="w-full h-full"/>
+                                                ) : (
+                                                    <EyeNoneIcon className="w-full h-full"/>
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => deleteLayer(layer.name)}
+                                                aria-label={`Delete layer ${layer.name}`}
+                                                className="p-1 w-6 h-6 rounded text-red-400 hover:text-red-700 focus:outline-none"
+                                            >
+                                                <TrashIcon className="w-full h-full"/>
+                                            </button>
+                                        </div>
+
                                     </div>
                                 ))}
                             </div>
@@ -502,9 +522,9 @@ export default function MapPage() {
                 }}
                 layers={layers}
             >
-                    {popupData?.object && (
-                      <PopUpWindow props={popupData}/>
-                    )}
+                {popupData?.object && (
+                    <PopUpWindow props={popupData}/>
+                )}
                 <Map
                     maxPitch={0}
                     minZoom={INITIAL_VIEW_STATE.minZoom}
