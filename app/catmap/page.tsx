@@ -30,16 +30,7 @@ import {Separator} from "radix-ui";
 import {PopUpWindow} from "@/app/components/popup/PopUp";
 import AttributeTable, {ScatterPoint} from "@/app/components/table/AttributeTable";
 import {BASEMAP_KEYS, BASEMAPS} from './constants';
-
-const hexToRGB = (hex: string): [number, number, number] => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return [r, g, b];
-};
-const randomHex = () => {
-    return `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0")}`;
-};
+import {hexToRGB, randomHex} from '../utils/color';
 
 const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
     let timeoutId: NodeJS.Timeout | null;
@@ -196,7 +187,7 @@ export default function MapPage() {
         reader.readAsText(file);
     };
 
-    const addNewLayer = (newLayer: any) => {
+    const addNewLayer = useCallback((newLayer: any) => {
         setLayerManager(prevLayers => [...prevLayers, {
             name: newLayer.name,
             type: newLayer.type || 'scatterplot',
@@ -204,15 +195,15 @@ export default function MapPage() {
             data: newLayer.data || [],
             visible: true
         }]);
-    };
+    }, []);
 
-    const toggleLayerVisibility = (layerId: string) => {
+    const toggleLayerVisibility = useCallback((layerId: string) => {
         setLayerManager(prevLayers =>
             prevLayers.map(layer =>
                 layer.name === layerId ? {...layer, visible: !layer.visible} : layer
             )
         );
-    };
+    }, []);
 
     const deleteLayer = useCallback((name: string) => {
         setLayerManager(prev =>
