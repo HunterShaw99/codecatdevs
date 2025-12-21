@@ -36,6 +36,9 @@ const hexToRGB = (hex: string): [number, number, number] => {
     const b = parseInt(hex.slice(5, 7), 16);
     return [r, g, b];
 };
+const randomHex = () => {
+  return `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0")}`;
+};
 
 // debounce moved to module scope to avoid recreating on every render
 const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
@@ -118,7 +121,7 @@ export default function MapPage() {
     const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
         name: 'Default',
         type: 'scatterplot',
-        colors: {fill: '#ff0000'},
+        colors: {fill: randomHex()},
         visible: true,
         data: []
     }]);
@@ -201,7 +204,7 @@ export default function MapPage() {
         setLayerManager(prevLayers => [...prevLayers, {
             name: newLayer.name,
             type: newLayer.type || 'scatterplot',
-            colors: newLayer.colors || {fill: [255, 0, 0]},
+            colors: { fill: newLayer.colors?.fill ?? randomHex() },
             data: newLayer.data || [],
             visible: true
         }]);
@@ -273,7 +276,7 @@ export default function MapPage() {
                 <ul className="text-xs space-y-1">
                     {legendItems.map((layer: any) => (
                         <li key={layer.name} className="mb-1 flex items-center">
-                            {getLegendColor(hexToRGB(layer.colors.fill || '#ff0000'))}
+                            {getLegendColor(hexToRGB(layer.colors.fill))}
                             <span>{layer.name}</span>
                         </li>
                     ))}
@@ -365,11 +368,8 @@ export default function MapPage() {
                                         <span className="mr-2 w-20">{layer.name}</span>
                                         <input
                                             type="color"
-                                            value={layer.colors.fill || '#ff0000'}
-                                            onChange={(e) => {
-                                                const newColor = e.target.value;
-                                                updateLayerColorDebounced(layer.name, {fill: newColor});
-                                            }}
+                                            value={layer.colors.fill}
+                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: e.target.value })}
                                             className="w-12 p-1 rounded"
                                         />
                                         <button
