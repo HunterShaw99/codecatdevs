@@ -21,8 +21,15 @@ export type ScatterPoint = {
     status: string
 }
 
+export interface CompResults {
+  name: string;
+  coordinates: [number, number];
+  distance: number;
+}
+
 export type SearchRing = {
   originName: string
   originCoords: [number, number]
-  compareResults: Record<string, number>
+  searchedDistance: number
+  compareResults: Record<string, CompResults[]>
 }

@@ -34,8 +34,9 @@ import { PopUpWindow } from "@components/map/popup/PopUp";
 import AttributeTable from "@components/map/table/AttributeTable";
 import { BASEMAP_KEYS, BASEMAPS } from './constants';
 import { LabelledLayer } from "@components/map/layers/labelledScatterLayer";
-import { ScatterplotLayer } from "deck.gl";
-import { ScatterPoint, SearchRing } from "@components/map/utils/LayerTypes";
+import { SearchRingLayer } from "@components/map/layers/searchRingLayer"
+import { CompResults, ScatterPoint, SearchRing } from "@components/map/utils/LayerTypes";
+import { TRACE_OUTPUT_VERSION } from "next/dist/shared/lib/constants";
 
 
 // debounce moved to module scope to avoid recreating on every render
@@ -69,7 +70,6 @@ export default function MapPage() {
         colors: { fill?: string; stroke?: string };
         data: any[]
         visible: boolean;
-        layer?: any;
     }
 
 
@@ -276,7 +276,7 @@ export default function MapPage() {
 
     const layers = useMemo(() => {
         const visible = layerManager.filter(layer => layer.visible);
-        const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => l.layer)
+        const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => [new SearchRingLayer({data: l.data, color: l.colors.fill})])
         const labelledLayers = visible.filter(l => l.type === 'labelled-scatter').map(l => [new LabelledLayer({id: l.name, data: l.data, color: l.colors.fill})])
         
         return mode === MeasureDistanceMode ? 
@@ -284,10 +284,12 @@ export default function MapPage() {
             [...searchLayers, ...labelledLayers];
     }, [mode, layerManager, measureLayer]);
 
-    const getDistance = (inputPoint: ScatterPoint, compareLayer?: BaseLayerData): Record<string, number> => {
-        if (!compareLayer || !compareLayer.data) return {};
+    const getDistance = (inputPoint: ScatterPoint, compareLayer?: BaseLayerData): CompResults[] => {
+        if (!compareLayer || !compareLayer.data) return [];
 
-        return compareLayer.data.reduce((comp: Record<string, number>, row: any) => {
+        const output: CompResults[] = [];
+
+        for (const row of compareLayer.data) {
             const d = distance(
                 point([inputPoint.longitude, inputPoint.latitude]),
                 point([row.longitude, row.latitude]),
@@ -295,14 +297,18 @@ export default function MapPage() {
             );
 
             if (d <= searchDistance) {
-                comp[row.name] = d;
+                output.push({
+                    name: row.name,
+                    coordinates: [row.longitude, row.latitude],
+                    distance: d,
+                });
             }
+        }
 
-            return comp;
-        }, {});
+        return output;
     }
 
-    const runSearchRingAnalysis = ( locationA: string, locationB: string ) => {
+    const runSearchRingAnalysis = ( locationA: string, locationB?: string ) => {
         const layerA = layerManager.find(layer => layer.name === locationA);
         const layerB = layerManager.find(layer => layer.name === locationB);
 
@@ -310,24 +316,18 @@ export default function MapPage() {
             {
             'originName': row.name,
             'originCoords': [row.longitude, row.latitude],
+            'searchedDistance': searchDistance,
             'compareResults': getDistance(row, layerB)
             }))
-
-        const ringLayer = new ScatterplotLayer<SearchRing>({
-            data: results,
-            getPosition: (d: SearchRing) => d.originCoords,
-            getRadius: searchDistance * 1609.34,
-            getFillColor: [255, 255, 0],
-            pickable: true,
-            })
         
+        console.log(results)
+
         addNewLayer({
-            name: `${locationA} - ${locationB} search - ${searchDistance} miles`,
+            name: `${locationA} ${searchDistance} search - ${new Date().getTime().toString()}`,
             type: 'search-ring',
-            colors: { fill: [255, 255, 0] },
+            colors: { fill: randomHex() },
             data: results,
-            visible: true,
-            layer: ringLayer
+            visible: true
         })
     };
 
