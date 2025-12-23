@@ -10,13 +10,13 @@ export const AttributeTable = ({ layer }: AttributeTableProps) => {
 
     if (data.length < 1) {
         return (
-            <div className="p-4 m-2 bg-white border rounded-lg shadow-md text-stone-500 text-sm">
+            <div className="p-2 mb-2 mx-2 bg-white border rounded-lg shadow-md text-stone-500 text-sm">
                 <p> No Layers in Current Workspace. </p>
             </div>
         )
     } else if (layer[0].type === 'labelled-scatter') {
         return (
-            <div className="p-4 m-2 bg-white border rounded-lg shadow-md text-stone-500 text-sm">
+            <div className="p-2 mb-2 mx-2 bg-white border rounded-lg shadow-md text-stone-500 text-sm">
                 <table>
                     <thead>
                         <tr>
@@ -40,7 +40,7 @@ export const AttributeTable = ({ layer }: AttributeTableProps) => {
             </div>)
     } else if (layer[0].type === 'search-ring') {
         return (
-            <div className="p-4 m-2 bg-white border rounded-lg shadow-md text-stone-500 text-sm">
+            <div className="p-2 mb-2 mx-2 bg-white border rounded-lg shadow-md text-stone-500 text-sm">
                 <table>
                     <thead>
                         <tr>

@@ -26,7 +26,7 @@ import { PickingInfo } from '@deck.gl/core';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Separator } from "radix-ui";
-import { distance, featureCollection, point } from "@turf/turf";
+import { distance, point } from "@turf/turf";
 
 import { hexToRGB, randomHex } from '../utils/color';
 import { PopUpWindow } from "@components/map/popup/PopUp";
@@ -93,7 +93,7 @@ export default function MapPage() {
     const [searchDistance, setSearchDistance] = useState(1)
 
     useEffect(() => {
-        if (searchLocationA && searchLocationB) {
+        if (searchLocationA && searchLocationB && searchLocationA !== searchLocationB) {
             setIsDisabled(false)
         } else {
             setIsDisabled(true)
@@ -194,14 +194,17 @@ export default function MapPage() {
         ></span>);
     }
 
-    const updateLayerColor = useCallback((layerName: string, newColors: { fill?: string }) => {
+    const updateLayerColor = useCallback((layerName: string, newColors: { fill?: string }, opacity?: number) => {
+        
+        const opacityString = opacity ? Math.abs((opacity/100) * 255).toString(16) : 'FF'
+        
         setLayerManager(prevLayers =>
             prevLayers.map(layer =>
                 layer.name === layerName ? {
                     ...layer,
                     colors: {
                         ...layer.colors,
-                        fill: newColors.fill ? newColors.fill : '#ff0000'
+                        fill: newColors.fill.slice(0,7) + opacityString 
                     }
                 } : layer
             )
@@ -277,7 +280,7 @@ export default function MapPage() {
         addNewLayer({
             name: `${locationA} ${searchDistance} search - ${new Date().getTime().toString()}`,
             type: 'search-ring',
-            colors: { fill: randomHex() + '99' },
+            colors: { fill: randomHex() },
             data: results,
             visible: true
         })
@@ -297,323 +300,357 @@ export default function MapPage() {
         }
     };
 
-return (
-    <div className={'max-w-full max-h-full'}>
-        <div
-            className="absolute top-2 left-2 z-1000 text-3xl text-peach font-bold text-shadow-2xs select-none text-shadow-peach-3">Cat
-            Map
-        </div>
-
-        {/* Legend Section */}
-        <div className="rounded-lg mr-2 z-100 flex flex-col absolute top-2 right-0">
-            <button
-                onClick={() => setIsLegendExpanded(!isLegendExpanded)}
-                className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
-            >
-                {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'} /> : getLegendList()}
-            </button>
-        </div>
-
-        {/* Attribute Table */}
-        <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
-            {isTableExpanded ?
-                <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[50vw] max-h-[30vh] 
-                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
-                    <div className="flex flex-row">
-                        <button
-                            onClick={() => setIsTableExpanded(!isTableExpanded)}
-                            className={'subdomain-btn'}
-                        ><TableIcon className={'w-6 h-6'} />
-                        </button>
-                        <select
-                            value={tableName}
-                            onChange={(e) => setTableName(e.target.value)}
-                            className="p-1 m-2 rounded-lg border border-zinc-500 text-stone-500 bg-white"
-                        >
-                            {layerManager.map(layer => (
-                                <option key={layer.name} value={layer.name}>
-                                    {layer.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <AttributeTable layer={layerManager.filter(layer => layer.name === tableName)} />
-                </div>
-                :
-                <button
-                    onClick={() => setIsTableExpanded(!isTableExpanded)}
-                    className={'subdomain-btn'}
-                ><TableIcon className={'w-6 h-6'} />
-                </button>
-
-            }
-        </div>
-
-        {/* Widgets Section */}
-        <div className="pl-4 pt-4 pb-4 rounded-lg z-100 flex flex-col absolute top-[30%] left-0">
-            <div className="flex items-start relative">
-                <button
-                    onClick={() => setLayerManagerClicked(!layerManagerClicked)}
-                    title="Layers"
-                    className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${layerManagerClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                    <LayersIcon className={'w-8 h-8'} />
-                </button>
-                {layerManagerClicked && (
-                    <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                        <label className="layer-select text-stone-700">Layer Manager:</label>
-                        <div className={"flex flex-row items-center justify-between gap-4"}>
-                            <input
-                                type={'text'}
-                                className={"px-2 border border-zinc-500 text-stone-500 bg-stone-100 rounded-md max-w-48 max-h-6"}
-                                id={'layer-name-input'}
-                                value={layerName}
-                                onChange={(e) => {
-                                    const exists = layerManager.some(l => l.name === e.target.value);
-                                    if (exists) {
-                                        alert('Layer name already taken');
-                                        return;
-                                    }
-                                    setLayerName(e.target.value);
-                                }}
-                            />
-                            <button
-                                onClick={() => {
-                                    addNewLayer({ name: `${layerName}`, type: 'labelled-scatter', data: [] });
-                                    setLayerName('');
-                                }}
-                                className="p-1 max-h-10 text-blue-700 flex-row flex items-center justify-center"
-                            >
-                                <PlusIcon className={'w-4 h-4'} /> Layer
-                            </button>
-                        </div>
-                        <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
-                            decorative />
-                        <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
-                            {layerManager.map(layer => (
-                                <div key={layer.name} className="flex items-center justify-between mb-1 space-x-4">
-                                    <span className="mr-2 w-20">{layer.name}</span>
-                                    <input
-                                        type="color"
-                                        value={layer.colors.fill}
-                                        onChange={(e) => updateLayerColorDebounced(layer.name, { fill: e.target.value })}
-                                        className="w-12 p-1 rounded"
-                                    />
-                                    <div className={'flex flex-row gap-2'}>
-                                        <button
-                                            onClick={() => toggleLayerVisibility(layer.name)}
-                                            className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
-                                        >
-                                            {layer.visible ? (
-                                                <EyeOpenIcon className="w-full h-full" />
-                                            ) : (
-                                                <EyeNoneIcon className="w-full h-full" />
-                                            )}
-                                        </button>
-                                        <button
-                                            onClick={() => deleteLayer(layer.name)}
-                                            aria-label={`Delete layer ${layer.name}`}
-                                            className="p-1 w-6 h-6 rounded text-red-400 hover:text-red-700 focus:outline-none"
-                                        >
-                                            <TrashIcon className="w-full h-full" />
-                                        </button>
-                                    </div>
-
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+    return (
+        <div className={'max-w-full max-h-full'}>
+            <div
+                className="absolute top-2 left-2 z-1000 text-3xl text-peach font-bold text-shadow-2xs select-none text-shadow-peach-3">Cat
+                Map
             </div>
-            <div className="flex items-start relative">
+
+            {/* Legend Section */}
+            <div className="rounded-lg mr-2 z-100 flex flex-col absolute top-2 right-0">
                 <button
-                    onClick={() => setIsUploadExpanded(!isUploadExpanded)}
-                    title={"Upload Data"}
-                    className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isUploadExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                    <UploadIcon className={'w-8 h-8'} />
+                    onClick={() => setIsLegendExpanded(!isLegendExpanded)}
+                    className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
+                >
+                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'} /> : getLegendList()}
                 </button>
-                {isUploadExpanded && !isClicked && (
-                    <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                        <input
-                            type="file"
-                            accept=".csv,.xlsx,.xls"
-                            onChange={handleFileUpload}
-                            className="block text-sm text-stone-500
+            </div>
+
+            {/* Attribute Table */}
+            <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                {isTableExpanded ?
+                    <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[50vw] max-h-[30vh] 
+                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
+                        <div className="flex flex-row">
+                            <button
+                                onClick={() => setIsTableExpanded(!isTableExpanded)}
+                                className={'subdomain-btn'}
+                            ><TableIcon className={'w-6 h-6'} />
+                            </button>
+                            <select
+                                value={tableName}
+                                onChange={(e) => setTableName(e.target.value)}
+                                className="p-1 m-2 rounded-lg border border-zinc-500 text-stone-500 bg-white"
+                            >
+                                {layerManager.map(layer => (
+                                    <option key={layer.name} value={layer.name}>
+                                        {layer.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <AttributeTable layer={layerManager.filter(layer => layer.name === tableName)} />
+                    </div>
+                    :
+                    <button
+                        onClick={() => setIsTableExpanded(!isTableExpanded)}
+                        className={'subdomain-btn'}
+                    ><TableIcon className={'w-6 h-6'} />
+                    </button>
+
+                }
+            </div>
+
+            {/* Widgets Section */}
+            <div className="pl-4 pt-4 pb-4 rounded-lg z-100 flex flex-col absolute top-[30%] left-0">
+                <div className="flex items-start relative">
+                    <button
+                        onClick={() => setLayerManagerClicked(!layerManagerClicked)}
+                        title="Layers"
+                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${layerManagerClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        <LayersIcon className={'w-8 h-8'} />
+                    </button>
+                    {layerManagerClicked && (
+                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                            <label className="layer-select text-stone-700">Layer Manager:</label>
+                            <div className={"flex flex-row items-center justify-between gap-4"}>
+                                <input
+                                    type={'text'}
+                                    className={"px-2 border border-zinc-500 text-stone-500 bg-stone-100 rounded-md max-w-48 max-h-6"}
+                                    id={'layer-name-input'}
+                                    value={layerName}
+                                    onChange={(e) => {
+                                        const exists = layerManager.some(l => l.name === e.target.value);
+                                        if (exists) {
+                                            alert('Layer name already taken');
+                                            return;
+                                        }
+                                        setLayerName(e.target.value);
+                                    }}
+                                />
+                                <button
+                                    onClick={() => {
+                                        addNewLayer({ name: `${layerName}`, type: 'labelled-scatter', data: [] });
+                                        setLayerName('');
+                                    }}
+                                    className="p-1 max-h-10 text-blue-700 flex-row flex items-center justify-center"
+                                >
+                                    <PlusIcon className={'w-4 h-4'} /> Layer
+                                </button>
+                            </div>
+                            <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                                decorative />
+                            <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
+                                {layerManager.map(layer => (
+                                    <div key={layer.name} className="flex items-center justify-between mb-1 space-x-4">
+                                        <span className="mr-2 w-20">{layer.name}</span>
+                                        <input
+                                            type="color"
+                                            value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
+                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: e.target.value })}
+                                            className="w-12 p-1 rounded"
+                                        />
+                                        <input
+                                            className="w-16 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-black/25 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-700"
+                                            type="range"
+                                            id="opacity"
+                                            name="opacity"
+                                            min="0"
+                                            max="100"
+                                            value={layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}
+                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: layer.colors?.fill ?? randomHex() },
+                                                e.target.valueAsNumber)}
+                                        />
+                                        <div className={'flex flex-row gap-2'}>
+                                            <button
+                                                onClick={() => toggleLayerVisibility(layer.name)}
+                                                className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
+                                            >
+                                                {layer.visible ? (
+                                                    <EyeOpenIcon className="w-full h-full" />
+                                                ) : (
+                                                    <EyeNoneIcon className="w-full h-full" />
+                                                )}
+                                            </button>
+                                            <button
+                                                onClick={() => deleteLayer(layer.name)}
+                                                aria-label={`Delete layer ${layer.name}`}
+                                                className="p-1 w-6 h-6 rounded text-red-400 hover:text-red-700 focus:outline-none"
+                                            >
+                                                <TrashIcon className="w-full h-full" />
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="flex items-start relative">
+                    <button
+                        onClick={() => setIsUploadExpanded(!isUploadExpanded)}
+                        title={"Upload Data"}
+                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isUploadExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        <UploadIcon className={'w-8 h-8'} />
+                    </button>
+                    {isUploadExpanded && !isClicked && (
+                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                            <input
+                                type="file"
+                                accept=".csv,.xlsx,.xls"
+                                onChange={handleFileUpload}
+                                className="block text-sm text-stone-500
                               file:mr-4 file:py-2 file:px-4
                               file:rounded-md file:border-0
                               file:text-sm file:font-semibold
                               file:bg-blue-50 file:text-blue-700
                               hover:file:bg-blue-100"
-                        />
-                        <p className="mt-2 text-sm text-stone-600">
-                            Upload a CSV or Excel file with latitude and longitude columns
-                        </p>
-                    </div>
-                )}
-            </div>
-            <div className="flex items-start relative">
-                <button
-                    onClick={() => setIsClicked(!isClicked)}
-                    title={'Add Points'}
-                    className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                    <CursorArrowIcon className={'w-8 h-8'} />
-                </button>
+                            />
+                            <p className="mt-2 text-sm text-stone-600">
+                                Upload a CSV or Excel file with latitude and longitude columns
+                            </p>
+                        </div>
+                    )}
+                </div>
+                <div className="flex items-start relative">
+                    <button
+                        onClick={() => setIsClicked(!isClicked)}
+                        title={'Add Points'}
+                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        <CursorArrowIcon className={'w-8 h-8'} />
+                    </button>
 
-                {isClicked &&
-                    <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                        <label className="text-stone-500">Add points to:</label>
-                        <select
-                            value={selectedLayerName}
-                            onChange={(e) => setSelectedLayerName(e.target.value)}
-                            className="p-1 rounded-lg border border-zinc-500 text-stone-500"
-                        >
-                            {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
-                                <option key={layer.name} value={layer.name}>
-                                    {layer.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>}
-            </div>
-
-            {/* Analysis Section */}
-            <div className="button-menu-container">
-                <button
-                    onClick={() => setToolboxOpen(!toolboxOpen)}
-                    title={'Analysis Tools'}
-                    className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${toolboxOpen ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                    <BackpackIcon className={'w-8 h-8'} />
-                </button>
-
-                {toolboxOpen &&
-                    (<div className={`menu-popover open`}>
-                        <button
-                            onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
-                            title={'Measure Tool'}
-                            className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                            <RulerHorizontalIcon className={'w-8 h-8'} />
-                        </button>
-
-                        <button
-                            onClick={() => setSearchRingSelected(!searchRingSelected)}
-                            title={'Search Area'}
-                            className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${searchRingSelected ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                            <RadiobuttonIcon className={'w-8 h-8'} />
-                        </button>
-                        {searchRingSelected && (
-                            <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                                <label className="search-area text-stone-500">Search Area Tool:</label>
-                                <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
-                                    decorative />
-                                <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
-                                    <select
-                                        value={searchLocationA}
-                                        onChange={(e) => setSearchLocationA(e.target.value)}
-                                        className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500"
-                                    >
-                                        {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                            <option key={layer.name} value={layer.name}>
-                                                {layer.name}
-                                            </option> :
-                                            undefined
-                                        ))}
-                                    </select>
-                                    <select
-                                        value={searchLocationB}
-                                        onChange={(e) => setSearchLocationB(e.target.value)}
-                                        className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500"
-                                    >
-                                        {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                            <option key={layer.name} value={layer.name}>
-                                                {layer.name}
-                                            </option> :
-                                            undefined
-                                        ))}
-                                    </select>
-                                    <input
-                                        type={'number'}
-                                        className={"px-2 border border-zinc-500 text-stone-500 rounded-lg max-w-48 max-h-6"}
-                                        id={'sr-distance-input'}
-                                        value={searchDistance}
-                                        onChange={(e) => {
-                                            setSearchDistance(Number(e.target.value));
-                                        }}
-                                    />
-                                    <button
-                                        onClick={() => runSearchRingAnalysis(searchLocationA, searchLocationB)}
-                                        title={'Run Area Analysis'}
-                                        disabled={isDisabled}
-                                        className={`p-2 rounded-lg border border-zinc-600 text-stone-600 ${isDisabled ? 'bg-zinc-400' : 'bg-white'}`}>
-                                        Run Analysis
-                                    </button>
-                                </div>
+                    {isClicked &&
+                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                            <label className="text-stone-500 text-sm">Add points:</label>
+                            <Separator.Root className="my-[5px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                                decorative />
+                            <div className="flex flex-row items-center">
+                                <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
+                                <select
+                                    value={selectedLayerName}
+                                    onChange={(e) => setSelectedLayerName(e.target.value)}
+                                    className="p-1 ml-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
+                                >
+                                    {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
+                                        <option key={layer.name} value={layer.name}>
+                                            {layer.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                        )}
-                    </div>)
-                }
-            </div>
+                        </div>}
+                </div>
 
-            <div className="flex items-start relative">
-                <button
-                    onClick={() => setIsBaseMapExpanded(!isBaseMapExpanded)}
-                    title={'Preferences'}
-                    className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isBaseMapExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}
-                >
-                    <MixerHorizontalIcon className={'w-8 h-8 rounded-full'} />
-                </button>
+                {/* Analysis Section */}
+                <div className="button-menu-container">
+                    <button
+                        onClick={() => setToolboxOpen(!toolboxOpen)}
+                        title={'Analysis Tools'}
+                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${toolboxOpen ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        <BackpackIcon className={'w-8 h-8'} />
+                    </button>
 
-                {isBaseMapExpanded && (
-                    <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                        <h3 className="text-m  text-gray-600">
-                            Basemap Selection
-                        </h3>
-                        <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
-                            decorative />
-                        <form>
-                            <RadioGroup.Root
-                                className="RadioGroupRoot"
-                                value={baseMap}
-                                onValueChange={(value) => setBaseMap(value as 'light' | 'dark' | 'standard' | 'hybrid')}
-                                aria-label="Basemap Selection"
-                            >
-                                {BASEMAP_KEYS.map((key) => (
-                                    <div key={key} style={{ display: "flex", alignItems: "center" }}>
-                                        <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
-                                            <RadioGroup.Indicator className="RadioGroupIndicator" />
-                                        </RadioGroup.Item>
-                                        <label className="Label" htmlFor={`${key}`}>
-                                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                                        </label>
+                    {toolboxOpen &&
+                        (<div className={`menu-popover open`}>
+                            <button
+                                onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
+                                title={'Measure Tool'}
+                                className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                                <RulerHorizontalIcon className={'w-8 h-8'} />
+                            </button>
+
+                            <button
+                                onClick={() => setSearchRingSelected(!searchRingSelected)}
+                                title={'Search Area'}
+                                className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${searchRingSelected ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                                <RadiobuttonIcon className={'w-8 h-8'} />
+                            </button>
+                            {searchRingSelected && (
+                                <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
+                                    <label className="ml-2 text-m text-stone-500">Search Area Tool:</label>
+                                    <Separator.Root className="my-[5px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                                        decorative />
+                                    <div className="text-stone-500 overflow-y-auto max-h-112 p-2">
+                                        <div className="flex flex-row items-center">
+                                            <p className="font-bold text-sm">Input Layer:</p>
+                                            <select
+                                                value={searchLocationA}
+                                                onChange={(e) => setSearchLocationA(e.target.value)}
+                                                className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
+                                            >
+                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
+                                                    <option key={layer.name} value={layer.name}>
+                                                        {layer.name}
+                                                    </option> :
+                                                    undefined
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <Separator.Root className="my-1 bg-zinc-200 data-[orientation=horizontal]:h-px"
+                                            decorative />
+                                        <div className="flex flex-row items-center">
+                                            <p className="font-bold text-sm">Comparison Layer:</p>
+                                            <select
+                                                value={searchLocationB}
+                                                onChange={(e) => setSearchLocationB(e.target.value)}
+                                                className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
+                                            >
+                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
+                                                    <option key={layer.name} value={layer.name}>
+                                                        {layer.name}
+                                                    </option> :
+                                                    undefined
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <Separator.Root className="my-1 bg-zinc-200 data-[orientation=horizontal]:h-px"
+                                            decorative />
+                                        <div className="flex flex-row items-center">
+                                            <p className="font-bold text-sm">Distance (miles):</p>
+                                            <input
+                                                type={'number'}
+                                                className={"p-2 ml-1 border border-zinc-500 text-sm text-stone-500 rounded-lg h-6 w-16"}
+                                                id={'sr-distance-input'}
+                                                min={"1"}
+                                                max={"10"}
+                                                step={"0.2"}
+                                                value={searchDistance}
+                                                onChange={(e) => {
+                                                    setSearchDistance(Number(e.target.value));
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <button
+                                                onClick={() => runSearchRingAnalysis(searchLocationA, searchLocationB)}
+                                                title={'Run Area Analysis'}
+                                                disabled={isDisabled}
+                                                className={`p-2 mt-2 rounded-lg border text-white ${isDisabled ? 'bg-red border-maroon' : 'bg-green border-teal'}`}>
+                                                Run Analysis
+                                            </button>
+                                        </div>
                                     </div>
-                                ))}
-                            </RadioGroup.Root>
-                        </form>
-                    </div>
-                )}
-            </div>
-        </div>
+                                </div>
+                            )}
+                        </div>)
+                    }
+                </div>
 
-        <DeckGL
-            ref={deckRef}
-            initialViewState={INITIAL_VIEW_STATE}
-            controller={{
-                doubleClickZoom: false,
-                inertia: false
-            }}
-            onClick={(info) => handleCursorClick(info)}
-            layers={layers}
-        >
-            {popupData?.object && (
-                <PopUpWindow props={popupData} />
-            )}
-            <Map
-                maxPitch={0}
-                minZoom={INITIAL_VIEW_STATE.minZoom}
-                maxZoom={INITIAL_VIEW_STATE.maxZoom}
-                mapStyle={BASEMAPS[baseMap]}
-                reuseMaps
+                <div className="flex items-start relative">
+                    <button
+                        onClick={() => setIsBaseMapExpanded(!isBaseMapExpanded)}
+                        title={'Preferences'}
+                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isBaseMapExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}
+                    >
+                        <MixerHorizontalIcon className={'w-8 h-8 rounded-full'} />
+                    </button>
+
+                    {isBaseMapExpanded && (
+                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                            <h3 className="text-m  text-gray-600">
+                                Basemap Selection
+                            </h3>
+                            <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                                decorative />
+                            <form>
+                                <RadioGroup.Root
+                                    className="RadioGroupRoot"
+                                    value={baseMap}
+                                    onValueChange={(value) => setBaseMap(value as 'light' | 'dark' | 'standard' | 'hybrid')}
+                                    aria-label="Basemap Selection"
+                                >
+                                    {BASEMAP_KEYS.map((key) => (
+                                        <div key={key} style={{ display: "flex", alignItems: "center" }}>
+                                            <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
+                                                <RadioGroup.Indicator className="RadioGroupIndicator" />
+                                            </RadioGroup.Item>
+                                            <label className="Label" htmlFor={`${key}`}>
+                                                {key.charAt(0).toUpperCase() + key.slice(1)}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </RadioGroup.Root>
+                            </form>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <DeckGL
+                ref={deckRef}
+                initialViewState={INITIAL_VIEW_STATE}
+                controller={{
+                    doubleClickZoom: false,
+                    inertia: false
+                }}
+                onClick={(info) => handleCursorClick(info)}
+                layers={layers}
             >
-            </Map>
-        </DeckGL>
-    </div>
-);
+                {popupData?.object && (
+                    <PopUpWindow props={popupData} />
+                )}
+                <Map
+                    maxPitch={0}
+                    minZoom={INITIAL_VIEW_STATE.minZoom}
+                    maxZoom={INITIAL_VIEW_STATE.maxZoom}
+                    mapStyle={BASEMAPS[baseMap]}
+                    reuseMaps
+                >
+                </Map>
+            </DeckGL>
+        </div>
+    );
 }

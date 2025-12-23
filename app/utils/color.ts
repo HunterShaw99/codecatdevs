@@ -29,5 +29,5 @@ export const hexToRGB = (hex: string): [number, number, number, number] => {
  * @returns A new colour in the format "#XXXXXX".
  */
 export const randomHex = () => {
-    return `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0")}`;
+    return `#${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0")}` + 'FF';
 };

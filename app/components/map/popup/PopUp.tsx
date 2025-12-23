@@ -11,7 +11,7 @@ export const PopUpWindow = ({ props }: any) => {
                     {object.compareResults.length > 0 ?
                     <table>
                         <thead>
-                            <tr>
+                            <tr key={crypto.randomUUID()}>
                                 {Object.keys(object.compareResults[0]).filter(key => key !== 'coordinates').map((key) =>
                                     <th>{key}</th>)}
                             </tr>
