@@ -13,6 +13,14 @@ export interface ClusterObject {
   points: Point[];
 }
 
+export type BaseLayerData = {
+        name: string;
+        type: string;
+        colors: { fill?: string; stroke?: string };
+        data: any[]
+        visible: boolean;
+    }
+
 export type ScatterPoint = {
     name: string
     state: string
