@@ -12,3 +12,17 @@ export interface ClusterObject {
   point_count: number;
   points: Point[];
 }
+
+export type ScatterPoint = {
+    name: string
+    state: string
+    latitude: number
+    longitude: number
+    status: string
+}
+
+export type SearchRing = {
+  originName: string
+  originCoords: [number, number]
+  compareResults: Record<string, number>
+}

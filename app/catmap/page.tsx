@@ -1,8 +1,7 @@
 'use client';
 import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
-import {useCallback, useMemo, useRef, useState} from 'react';
-import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import {
     EditableGeoJsonLayer,
     FeatureCollection,
@@ -10,6 +9,7 @@ import {
     ViewMode
 } from '@deck.gl-community/editable-layers';
 import {
+    BackpackIcon,
     CursorArrowIcon,
     EyeNoneIcon,
     EyeOpenIcon,
@@ -17,21 +17,28 @@ import {
     ListBulletIcon,
     MixerHorizontalIcon,
     PlusIcon,
+    RadiobuttonIcon,
     RulerHorizontalIcon,
     TableIcon,
     TrashIcon,
     UploadIcon
 } from "@radix-ui/react-icons"
-import {CompositeLayer, PickingInfo} from '@deck.gl/core';
+import { PickingInfo } from '@deck.gl/core';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import {Separator} from "radix-ui";
+import { Separator } from "radix-ui";
+import { distance, point } from "@turf/turf";
 
-import {PopUpWindow} from "@/app/components/popup/PopUp";
-import AttributeTable, {ScatterPoint} from "@/app/components/table/AttributeTable";
-import {BASEMAP_KEYS, BASEMAPS} from './constants';
 import {hexToRGB, randomHex} from '../utils/color';
+import { PopUpWindow } from "@components/map/popup/PopUp";
+import AttributeTable from "@components/map/table/AttributeTable";
+import { BASEMAP_KEYS, BASEMAPS } from './constants';
+import { LabelledLayer } from "@components/map/layers/labelledScatterLayer";
+import { ScatterplotLayer } from "deck.gl";
+import { ScatterPoint, SearchRing } from "@components/map/utils/LayerTypes";
 
+
+// debounce moved to module scope to avoid recreating on every render
 const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
     let timeoutId: NodeJS.Timeout | null;
 
@@ -45,39 +52,6 @@ const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number
         }, delay);
     };
 };
-
-class LabelledLayer extends CompositeLayer<{ data: any[], color?: any }> {
-    renderLayers() {
-        return [new ScatterplotLayer({
-            id: `${this.props.id}-points`,
-            data: this.props.data,
-            getPosition: (d: any) => [d.longitude, d.latitude],
-            getRadius: 100,
-            getFillColor: hexToRGB(this.props.color) || [255, 0, 0],
-            radiusMinPixels: 5,
-            radiusMaxPixels: 10,
-            pickable: true,
-            // ensure layer updates when data changes
-            updateTriggers: {getPosition: this.props.data, getFillColor: this.props.color}
-        }),
-            new TextLayer({
-                id: `${this.props.id}-labels`,
-                data: this.props.data,
-                getPosition: (d: any) => [d.longitude, d.latitude],
-                getText: (d: any) => `${d.name}`,
-                getSize: 12,
-                getColor: [30, 30, 46],
-                getPixelOffset: [0, -20],
-                fontFamily: 'Arial, Helvetica, sans-serif',
-                fontWeight: 700,
-                fontSettings: {sdf: true},
-                outlineColor: [255, 255, 255, 200],
-                outlineWidth: 3,
-                updateTriggers: {getPosition: this.props.data, getText: this.props.data},
-            })
-        ]
-    };
-}
 
 export default function MapPage() {
     // set minZoom and MaxZoom for both Map and Deck component
@@ -93,8 +67,9 @@ export default function MapPage() {
         name: string;
         type: string;
         colors: { fill?: string; stroke?: string };
-        data: ScatterPoint[];
+        data: any[]
         visible: boolean;
+        layer?: any;
     }
 
 
@@ -105,12 +80,13 @@ export default function MapPage() {
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
     const [isBaseMapExpanded, setIsBaseMapExpanded] = useState(false);
     const [isTableExpanded, setIsTableExpanded] = useState(false);
+    const [toolboxOpen, setToolboxOpen] = useState(false)
 
     // layer state
     const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
         name: 'Default',
-        type: 'scatterplot',
-        colors: {fill: randomHex()},
+        type: 'labelled-scatter',
+        colors: { fill: randomHex() },
         visible: true,
         data: []
     }]);
@@ -118,6 +94,21 @@ export default function MapPage() {
     const [layerManagerClicked, setLayerManagerClicked] = useState(false);
     const [layerName, setLayerName] = useState('');
     const [popupData, setPopupData] = useState<PickingInfo<BaseLayerData>>()
+    
+    // search ring state
+    const [searchRingSelected, setSearchRingSelected] = useState(false)
+    const [searchLocationA, setSearchLocationA] = useState('Default')
+    const [searchLocationB, setSearchLocationB] = useState<string>()
+    const [isDisabled, setIsDisabled] = useState(true)
+    const [searchDistance, setSearchDistance] = useState(1)
+
+    useEffect(() => {
+        if (searchLocationA && searchLocationB) {
+            setIsDisabled(false)
+        } else {
+            setIsDisabled(true)
+        }
+    },[searchLocationA, searchLocationB]);
 
     // meaurement state
     const [mode, setMode] = useState<any>(() => ViewMode);
@@ -134,7 +125,7 @@ export default function MapPage() {
         // options for actual measurement - see turf/distance docs
         modeConfig: {
             centerTooltipsOnLine: true,
-            turfOptions: {units: 'miles'}
+            turfOptions: { units: 'miles' }
         },
         // color of line and points - see editable-geojson-layer docs
         getTentativeLineColor: [250, 179, 135, 200],
@@ -150,12 +141,13 @@ export default function MapPage() {
                 getSize: 16,
                 fontFamily: 'Arial, Helvetica, sans-serif',
                 fontWeight: 750,
-                fontSettings: {sdf: true},
+                fontSettings: { sdf: true },
                 outlineColor: [255, 255, 255, 200],
                 outlineWidth: 3,
             }
         },
-        onEdit: ({updatedData}) => {
+        // allows for double click to retain drawn features
+        onEdit: ({ updatedData }) => {
             setMeasurementFeatures(updatedData);
         },
     }), [measurementFeatures, mode]);
@@ -172,7 +164,8 @@ export default function MapPage() {
                 const [lat, lng] = row.split(',').map(Number);
                 const [, , name, state] = row.split(',');
                 const status = 'new'
-                return {longitude: lng, latitude: lat, name, state, status};
+                
+                return { longitude: lng, latitude: lat, name, state, status };
             });
 
             setLayerManager(prevLayers =>
@@ -190,17 +183,18 @@ export default function MapPage() {
     const addNewLayer = useCallback((newLayer: any) => {
         setLayerManager(prevLayers => [...prevLayers, {
             name: newLayer.name,
-            type: newLayer.type || 'scatterplot',
+            type: newLayer.type || 'labelled-scatter',
             colors: {fill: newLayer.colors?.fill ?? randomHex()},
             data: newLayer.data || [],
-            visible: true
+            visible: true,
+            layer: newLayer.layer || undefined
         }]);
     }, []);
 
     const toggleLayerVisibility = useCallback((layerId: string) => {
         setLayerManager(prevLayers =>
             prevLayers.map(layer =>
-                layer.name === layerId ? {...layer, visible: !layer.visible} : layer
+                layer.name === layerId ? { ...layer, visible: !layer.visible } : layer
             )
         );
     }, []);
@@ -240,7 +234,7 @@ export default function MapPage() {
         const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
         return (<span
             className="inline-block w-3 h-3 mr-2 rounded-full"
-            style={{backgroundColor: rgb}}
+            style={{ backgroundColor: rgb }}
         ></span>);
     }
 
@@ -282,13 +276,60 @@ export default function MapPage() {
 
     const layers = useMemo(() => {
         const visible = layerManager.filter(layer => layer.visible);
-        const labelled = visible.flatMap(l => l.type === 'scatterplot' ? [new LabelledLayer({
-            id: l.name,
-            data: l.data,
-            color: l.colors.fill
-        })] : []);
-        return mode === MeasureDistanceMode ? [measureLayer, ...labelled] : labelled;
+        const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => l.layer)
+        const labelledLayers = visible.filter(l => l.type === 'labelled-scatter').map(l => [new LabelledLayer({id: l.name, data: l.data, color: l.colors.fill})])
+        
+        return mode === MeasureDistanceMode ? 
+            [...searchLayers, ...labelledLayers, measureLayer] : 
+            [...searchLayers, ...labelledLayers];
     }, [mode, layerManager, measureLayer]);
+
+    const getDistance = (inputPoint: ScatterPoint, compareLayer?: BaseLayerData): Record<string, number> => {
+        if (!compareLayer || !compareLayer.data) return {};
+
+        return compareLayer.data.reduce((comp: Record<string, number>, row: any) => {
+            const d = distance(
+                point([inputPoint.longitude, inputPoint.latitude]),
+                point([row.longitude, row.latitude]),
+                { units: 'miles' }
+            );
+
+            if (d <= searchDistance) {
+                comp[row.name] = d;
+            }
+
+            return comp;
+        }, {});
+    }
+
+    const runSearchRingAnalysis = ( locationA: string, locationB: string ) => {
+        const layerA = layerManager.find(layer => layer.name === locationA);
+        const layerB = layerManager.find(layer => layer.name === locationB);
+
+        const results = layerA?.data.map(row => (
+            {
+            'originName': row.name,
+            'originCoords': [row.longitude, row.latitude],
+            'compareResults': getDistance(row, layerB)
+            }))
+
+        const ringLayer = new ScatterplotLayer<SearchRing>({
+            data: results,
+            getPosition: (d: SearchRing) => d.originCoords,
+            getRadius: searchDistance * 1609.34,
+            getFillColor: [255, 255, 0],
+            pickable: true,
+            })
+        
+        addNewLayer({
+            name: `${locationA} - ${locationB} search - ${searchDistance} miles`,
+            type: 'search-ring',
+            colors: { fill: [255, 255, 0] },
+            data: results,
+            visible: true,
+            layer: ringLayer
+        })
+    };
 
     return (
         <div className={'max-w-full max-h-full'}>
@@ -303,7 +344,7 @@ export default function MapPage() {
                     onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                     className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
                 >
-                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'}/> : getLegendList()}
+                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'} /> : getLegendList()}
                 </button>
             </div>
 
@@ -317,21 +358,20 @@ export default function MapPage() {
                 </button>
 
                 {isTableExpanded && (
-                    <div
-                        className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 z-50 max-w-120 max-h-[60vh] overflow-auto grid place-items-center">
-                        <AttributeTable layer={tableData}/>
+                    <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 z-50 max-w-120 max-h-[60vh] overflow-auto grid place-items-center">
+                        <AttributeTable layer={tableData} />
                     </div>
                 )}
             </div>
 
             {/* Widgets Section */}
-            <div className="p-4 rounded-lg mb-4 z-100 flex flex-col absolute top-[30%] left-0">
+            <div className="pl-4 pt-4 pb-4 rounded-lg z-100 flex flex-col absolute top-[30%] left-0">
                 <div className="flex items-start relative">
                     <button
                         onClick={() => setLayerManagerClicked(!layerManagerClicked)}
                         title="Layers"
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${layerManagerClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <LayersIcon className={'w-8 h-8 rounded-full'}/>
+                        <LayersIcon className={'w-8 h-8'} />
                     </button>
                     {layerManagerClicked && (
                         <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
@@ -353,16 +393,16 @@ export default function MapPage() {
                                 />
                                 <button
                                     onClick={() => {
-                                        addNewLayer({name: `${layerName}`, type: 'scatterplot', data: []});
+                                        addNewLayer({ name: `${layerName}`, type: 'labelled-scatter', data: [] });
                                         setLayerName('');
                                     }}
                                     className="p-1 max-h-10 text-blue-700 flex-row flex items-center justify-center"
                                 >
-                                    <PlusIcon className={'w-4 h-4'}/> Layer
+                                    <PlusIcon className={'w-4 h-4'} /> Layer
                                 </button>
                             </div>
                             <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
-                                            decorative/>
+                                decorative />
                             <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
                                 {layerManager.map(layer => (
                                     <div key={layer.name} className="flex items-center justify-between mb-1 space-x-4">
@@ -404,7 +444,7 @@ export default function MapPage() {
                         onClick={() => setIsUploadExpanded(!isUploadExpanded)}
                         title={"Upload Data"}
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isUploadExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <UploadIcon className={'w-8 h-8 rounded-full'}/>
+                        <UploadIcon className={'w-8 h-8'} />
                     </button>
                     {isUploadExpanded && !isClicked && (
                         <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
@@ -430,7 +470,7 @@ export default function MapPage() {
                         onClick={() => setIsClicked(!isClicked)}
                         title={'Add Points'}
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <CursorArrowIcon className={'w-8 h-8 rounded-full'}/>
+                        <CursorArrowIcon className={'w-8 h-8'} />
                     </button>
 
                     {isClicked &&
@@ -449,21 +489,91 @@ export default function MapPage() {
                             </select>
                         </div>}
                 </div>
-                <div className="flex items-start relative">
+
+                {/* Analysis Section */}
+                <div className="button-menu-container">
                     <button
-                        onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
-                        title={'Measure Tool'}
-                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <RulerHorizontalIcon className={'w-8 h-8 rounded-full'}/>
+                        onClick={() => setToolboxOpen(!toolboxOpen)}
+                        title={'Analysis Tools'}
+                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${toolboxOpen ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        <BackpackIcon className={'w-8 h-8'} />
                     </button>
+
+                    {toolboxOpen &&
+                        (<div className={`menu-popover open`}>
+                            <button
+                                onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
+                                title={'Measure Tool'}
+                                className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                                <RulerHorizontalIcon className={'w-8 h-8'} />
+                            </button>
+
+                            <button
+                                onClick={() => setSearchRingSelected(!searchRingSelected)}
+                                title={'Search Area'}
+                                className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${searchRingSelected ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                                <RadiobuttonIcon className={'w-8 h-8'} />
+                            </button>
+                            {searchRingSelected && (
+                                <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                                    <label className="search-area text-stone-500">Search Area Tool:</label>
+                                    <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                                        decorative />
+                                    <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
+                                        <select
+                                            value={searchLocationA}
+                                            onChange={(e) => setSearchLocationA(e.target.value)}
+                                            className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500"
+                                        >
+                                            {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
+                                                <option key={layer.name} value={layer.name}>
+                                                    {layer.name}
+                                                </option> : 
+                                                undefined
+                                            ))}
+                                        </select>
+                                        <select
+                                            value={searchLocationB}
+                                            onChange={(e) => setSearchLocationB(e.target.value)}
+                                            className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500"
+                                        >
+                                            {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
+                                                <option key={layer.name} value={layer.name}>
+                                                    {layer.name}
+                                                </option> : 
+                                                undefined
+                                            ))}
+                                        </select>
+                                        <input
+                                            type={'number'}
+                                            className={"px-2 border border-zinc-500 text-stone-500 rounded-lg max-w-48 max-h-6"}
+                                            id={'sr-distance-input'}
+                                            value={searchDistance}
+                                            onChange={(e) => {
+                                        setSearchDistance(Number(e.target.value));
+                                    }}
+                                />
+                                        <button
+                                            onClick={() => runSearchRingAnalysis(searchLocationA, searchLocationB)}
+                                            title={'Run Area Analysis'}
+                                            disabled={isDisabled}
+                                            className={`p-2 rounded-lg border border-zinc-600 text-stone-600 ${isDisabled ? 'bg-zinc-400' : 'bg-white'}`}>
+                                                Run Analysis
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>)
+                    }
                 </div>
+
                 <div className="flex items-start relative">
                     <button
                         onClick={() => setIsBaseMapExpanded(!isBaseMapExpanded)}
                         title={'Preferences'}
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isBaseMapExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}
                     >
-                        <MixerHorizontalIcon className={'w-8 h-8 rounded-full'}/>
+                        <MixerHorizontalIcon className={'w-8 h-8 rounded-full'} />
                     </button>
 
                     {isBaseMapExpanded && (
@@ -472,7 +582,7 @@ export default function MapPage() {
                                 Basemap Selection
                             </h3>
                             <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
-                                            decorative/>
+                                decorative />
                             <form>
                                 <RadioGroup.Root
                                     className="RadioGroupRoot"
@@ -481,9 +591,9 @@ export default function MapPage() {
                                     aria-label="Basemap Selection"
                                 >
                                     {BASEMAP_KEYS.map((key) => (
-                                        <div key={key} style={{display: "flex", alignItems: "center"}}>
+                                        <div key={key} style={{ display: "flex", alignItems: "center" }}>
                                             <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
-                                                <RadioGroup.Indicator className="RadioGroupIndicator"/>
+                                                <RadioGroup.Indicator className="RadioGroupIndicator" />
                                             </RadioGroup.Item>
                                             <label className="Label" htmlFor={`${key}`}>
                                                 {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -514,7 +624,7 @@ export default function MapPage() {
                 layers={layers}
             >
                 {popupData?.object && (
-                    <PopUpWindow props={popupData}/>
+                    <PopUpWindow props={popupData} />
                 )}
                 <Map
                     maxPitch={0}

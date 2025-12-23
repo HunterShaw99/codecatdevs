@@ -585,3 +585,29 @@ table, th, td, tr {
   border: 1px solid lightgray;
   padding: 4px
 }
+
+/* Analysis Menu */
+button-menu-container {
+  position: relative; /* Important for positioning the popover */
+  display: inline-block;
+}
+
+.menu-popover {
+  position: absolute;
+  bottom: 10%; 
+  left: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  transform: scale(0.9); 
+  transform-origin: bottom center; 
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  z-index: 10;
+}
+
+.menu-popover.open { /* Class added when isOpen is true */
+  opacity: 1;
+  transform: scale(1);
+}
