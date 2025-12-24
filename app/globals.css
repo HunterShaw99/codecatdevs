@@ -611,3 +611,28 @@ button-menu-container {
   opacity: 1;
   transform: scale(1);
 }
+
+.seperator-minor {
+  @apply my-1 bg-zinc-200 data-[orientation=horizontal]:h-px;
+}
+
+.seperator-major {
+  @apply my-[5px] bg-zinc-300 data-[orientation=horizontal]:h-px;
+}
+
+select {
+  @apply border border-zinc-500 text-stone-500 text-sm rounded-sm;  
+}
+
+select:focus {
+  @apply ring-1 ring-zinc-400;
+}
+
+select:focus-visible {
+  @apply ring-2 ring-zinc-300
+      transition-all duration-300 ease-in-out;
+}
+
+select::selection {
+  @apply border-zinc-400;
+}

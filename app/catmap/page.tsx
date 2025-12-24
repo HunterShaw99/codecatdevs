@@ -3,7 +3,6 @@ import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import {
-    FeatureCollection,
     MeasureDistanceMode,
     ViewMode
 } from '@deck.gl-community/editable-layers';
@@ -36,6 +35,7 @@ import { LabelledLayer } from "@components/map/layers/labelledScatterLayer";
 import measureLayer from "@components/map/layers/measureLayer";
 import { SearchRingLayer } from "@components/map/layers/searchRingLayer"
 import { CompResults, ScatterPoint, BaseLayerData } from "@components/map/utils/LayerTypes";
+import CodeCatLine from "../components/icons/CodeCatLine";
 
 // debounce moved to module scope to avoid recreating on every render
 const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
@@ -195,16 +195,16 @@ export default function MapPage() {
     }
 
     const updateLayerColor = useCallback((layerName: string, newColors: { fill?: string }, opacity?: number) => {
-        
-        const opacityString = opacity ? Math.abs((opacity/100) * 255).toString(16) : 'FF'
-        
+
+        const opacityString = opacity ? Math.abs((opacity / 100) * 255).toString(16) : 'FF'
+
         setLayerManager(prevLayers =>
             prevLayers.map(layer =>
                 layer.name === layerName ? {
                     ...layer,
                     colors: {
                         ...layer.colors,
-                        fill: newColors.fill.slice(0,7) + opacityString 
+                        fill: newColors.fill.slice(0, 7) + opacityString
                     }
                 } : layer
             )
@@ -303,8 +303,14 @@ export default function MapPage() {
     return (
         <div className={'max-w-full max-h-full'}>
             <div
-                className="absolute top-2 left-2 z-1000 text-3xl text-peach font-bold text-shadow-2xs select-none text-shadow-peach-3">Cat
-                Map
+                className="absolute top-2 left-2 z-1000 text-3xl text-peach font-bold text-shadow-2xs select-none text-shadow-peach-3 flex flex-row">
+                <CodeCatLine
+                    width={35}
+                    height={35}
+                    className="opacity-80 rounded-lg mr-1"
+                    fill="#fab387"
+                />
+                Cat Map
             </div>
 
             {/* Legend Section */}
@@ -384,12 +390,12 @@ export default function MapPage() {
                                         addNewLayer({ name: `${layerName}`, type: 'labelled-scatter', data: [] });
                                         setLayerName('');
                                     }}
-                                    className="p-1 max-h-10 text-blue-700 flex-row flex items-center justify-center"
+                                    className="p-1 max-h-10 text-peach-5 flex-row flex items-center justify-center"
                                 >
                                     <PlusIcon className={'w-4 h-4'} /> Layer
                                 </button>
                             </div>
-                            <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                            <Separator.Root className="seperator-major"
                                 decorative />
                             <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
                                 {layerManager.map(layer => (
@@ -402,12 +408,13 @@ export default function MapPage() {
                                             className="w-12 p-1 rounded"
                                         />
                                         <input
-                                            className="w-16 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-black/25 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-700"
+                                            className="w-16 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-peach-8 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-peach-5"
                                             type="range"
                                             id="opacity"
                                             name="opacity"
                                             min="0"
                                             max="100"
+                                            title={`Opacity Slider: ${layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}%`}
                                             value={layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}
                                             onChange={(e) => updateLayerColorDebounced(layer.name, { fill: layer.colors?.fill ?? randomHex() },
                                                 e.target.valueAsNumber)}
@@ -416,6 +423,7 @@ export default function MapPage() {
                                             <button
                                                 onClick={() => toggleLayerVisibility(layer.name)}
                                                 className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
+                                                title="Toggle Visibility"
                                             >
                                                 {layer.visible ? (
                                                     <EyeOpenIcon className="w-full h-full" />
@@ -447,20 +455,36 @@ export default function MapPage() {
                     </button>
                     {isUploadExpanded && !isClicked && (
                         <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                            <label className="text-stone-500 text-sm">Upload Locations:</label>
+                            <Separator.Root className="seperator-major"
+                                decorative />
+                            <div className="flex flex-row items-center">
+                                <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
+                                <select
+                                    value={selectedLayerName}
+                                    onChange={(e) => setSelectedLayerName(e.target.value)}
+                                    className="p-1 ml-1">
+                                    {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
+                                        <option key={layer.name} value={layer.name}>
+                                            {layer.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <Separator.Root className="seperator-minor"
+                                decorative />
                             <input
                                 type="file"
+                                title="Upload a CSV or Excel file with latitude and longitude columns."
                                 accept=".csv,.xlsx,.xls"
                                 onChange={handleFileUpload}
                                 className="block text-sm text-stone-500
                               file:mr-4 file:py-2 file:px-4
                               file:rounded-md file:border-0
                               file:text-sm file:font-semibold
-                              file:bg-blue-50 file:text-blue-700
-                              hover:file:bg-blue-100"
+                              file:bg-peach-8 file:text-peach-5
+                              hover:file:bg-peach-7"
                             />
-                            <p className="mt-2 text-sm text-stone-600">
-                                Upload a CSV or Excel file with latitude and longitude columns
-                            </p>
                         </div>
                     )}
                 </div>
@@ -475,7 +499,7 @@ export default function MapPage() {
                     {isClicked &&
                         <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
                             <label className="text-stone-500 text-sm">Add points:</label>
-                            <Separator.Root className="my-[5px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                            <Separator.Root className="seperator-major"
                                 decorative />
                             <div className="flex flex-row items-center">
                                 <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
@@ -521,7 +545,7 @@ export default function MapPage() {
                             {searchRingSelected && (
                                 <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
                                     <label className="ml-2 text-m text-stone-500">Search Area Tool:</label>
-                                    <Separator.Root className="my-[5px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                                    <Separator.Root className="seperator-major"
                                         decorative />
                                     <div className="text-stone-500 overflow-y-auto max-h-112 p-2">
                                         <div className="flex flex-row items-center">
@@ -539,7 +563,7 @@ export default function MapPage() {
                                                 ))}
                                             </select>
                                         </div>
-                                        <Separator.Root className="my-1 bg-zinc-200 data-[orientation=horizontal]:h-px"
+                                        <Separator.Root className="seperator-minor"
                                             decorative />
                                         <div className="flex flex-row items-center">
                                             <p className="font-bold text-sm">Comparison Layer:</p>
@@ -556,7 +580,7 @@ export default function MapPage() {
                                                 ))}
                                             </select>
                                         </div>
-                                        <Separator.Root className="my-1 bg-zinc-200 data-[orientation=horizontal]:h-px"
+                                        <Separator.Root className="seperator-minor"
                                             decorative />
                                         <div className="flex flex-row items-center">
                                             <p className="font-bold text-sm">Distance (miles):</p>
@@ -576,9 +600,11 @@ export default function MapPage() {
                                         <div className="flex justify-end">
                                             <button
                                                 onClick={() => runSearchRingAnalysis(searchLocationA, searchLocationB)}
-                                                title={'Run Area Analysis'}
+                                                title={isDisabled ? 'Select distinct layers to run analysis' : 'Run Area Analysis'}
                                                 disabled={isDisabled}
-                                                className={`p-2 mt-2 rounded-lg border text-white ${isDisabled ? 'bg-red border-maroon' : 'bg-green border-teal'}`}>
+                                                className={`mt-2 py-2 px-4 rounded-md font-semibold ${isDisabled ?
+                                                    ' text-red-700 bg-red hover:bg-red-400' :
+                                                    ' text-peach-5 bg-peach-8 hover:bg-peach-7'}`}>
                                                 Run Analysis
                                             </button>
                                         </div>
@@ -603,7 +629,7 @@ export default function MapPage() {
                             <h3 className="text-m  text-gray-600">
                                 Basemap Selection
                             </h3>
-                            <Separator.Root className="my-[15px] bg-zinc-300 data-[orientation=horizontal]:h-px"
+                            <Separator.Root className="seperator-major"
                                 decorative />
                             <form>
                                 <RadioGroup.Root
