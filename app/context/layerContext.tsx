@@ -3,7 +3,6 @@ import { createContext, useContext, useState, useCallback, useMemo } from 'react
 import {BaseLayerData} from "@map/utils/LayerTypes";
 import {randomHex} from "@/app/utils/color";
 
-// Lightweight ID generator - combines timestamp and random hex for uniqueness
 const generateLayerId = () => {
   const timestamp = Date.now().toString(16); // Hex timestamp
   const randomHex = Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'); // 6-digit hex
@@ -20,6 +19,7 @@ interface LayerContextType {
   deleteLayer: (layerId: string) => void;
   updateLayerColor: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
   updateLayerColorDebounced: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
+  updateLayerOpacity: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -85,7 +85,6 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     );
   }, [setLayerManager]);
 
-  // debounce moved to module scope to avoid recreating on every render
   const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
     let timeoutId: NodeJS.Timeout | null;
 
@@ -102,6 +101,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateLayerColorDebounced = useMemo(() => debounce(updateLayerColor, 300), [updateLayerColor]);
 
+  const updateLayerOpacity = useMemo(() => debounce(updateLayerColor, 10), [updateLayerColor]);
+
   const value = {
     layerManager,
     setLayerManager,
@@ -111,7 +112,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     toggleLayerVisibility,
     deleteLayer,
     updateLayerColor,
-    updateLayerColorDebounced
+    updateLayerColorDebounced,
+    updateLayerOpacity
   };
 
   return (
