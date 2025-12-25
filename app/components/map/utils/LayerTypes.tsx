@@ -14,6 +14,7 @@ export interface ClusterObject {
 }
 
 export type BaseLayerData = {
+        id: string;
         name: string;
         type: string;
         colors: { fill?: string; stroke?: string };

@@ -36,6 +36,7 @@ import measureLayer from "@components/map/layers/measureLayer";
 import { SearchRingLayer } from "@components/map/layers/searchRingLayer"
 import { CompResults, ScatterPoint, BaseLayerData } from "@components/map/utils/LayerTypes";
 import CodeCatLine from "../components/icons/CodeCatLine";
+import { LayerProvider, useLayerContext } from '../context/layerContext';
 
 // debounce moved to module scope to avoid recreating on every render
 const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
@@ -52,7 +53,7 @@ const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number
     };
 };
 
-export default function MapPage() {
+function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
     const INITIAL_VIEW_STATE = {
         longitude: -79.9915,
@@ -73,14 +74,18 @@ export default function MapPage() {
     const [tableName, setTableName] = useState('Default')
 
     // layer state
-    const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
-        name: 'Default',
-        type: 'labelled-scatter',
-        colors: { fill: randomHex() },
-        visible: true,
-        data: []
-    }]);
-    const [selectedLayerName, setSelectedLayerName] = useState('Default');
+    const {
+        layerManager,
+        setLayerManager,
+        selectedLayerName,
+        setSelectedLayerName,
+        addNewLayer,
+        toggleLayerVisibility,
+        deleteLayer,
+        updateLayerColor,
+        updateLayerColorDebounced
+    } = useLayerContext();
+
     const [layerManagerClicked, setLayerManagerClicked] = useState(false);
     const [layerName, setLayerName] = useState('');
     const [popupData, setPopupData] = useState<PickingInfo<BaseLayerData>>()
@@ -136,31 +141,6 @@ export default function MapPage() {
         reader.readAsText(file);
     };
 
-    const addNewLayer = useCallback((newLayer: any) => {
-        setLayerManager(prevLayers => [...prevLayers, {
-            name: newLayer.name,
-            type: newLayer.type || 'labelled-scatter',
-            colors: { fill: newLayer.colors?.fill ?? randomHex() },
-            data: newLayer.data || [],
-            visible: true,
-            layer: newLayer.layer || undefined
-        }]);
-    }, []);
-
-    const toggleLayerVisibility = useCallback((layerId: string) => {
-        setLayerManager(prevLayers =>
-            prevLayers.map(layer =>
-                layer.name === layerId ? { ...layer, visible: !layer.visible } : layer
-            )
-        );
-    }, []);
-
-    const deleteLayer = useCallback((name: string) => {
-        setLayerManager(prev =>
-            prev.filter(l => l.name !== name)
-        );
-    }, []);
-
     const handleAddPointClick = (event: any) => {
         const deck = deckRef.current.deck;
         const viewport = deck.getViewports()[0];
@@ -193,25 +173,6 @@ export default function MapPage() {
             style={{ backgroundColor: rgb }}
         ></span>);
     }
-
-    const updateLayerColor = useCallback((layerName: string, newColors: { fill?: string }, opacity?: number) => {
-
-        const opacityString = opacity ? Math.abs((opacity / 100) * 255).toString(16) : 'FF'
-
-        setLayerManager(prevLayers =>
-            prevLayers.map(layer =>
-                layer.name === layerName ? {
-                    ...layer,
-                    colors: {
-                        ...layer.colors,
-                        fill: newColors.fill.slice(0, 7) + opacityString
-                    }
-                } : layer
-            )
-        );
-    }, [setLayerManager]);
-
-    const updateLayerColorDebounced = useMemo(() => debounce(updateLayerColor, 300), [updateLayerColor]);
 
     const getLegendList = () => {
         const legendItems = layerManager.filter(layer => layer.visible);
@@ -326,7 +287,7 @@ export default function MapPage() {
             {/* Attribute Table */}
             <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
                 {isTableExpanded ?
-                    <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[50vw] max-h-[30vh] 
+                    <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[50vw] max-h-[30vh]
                         overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
                         <div className="flex flex-row">
                             <button
@@ -404,7 +365,7 @@ export default function MapPage() {
                                         <input
                                             type="color"
                                             value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
-                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: e.target.value })}
+                                            onChange={(e) => updateLayerColorDebounced(layer.id, { fill: e.target.value })}
                                             className="w-12 p-1 rounded"
                                         />
                                         <input
@@ -416,12 +377,12 @@ export default function MapPage() {
                                             max="100"
                                             title={`Opacity Slider: ${layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}%`}
                                             value={layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}
-                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: layer.colors?.fill ?? randomHex() },
+                                            onChange={(e) => updateLayerColorDebounced(layer.id, { fill: layer.colors?.fill ?? randomHex() },
                                                 e.target.valueAsNumber)}
                                         />
                                         <div className={'flex flex-row gap-2'}>
                                             <button
-                                                onClick={() => toggleLayerVisibility(layer.name)}
+                                                onClick={() => toggleLayerVisibility(layer.id)}
                                                 className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
                                                 title="Toggle Visibility"
                                             >
@@ -432,7 +393,7 @@ export default function MapPage() {
                                                 )}
                                             </button>
                                             <button
-                                                onClick={() => deleteLayer(layer.name)}
+                                                onClick={() => deleteLayer(layer.id)}
                                                 aria-label={`Delete layer ${layer.name}`}
                                                 className="p-1 w-6 h-6 rounded text-red-400 hover:text-red-700 focus:outline-none"
                                             >
@@ -464,7 +425,7 @@ export default function MapPage() {
                                     value={selectedLayerName}
                                     onChange={(e) => setSelectedLayerName(e.target.value)}
                                     className="p-1 ml-1">
-                                    {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
+                                    {layerManager.filter((layer: { type: string; }) => layer.type === 'labelled-scatter').map(layer => (
                                         <option key={layer.name} value={layer.name}>
                                             {layer.name}
                                         </option>
@@ -678,5 +639,13 @@ export default function MapPage() {
                 </Map>
             </DeckGL>
         </div>
+    );
+}
+
+export default function MapPage() {
+    return (
+        <LayerProvider>
+            <MapPageContent />
+        </LayerProvider>
     );
 }
