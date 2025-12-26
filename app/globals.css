@@ -615,6 +615,9 @@ button-menu-container {
 .seperator-minor {
   @apply my-1 bg-zinc-200 data-[orientation=horizontal]:h-px;
 }
+.seperator-minor-vertical {
+  @apply my-1 bg-zinc-200 data-[orientation=vertical]:h-px;
+}
 
 .seperator-major {
   @apply my-[5px] bg-zinc-300 data-[orientation=horizontal]:h-px;
