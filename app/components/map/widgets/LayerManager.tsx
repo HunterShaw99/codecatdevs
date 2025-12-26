@@ -4,7 +4,7 @@ import Draggable from 'react-draggable';
 import { Separator } from 'radix-ui';
 import { EyeNoneIcon, EyeOpenIcon, TrashIcon, PlusIcon } from '@radix-ui/react-icons';
 import {useLayerContext} from "@/app/context/layerContext";
-import {hexToRGB, randomHex} from "@/app/utils/color";
+import {randomHex} from "@/app/utils/color";
 
 interface LayerManagerWidgetProps {
   isOpen: boolean;
@@ -99,18 +99,6 @@ export function LayerManagerWidget({ isOpen, onClose }: LayerManagerWidgetProps)
                 value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
                 onChange={(e) => updateLayerColorDebounced(layer.id, { fill: e.target.value })}
                 className="w-12 p-1 rounded"
-              />
-              <input
-                className="w-16 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-peach-8 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-peach-5"
-                type="range"
-                id="opacity"
-                name="opacity"
-                min="0"
-                max="100"
-                title={`Opacity Slider: ${layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}%`}
-                value={layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}
-                onChange={(e) => updateLayerOpacity(layer.id, { fill: layer.colors?.fill ?? randomHex() },
-                  e.target.valueAsNumber)}
               />
               <div className={'flex flex-row gap-2'}>
                 <button

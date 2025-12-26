@@ -136,8 +136,6 @@ function MapPageContent() {
                 } : layer
             )
         );
-
-        setIsClicked(false);
     };
 
 
