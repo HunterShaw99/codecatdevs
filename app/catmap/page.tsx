@@ -9,6 +9,7 @@ import {
 import {
     BackpackIcon,
     CursorArrowIcon,
+    DownloadIcon,
     EyeNoneIcon,
     EyeOpenIcon,
     LayersIcon,
@@ -194,9 +195,7 @@ export default function MapPage() {
         ></span>);
     }
 
-    const updateLayerColor = useCallback((layerName: string, newColors: { fill?: string }, opacity?: number) => {
-
-        const opacityString = opacity ? Math.abs((opacity / 100) * 255).toString(16) : 'FF'
+    const updateLayerColor = useCallback((layerName: string, newColors: { fill?: string }) => {
 
         setLayerManager(prevLayers =>
             prevLayers.map(layer =>
@@ -204,7 +203,7 @@ export default function MapPage() {
                     ...layer,
                     colors: {
                         ...layer.colors,
-                        fill: newColors.fill.slice(0, 7) + opacityString
+                        fill: newColors.fill
                     }
                 } : layer
             )
@@ -300,6 +299,62 @@ export default function MapPage() {
         }
     };
 
+    const handleDownloadClick = () => {
+        const layer = layerManager.find(layer => layer.name === tableName);
+        const data = layer?.data || [];
+
+        let headers = Object.keys(data[0]).join(",");
+
+        if (layer?.type === 'search-ring') {
+            headers = headers.replace('compareResults', 'compareResultsName,compareResultsCoordinates,compareResultsDistance');
+        }
+
+        const rows = data.map(obj => 
+            Object.entries(obj).map(([key, val]) => {
+                if (key === 'compareResults' && Array.isArray(val)) {
+                    if (val.length > 0) {
+                        let first = true;
+                        const compResult = val.map((compVal) => {
+                            if (first) {
+                                first = false;
+                                return Object.values(compVal).map(
+                                    v => String(v).replace(/,/g, ' ')).join(",") 
+                            }
+                        else {
+                            return `${obj['originName'].replace(/,/, ' ')},${obj['originCoords'].join(';')},${obj['searchedDistance']},
+                            ${Object.values(compVal).map(v => String(v).replace(/,/g, ' ')).join(",")}`
+                                }
+                     }) 
+                        return compResult.join(",");
+                    }
+                    else {
+                        return ",,,";
+                     }
+                }
+                if (key === 'originCoords' && Array.isArray(val)) {
+                    return val.join(";");
+                }
+                else {
+                    return String(val).replace(/,/g, ''); // remove commas to avoid CSV issues
+                }
+            }).join(",")
+        ).join("\n");
+
+        const csvContent = `${headers}\n${rows}`;
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", "exported_data.csv");
+        link.style.visibility = "hidden";
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className={'max-w-full max-h-full'}>
             <div
@@ -345,6 +400,11 @@ export default function MapPage() {
                                     </option>
                                 ))}
                             </select>
+                            <button
+                                onClick={handleDownloadClick}
+                                className={'subdomain-btn'}>
+                                <DownloadIcon className={'w-6 h-6'} />
+                            </button>
                         </div>
                         <AttributeTable layer={layerManager.filter(layer => layer.name === tableName)} />
                     </div>
@@ -406,18 +466,6 @@ export default function MapPage() {
                                             value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
                                             onChange={(e) => updateLayerColorDebounced(layer.name, { fill: e.target.value })}
                                             className="w-12 p-1 rounded"
-                                        />
-                                        <input
-                                            className="w-16 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-peach-8 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-peach-5"
-                                            type="range"
-                                            id="opacity"
-                                            name="opacity"
-                                            min="0"
-                                            max="100"
-                                            title={`Opacity Slider: ${layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}%`}
-                                            value={layer.colors?.fill ? Math.round((hexToRGB(layer.colors.fill)[3] / 255) * 100) : 100}
-                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: layer.colors?.fill ?? randomHex() },
-                                                e.target.valueAsNumber)}
                                         />
                                         <div className={'flex flex-row gap-2'}>
                                             <button
