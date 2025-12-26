@@ -219,7 +219,7 @@ function MapPageContent() {
             }))
 
         addNewLayer({
-            name: `${locationA} ${searchDistance} search - ${new Date().getTime().toString()}`,
+            name: `${locationA}-${locationB} ${searchDistance} mile`,
             type: 'search-ring',
             colors: {fill: randomHex()},
             data: results,
@@ -261,8 +261,7 @@ function MapPageContent() {
                                     v => String(v).replace(/,/g, ' ')).join(",") 
                             }
                         else {
-                            return `${obj['originName'].replace(/,/, ' ')},${obj['originCoords'].join(';')},${obj['searchedDistance']},
-                            ${Object.values(compVal).map(v => String(v).replace(/,/g, ' ')).join(",")}`
+                            return `\n${obj['originName'].replace(/,/, ' ')},${obj['originCoords'].join(';')},${obj['searchedDistance']},${Object.values(compVal).map(v => String(v).replace(/,/g, ' ')).join(",")}`
                                 }
                      }) 
                         return compResult.join(",");
@@ -277,7 +276,7 @@ function MapPageContent() {
                 else {
                     return String(val).replace(/,/g, ''); // remove commas to avoid CSV issues
                 }
-            }).join(",")
+            }).join(",").trim()
         ).join("\n");
 
         const csvContent = `${headers}\n${rows}`;
