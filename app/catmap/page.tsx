@@ -1,59 +1,39 @@
 'use client';
 import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
-import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
-import {
-    MeasureDistanceMode,
-    ViewMode
-} from '@deck.gl-community/editable-layers';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {MeasureDistanceMode, ViewMode} from '@deck.gl-community/editable-layers';
 import {
     BackpackIcon,
     CursorArrowIcon,
     DownloadIcon,
-    EyeNoneIcon,
-    EyeOpenIcon,
     LayersIcon,
     ListBulletIcon,
     MixerHorizontalIcon,
-    PlusIcon,
     RadiobuttonIcon,
     RulerHorizontalIcon,
     TableIcon,
-    TrashIcon,
     UploadIcon
 } from "@radix-ui/react-icons"
-import { PickingInfo } from '@deck.gl/core';
+import {PickingInfo} from '@deck.gl/core';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Separator } from "radix-ui";
-import { distance, point } from "@turf/turf";
+import {Separator} from "radix-ui";
+import {distance, point} from "@turf/turf";
 
-import { hexToRGB, randomHex } from '../utils/color';
-import { PopUpWindow } from "@components/map/popup/PopUp";
+import {hexToRGB, randomHex} from '../utils/color';
+import {PopUpWindow} from "@components/map/popup/PopUp";
 import AttributeTable from "@components/map/table/AttributeTable";
-import { BASEMAP_KEYS, BASEMAPS } from './constants';
-import { LabelledLayer } from "@components/map/layers/labelledScatterLayer";
+import {BASEMAP_KEYS, BASEMAPS} from './constants';
+import {LabelledLayer} from "@components/map/layers/labelledScatterLayer";
 import measureLayer from "@components/map/layers/measureLayer";
-import { SearchRingLayer } from "@components/map/layers/searchRingLayer"
-import { CompResults, ScatterPoint, BaseLayerData } from "@components/map/utils/LayerTypes";
+import {SearchRingLayer} from "@components/map/layers/searchRingLayer"
+import {BaseLayerData, CompResults, ScatterPoint} from "@components/map/utils/LayerTypes";
 import CodeCatLine from "../components/icons/CodeCatLine";
+import {LayerProvider, useLayerContext} from '../context/layerContext';
+import {LayerManagerWidget} from "@map/widgets/LayerManager";
 
-// debounce moved to module scope to avoid recreating on every render
-const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
-    let timeoutId: NodeJS.Timeout | null;
-
-    return (...args: Parameters<T>) => {
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-        }
-
-        timeoutId = setTimeout(() => {
-            callback(...args);
-        }, delay);
-    };
-};
-
-export default function MapPage() {
+function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
     const INITIAL_VIEW_STATE = {
         longitude: -79.9915,
@@ -74,16 +54,15 @@ export default function MapPage() {
     const [tableName, setTableName] = useState('Default')
 
     // layer state
-    const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
-        name: 'Default',
-        type: 'labelled-scatter',
-        colors: { fill: randomHex() },
-        visible: true,
-        data: []
-    }]);
-    const [selectedLayerName, setSelectedLayerName] = useState('Default');
+    const {
+        layerManager,
+        setLayerManager,
+        selectedLayerName,
+        setSelectedLayerName,
+        addNewLayer,
+    } = useLayerContext();
+
     const [layerManagerClicked, setLayerManagerClicked] = useState(false);
-    const [layerName, setLayerName] = useState('');
     const [popupData, setPopupData] = useState<PickingInfo<BaseLayerData>>()
 
     // search ring state
@@ -122,7 +101,7 @@ export default function MapPage() {
                 const [, , name, state] = row.split(',');
                 const status = 'new'
 
-                return { longitude: lng, latitude: lat, name, state, status };
+                return {longitude: lng, latitude: lat, name, state, status};
             });
 
             setLayerManager(prevLayers =>
@@ -136,31 +115,6 @@ export default function MapPage() {
         };
         reader.readAsText(file);
     };
-
-    const addNewLayer = useCallback((newLayer: any) => {
-        setLayerManager(prevLayers => [...prevLayers, {
-            name: newLayer.name,
-            type: newLayer.type || 'labelled-scatter',
-            colors: { fill: newLayer.colors?.fill ?? randomHex() },
-            data: newLayer.data || [],
-            visible: true,
-            layer: newLayer.layer || undefined
-        }]);
-    }, []);
-
-    const toggleLayerVisibility = useCallback((layerId: string) => {
-        setLayerManager(prevLayers =>
-            prevLayers.map(layer =>
-                layer.name === layerId ? { ...layer, visible: !layer.visible } : layer
-            )
-        );
-    }, []);
-
-    const deleteLayer = useCallback((name: string) => {
-        setLayerManager(prev =>
-            prev.filter(l => l.name !== name)
-        );
-    }, []);
 
     const handleAddPointClick = (event: any) => {
         const deck = deckRef.current.deck;
@@ -191,26 +145,9 @@ export default function MapPage() {
         const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
         return (<span
             className="inline-block w-3 h-3 mr-2 rounded-full"
-            style={{ backgroundColor: rgb }}
+            style={{backgroundColor: rgb}}
         ></span>);
     }
-
-    const updateLayerColor = useCallback((layerName: string, newColors: { fill?: string }) => {
-
-        setLayerManager(prevLayers =>
-            prevLayers.map(layer =>
-                layer.name === layerName ? {
-                    ...layer,
-                    colors: {
-                        ...layer.colors,
-                        fill: newColors.fill
-                    }
-                } : layer
-            )
-        );
-    }, [setLayerManager]);
-
-    const updateLayerColorDebounced = useMemo(() => debounce(updateLayerColor, 300), [updateLayerColor]);
 
     const getLegendList = () => {
         const legendItems = layerManager.filter(layer => layer.visible);
@@ -232,8 +169,15 @@ export default function MapPage() {
 
     const layers = useMemo(() => {
         const visible = layerManager.filter(layer => layer.visible);
-        const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => [new SearchRingLayer({ data: l.data, color: l.colors.fill })])
-        const labelledLayers = visible.filter(l => l.type === 'labelled-scatter').map(l => [new LabelledLayer({ id: l.name, data: l.data, color: l.colors.fill })])
+        const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => [new SearchRingLayer({
+            data: l.data,
+            color: l.colors.fill
+        })])
+        const labelledLayers = visible.filter(l => l.type === 'labelled-scatter').map(l => [new LabelledLayer({
+            id: l.name,
+            data: l.data,
+            color: l.colors.fill
+        })])
 
         return mode === MeasureDistanceMode ?
             [...searchLayers, ...labelledLayers, measurementLayer] :
@@ -249,7 +193,7 @@ export default function MapPage() {
             const d = distance(
                 point([inputPoint.longitude, inputPoint.latitude]),
                 point([row.longitude, row.latitude]),
-                { units: 'miles' }
+                {units: 'miles'}
             );
 
             if (d <= searchDistance) {
@@ -279,7 +223,7 @@ export default function MapPage() {
         addNewLayer({
             name: `${locationA} ${searchDistance} search - ${new Date().getTime().toString()}`,
             type: 'search-ring',
-            colors: { fill: randomHex() },
+            colors: {fill: randomHex()},
             data: results,
             visible: true
         })
@@ -288,11 +232,9 @@ export default function MapPage() {
     const handleCursorClick = (info: any) => {
         if (isClicked) {
             handleAddPointClick(info)
-        }
-        else if (mode === MeasureDistanceMode) {
+        } else if (mode === MeasureDistanceMode) {
             setPopupData(undefined)
-        }
-        else if (info.object) {
+        } else if (info.object) {
             setPopupData(info);
         } else {
             setPopupData(undefined)
@@ -374,20 +316,20 @@ export default function MapPage() {
                     onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                     className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
                 >
-                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'} /> : getLegendList()}
+                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'}/> : getLegendList()}
                 </button>
             </div>
 
             {/* Attribute Table */}
             <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
                 {isTableExpanded ?
-                    <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[50vw] max-h-[30vh] 
+                    <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[50vw] max-h-[30vh]
                         overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
                         <div className="flex flex-row">
                             <button
                                 onClick={() => setIsTableExpanded(!isTableExpanded)}
                                 className={'subdomain-btn'}
-                            ><TableIcon className={'w-6 h-6'} />
+                            ><TableIcon className={'w-6 h-6'}/>
                             </button>
                             <select
                                 value={tableName}
@@ -406,13 +348,13 @@ export default function MapPage() {
                                 <DownloadIcon className={'w-6 h-6'} />
                             </button>
                         </div>
-                        <AttributeTable layer={layerManager.filter(layer => layer.name === tableName)} />
+                        <AttributeTable layer={layerManager.filter(layer => layer.name === tableName)}/>
                     </div>
                     :
                     <button
                         onClick={() => setIsTableExpanded(!isTableExpanded)}
                         className={'subdomain-btn'}
-                    ><TableIcon className={'w-6 h-6'} />
+                    ><TableIcon className={'w-6 h-6'}/>
                     </button>
 
                 }
@@ -425,94 +367,34 @@ export default function MapPage() {
                         onClick={() => setLayerManagerClicked(!layerManagerClicked)}
                         title="Layers"
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${layerManagerClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <LayersIcon className={'w-8 h-8'} />
+                        <LayersIcon className={'w-8 h-8'}/>
                     </button>
-                    {layerManagerClicked && (
-                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                            <label className="layer-select text-stone-700">Layer Manager:</label>
-                            <div className={"flex flex-row items-center justify-between gap-4"}>
-                                <input
-                                    type={'text'}
-                                    className={"px-2 border border-zinc-500 text-stone-500 bg-stone-100 rounded-md max-w-48 max-h-6"}
-                                    id={'layer-name-input'}
-                                    value={layerName}
-                                    onChange={(e) => {
-                                        const exists = layerManager.some(l => l.name === e.target.value);
-                                        if (exists) {
-                                            alert('Layer name already taken');
-                                            return;
-                                        }
-                                        setLayerName(e.target.value);
-                                    }}
-                                />
-                                <button
-                                    onClick={() => {
-                                        addNewLayer({ name: `${layerName}`, type: 'labelled-scatter', data: [] });
-                                        setLayerName('');
-                                    }}
-                                    className="p-1 max-h-10 text-peach-5 flex-row flex items-center justify-center"
-                                >
-                                    <PlusIcon className={'w-4 h-4'} /> Layer
-                                </button>
-                            </div>
-                            <Separator.Root className="seperator-major"
-                                decorative />
-                            <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
-                                {layerManager.map(layer => (
-                                    <div key={layer.name} className="flex items-center justify-between mb-1 space-x-4">
-                                        <span className="mr-2 w-20">{layer.name}</span>
-                                        <input
-                                            type="color"
-                                            value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
-                                            onChange={(e) => updateLayerColorDebounced(layer.name, { fill: e.target.value })}
-                                            className="w-12 p-1 rounded"
-                                        />
-                                        <div className={'flex flex-row gap-2'}>
-                                            <button
-                                                onClick={() => toggleLayerVisibility(layer.name)}
-                                                className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
-                                                title="Toggle Visibility"
-                                            >
-                                                {layer.visible ? (
-                                                    <EyeOpenIcon className="w-full h-full" />
-                                                ) : (
-                                                    <EyeNoneIcon className="w-full h-full" />
-                                                )}
-                                            </button>
-                                            <button
-                                                onClick={() => deleteLayer(layer.name)}
-                                                aria-label={`Delete layer ${layer.name}`}
-                                                className="p-1 w-6 h-6 rounded text-red-400 hover:text-red-700 focus:outline-none"
-                                            >
-                                                <TrashIcon className="w-full h-full" />
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    <LayerManagerWidget
+                        isOpen={layerManagerClicked}
+                        onClose={() => setLayerManagerClicked(false)}
+                    />
                 </div>
                 <div className="flex items-start relative">
                     <button
                         onClick={() => setIsUploadExpanded(!isUploadExpanded)}
                         title={"Upload Data"}
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isUploadExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <UploadIcon className={'w-8 h-8'} />
+                        <UploadIcon className={'w-8 h-8'}/>
                     </button>
                     {isUploadExpanded && !isClicked && (
                         <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
                             <label className="text-stone-500 text-sm">Upload Locations:</label>
                             <Separator.Root className="seperator-major"
-                                decorative />
+                                            decorative/>
                             <div className="flex flex-row items-center">
                                 <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
                                 <select
                                     value={selectedLayerName}
                                     onChange={(e) => setSelectedLayerName(e.target.value)}
                                     className="p-1 ml-1">
-                                    {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
+                                    {layerManager.filter((layer: {
+                                        type: string;
+                                    }) => layer.type === 'labelled-scatter').map(layer => (
                                         <option key={layer.name} value={layer.name}>
                                             {layer.name}
                                         </option>
@@ -520,7 +402,7 @@ export default function MapPage() {
                                 </select>
                             </div>
                             <Separator.Root className="seperator-minor"
-                                decorative />
+                                            decorative/>
                             <input
                                 type="file"
                                 title="Upload a CSV or Excel file with latitude and longitude columns."
@@ -541,14 +423,14 @@ export default function MapPage() {
                         onClick={() => setIsClicked(!isClicked)}
                         title={'Add Points'}
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <CursorArrowIcon className={'w-8 h-8'} />
+                        <CursorArrowIcon className={'w-8 h-8'}/>
                     </button>
 
                     {isClicked &&
                         <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
                             <label className="text-stone-500 text-sm">Add points:</label>
                             <Separator.Root className="seperator-major"
-                                decorative />
+                                            decorative/>
                             <div className="flex flex-row items-center">
                                 <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
                                 <select
@@ -572,7 +454,7 @@ export default function MapPage() {
                         onClick={() => setToolboxOpen(!toolboxOpen)}
                         title={'Analysis Tools'}
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${toolboxOpen ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                        <BackpackIcon className={'w-8 h-8'} />
+                        <BackpackIcon className={'w-8 h-8'}/>
                     </button>
 
                     {toolboxOpen &&
@@ -581,20 +463,20 @@ export default function MapPage() {
                                 onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
                                 title={'Measure Tool'}
                                 className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                                <RulerHorizontalIcon className={'w-8 h-8'} />
+                                <RulerHorizontalIcon className={'w-8 h-8'}/>
                             </button>
 
                             <button
                                 onClick={() => setSearchRingSelected(!searchRingSelected)}
                                 title={'Search Area'}
                                 className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${searchRingSelected ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                                <RadiobuttonIcon className={'w-8 h-8'} />
+                                <RadiobuttonIcon className={'w-8 h-8'}/>
                             </button>
                             {searchRingSelected && (
                                 <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
                                     <label className="ml-2 text-m text-stone-500">Search Area Tool:</label>
                                     <Separator.Root className="seperator-major"
-                                        decorative />
+                                                    decorative/>
                                     <div className="text-stone-500 overflow-y-auto max-h-112 p-2">
                                         <div className="flex flex-row items-center">
                                             <p className="font-bold text-sm">Input Layer:</p>
@@ -604,15 +486,15 @@ export default function MapPage() {
                                                 className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
                                             >
                                                 {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
-                                                    undefined
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option> :
+                                                        undefined
                                                 ))}
                                             </select>
                                         </div>
                                         <Separator.Root className="seperator-minor"
-                                            decorative />
+                                                        decorative/>
                                         <div className="flex flex-row items-center">
                                             <p className="font-bold text-sm">Comparison Layer:</p>
                                             <select
@@ -621,15 +503,15 @@ export default function MapPage() {
                                                 className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
                                             >
                                                 {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
-                                                    undefined
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option> :
+                                                        undefined
                                                 ))}
                                             </select>
                                         </div>
                                         <Separator.Root className="seperator-minor"
-                                            decorative />
+                                                        decorative/>
                                         <div className="flex flex-row items-center">
                                             <p className="font-bold text-sm">Distance (miles):</p>
                                             <input
@@ -669,7 +551,7 @@ export default function MapPage() {
                         title={'Preferences'}
                         className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isBaseMapExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}
                     >
-                        <MixerHorizontalIcon className={'w-8 h-8 rounded-full'} />
+                        <MixerHorizontalIcon className={'w-8 h-8 rounded-full'}/>
                     </button>
 
                     {isBaseMapExpanded && (
@@ -678,7 +560,7 @@ export default function MapPage() {
                                 Basemap Selection
                             </h3>
                             <Separator.Root className="seperator-major"
-                                decorative />
+                                            decorative/>
                             <form>
                                 <RadioGroup.Root
                                     className="RadioGroupRoot"
@@ -687,9 +569,9 @@ export default function MapPage() {
                                     aria-label="Basemap Selection"
                                 >
                                     {BASEMAP_KEYS.map((key) => (
-                                        <div key={key} style={{ display: "flex", alignItems: "center" }}>
+                                        <div key={key} style={{display: "flex", alignItems: "center"}}>
                                             <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
-                                                <RadioGroup.Indicator className="RadioGroupIndicator" />
+                                                <RadioGroup.Indicator className="RadioGroupIndicator"/>
                                             </RadioGroup.Item>
                                             <label className="Label" htmlFor={`${key}`}>
                                                 {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -714,7 +596,7 @@ export default function MapPage() {
                 layers={layers}
             >
                 {popupData?.object && (
-                    <PopUpWindow props={popupData} />
+                    <PopUpWindow props={popupData}/>
                 )}
                 <Map
                     maxPitch={0}
@@ -726,5 +608,13 @@ export default function MapPage() {
                 </Map>
             </DeckGL>
         </div>
+    );
+}
+
+export default function MapPage() {
+    return (
+        <LayerProvider>
+            <MapPageContent/>
+        </LayerProvider>
     );
 }
