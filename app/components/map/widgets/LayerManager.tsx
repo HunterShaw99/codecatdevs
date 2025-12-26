@@ -77,6 +77,7 @@ export function LayerManagerWidget({ isOpen, onClose }: LayerManagerWidgetProps)
               }
               setLayerName(e.target.value);
             }}
+            maxLength={10}
           />
           <button
             onClick={() => {
@@ -91,16 +92,38 @@ export function LayerManagerWidget({ isOpen, onClose }: LayerManagerWidgetProps)
         <Separator.Root className="seperator-major" decorative />
         <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
           {layerManager.map(layer => (
-            <div key={layer.name}
-              className="flex items-center justify-between mb-1 space-x-4">
-              <span className="mr-2 w-20">{layer.name}</span>
-              <input
-                type="color"
-                value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
-                onChange={(e) => updateLayerColorDebounced(layer.id, { fill: e.target.value })}
-                className="w-12 p-1 rounded"
-              />
-              <input
+            <div key={layer.id}
+              className="flex items-center justify-between mb-1 space-x-4 h-5">
+              <span className="mr-2 w-25">{layer.name}</span>
+                <div className="relative">
+                      <input
+                        type="color"
+                        value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
+                        onChange={(e) => updateLayerColorDebounced(layer.id, { fill: e.target.value })}
+                        className="w-5 h-5 rounded-full border-0 cursor-pointer appearance-none bg-transparent hover:shadow-lg transition-shadow duration-200 absolute opacity-0"
+                        style={{
+                          WebkitAppearance: 'none',
+                          MozAppearance: 'none',
+                          backgroundColor: layer.colors?.fill || randomHex()
+                        }}
+                      />
+                      <div
+                        className="w-5 h-5 rounded-full cursor-pointer hover:shadow-md transition-shadow duration-200"
+                        style={{
+                          backgroundColor: layer.colors?.fill || randomHex(),
+                        }}
+                        onClick={(e) => {
+                          const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                          input.click();
+                        }}
+                      />
+                    </div>
+                <Separator.Root
+                  className="mx-8 bg-stone-400 data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px"
+                  decorative
+                  orientation="vertical"
+			    />
+                <input
                 className="w-16 appearance-none bg-transparent [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-peach-8 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-peach-5"
                 type="range"
                 id="opacity"
@@ -112,7 +135,11 @@ export function LayerManagerWidget({ isOpen, onClose }: LayerManagerWidgetProps)
                 onChange={(e) => updateLayerOpacity(layer.id, { fill: layer.colors?.fill ?? randomHex() },
                   e.target.valueAsNumber)}
               />
-              <div className={'flex flex-row gap-2'}>
+              <Separator.Root
+                  className="mx-8 bg-stone-400 data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px"
+                  decorative
+                  orientation="vertical"
+			    />
                 <button
                   onClick={() => toggleLayerVisibility(layer.id)}
                   className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
@@ -124,6 +151,11 @@ export function LayerManagerWidget({ isOpen, onClose }: LayerManagerWidgetProps)
                     <EyeNoneIcon className="w-full h-full" />
                   )}
                 </button>
+              <Separator.Root
+                  className="mx-8 bg-stone-400 data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px"
+                  decorative
+                  orientation="vertical"
+			    />
                 <button
                   onClick={() => deleteLayer(layer.id)}
                   aria-label={`Delete layer ${layer.name}`}
@@ -131,7 +163,6 @@ export function LayerManagerWidget({ isOpen, onClose }: LayerManagerWidgetProps)
                 >
                   <TrashIcon className="w-full h-full" />
                 </button>
-              </div>
 
             </div>
           ))}
