@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useCallback, useMemo} from 'react';
 import Draggable from 'react-draggable';
 import {Separator} from 'radix-ui';
 import {EyeNoneIcon, EyeOpenIcon, TrashIcon, PlusIcon} from '@radix-ui/react-icons';
@@ -19,24 +19,22 @@ export function LayerManagerWidget({isOpen, onClose}: LayerManagerWidgetProps) {
         toggleLayerVisibility,
         deleteLayer,
         updateLayerColorDebounced,
-        updateLayerOpacity
+        updateLayerOpacity,
+        getLayerById
     } = useLayerContext();
 
     const [layerName, setLayerName] = useState('');
     const [position, setPosition] = useState({x: 0, y: 0});
     const nodeRef = useRef(null);
 
-    const savePosition = (x: number, y: number) => {
-        localStorage.setItem('layerManagerPosition', JSON.stringify({x, y}));
-    };
-
-    const loadPosition = () => {
+    const loadPosition = useCallback(() => {
         const savedPosition = localStorage.getItem('layerManagerPosition');
-        if (savedPosition) {
-            return JSON.parse(savedPosition);
-        }
-        return {x: 0, y: 0};
-    };
+        return savedPosition ? JSON.parse(savedPosition) : { x: 0, y: 0 };
+    }, []);
+
+    const savePosition = useCallback((x: number, y: number) => {
+        localStorage.setItem('layerManagerPosition', JSON.stringify({ x, y }));
+    }, []);
 
     useEffect(() => {
         if (isOpen) {

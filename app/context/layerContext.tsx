@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import {BaseLayerData} from "@map/utils/LayerTypes";
 import {randomHex} from "@/app/utils/color";
@@ -20,6 +19,7 @@ interface LayerContextType {
   updateLayerColor: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
   updateLayerColorDebounced: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
   updateLayerOpacity: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
+  getLayerById: (layerId: string) => BaseLayerData | undefined;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -43,6 +43,16 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
   }]);
   const [selectedLayerName, setSelectedLayerName] = useState('Default');
 
+  const layerMap = useMemo(() => {
+    const map = new Map<string, BaseLayerData>();
+    layerManager.forEach(layer => map.set(layer.id, layer));
+    return map;
+  }, [layerManager]);
+
+  const getLayerById = useCallback((layerId: string) => {
+    return layerMap.get(layerId);
+  }, [layerMap]);
+
   const addNewLayer = useCallback((newLayer: any) => {
     setLayerManager(prevLayers => [...prevLayers, {
       id: generateLayerId(),
@@ -56,37 +66,44 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const toggleLayerVisibility = useCallback((layerId: string) => {
-    setLayerManager(prevLayers =>
-      prevLayers.map(layer =>
-        layer.id === layerId ? { ...layer, visible: !layer.visible } : layer
-      )
-    );
-  }, []);
+    setLayerManager(prevLayers => {
+      const layer = getLayerById(layerId);
+      if (!layer) return prevLayers;
+
+      return prevLayers.map(l =>
+        l.id === layerId ? { ...l, visible: !l.visible } : l
+      );
+    });
+  }, [getLayerById]);
 
   const deleteLayer = useCallback((layerId: string) => {
-    setLayerManager(prev =>
-      prev.filter(l => l.id !== layerId)
-    );
+    setLayerManager(prev => prev.filter(l => l.id !== layerId));
   }, []);
 
   const updateLayerColor = useCallback((layerId: string, newColors: { fill?: string }, opacity?: number) => {
-    const opacityString = opacity ? Math.abs((opacity / 100) * 255).toString(16) : 'FF'
+    setLayerManager(prevLayers => {
+      const layer = getLayerById(layerId);
+      if (!layer) return prevLayers;
 
-    setLayerManager(prevLayers =>
-      prevLayers.map(layer =>
-        layer.id === layerId ? {
-          ...layer,
-          colors: {
-            ...layer.colors,
-            fill: newColors?.fill?.slice(0, 7) + opacityString
-          }
-        } : layer
-      )
-    );
-  }, [setLayerManager]);
+      const opacityValue = opacity ? Math.abs((opacity / 100) * 255) : 255;
+      const opacityHex = opacityValue.toString(16).padStart(2, '0').toUpperCase();
 
-  const debounce = <T extends (...args: any[]) => void>(callback: T, delay: number) => {
-    let timeoutId: NodeJS.Timeout | null;
+      return prevLayers.map(l =>
+        l.id === layerId
+          ? {
+              ...l,
+              colors: {
+                ...l.colors,
+                fill: newColors?.fill?.slice(0, 7) + opacityHex
+              }
+            }
+          : l
+      );
+    });
+  }, [getLayerById]);
+
+  const debounce = useCallback(<T extends (...args: any[]) => void>(callback: T, delay: number) => {
+    let timeoutId: NodeJS.Timeout | null = null;
 
     return (...args: Parameters<T>) => {
       if (timeoutId) {
@@ -97,13 +114,12 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
         callback(...args);
       }, delay);
     };
-  };
+  }, []);
 
-  const updateLayerColorDebounced = useMemo(() => debounce(updateLayerColor, 300), [updateLayerColor]);
+  const updateLayerColorDebounced = useMemo(() => debounce(updateLayerColor, 300), [updateLayerColor, debounce]);
+  const updateLayerOpacity = useMemo(() => debounce(updateLayerColor, 10), [updateLayerColor, debounce]);
 
-  const updateLayerOpacity = useMemo(() => debounce(updateLayerColor, 10), [updateLayerColor]);
-
-  const value = {
+  const value = useMemo(() => ({
     layerManager,
     setLayerManager,
     selectedLayerName,
@@ -113,8 +129,19 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     deleteLayer,
     updateLayerColor,
     updateLayerColorDebounced,
-    updateLayerOpacity
-  };
+    updateLayerOpacity,
+    getLayerById
+  }), [
+    layerManager,
+    selectedLayerName,
+    addNewLayer,
+    toggleLayerVisibility,
+    deleteLayer,
+    updateLayerColor,
+    updateLayerColorDebounced,
+    updateLayerOpacity,
+    getLayerById
+  ]);
 
   return (
     <LayerContext.Provider value={value}>
