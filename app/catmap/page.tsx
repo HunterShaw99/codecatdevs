@@ -32,6 +32,7 @@ import {BaseLayerData, CompResults, ScatterPoint} from "@components/map/utils/La
 import CodeCatLine from "../components/icons/CodeCatLine";
 import {LayerProvider, useLayerContext} from '../context/layerContext';
 import {LayerManagerWidget} from "@map/widgets/LayerManager";
+import CSVReader from "@map/widgets/csvReader";
 
 function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
@@ -45,6 +46,7 @@ function MapPageContent() {
 
     const deckRef = useRef<any>(null);
     const [isUploadExpanded, setIsUploadExpanded] = useState(false);
+    const [uploadedData, setUploadedData] = useState<any>(null);
     const [isClicked, setIsClicked] = useState(false);
     const [isLegendExpanded, setIsLegendExpanded] = useState(false);
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
@@ -88,33 +90,18 @@ function MapPageContent() {
         features: []
     }, mode);
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const content = e.target?.result as string;
-            const rows = content.split('\n');
-            const points = rows.slice(1).map(row => {
-                const [lat, lng] = row.split(',').map(Number);
-                const [, , name, state] = row.split(',');
-                const status = 'new'
-
-                return {longitude: lng, latitude: lat, name, state, status};
-            });
-
+    useEffect(() => {
+        if (uploadedData && uploadedData.data) {
             setLayerManager(prevLayers =>
                 prevLayers.map(layer =>
                     layer.name === selectedLayerName ? {
                         ...layer,
-                        data: [...layer?.data, ...points]
+                        data: [...layer?.data, ...uploadedData.data]
                     } : layer
                 )
             );
-        };
-        reader.readAsText(file);
-    };
+            }
+        },[uploadedData]);
 
     const handleAddPointClick = (event: any) => {
         const deck = deckRef.current.deck;
@@ -131,7 +118,7 @@ function MapPageContent() {
                     ...layer,
                     data: [...layer?.data, {
                         latitude: lat, longitude: lng,
-                        name: `${lng.toFixed(2)}, ${lat.toFixed(2)}`, state: '', status: 'new'
+                        name: `${lng.toFixed(2)}, ${lat.toFixed(2)}`, status: 'new'
                     }]
                 } : layer
             )
@@ -325,7 +312,7 @@ function MapPageContent() {
                         <div className="flex flex-row">
                             <button
                                 onClick={() => setIsTableExpanded(!isTableExpanded)}
-                                className={'subdomain-btn'}
+                                className={'p-2 w-10 h-10 bg-base'}
                             ><TableIcon className={'w-6 h-6'}/>
                             </button>
                             <select
@@ -341,7 +328,7 @@ function MapPageContent() {
                             </select>
                             <button
                                 onClick={handleDownloadClick}
-                                className={'subdomain-btn'}>
+                                className={'p-2 w-10 h-10 bg-base'}>
                                 <DownloadIcon className={'w-6 h-6'} />
                             </button>
                         </div>
@@ -350,7 +337,7 @@ function MapPageContent() {
                     :
                     <button
                         onClick={() => setIsTableExpanded(!isTableExpanded)}
-                        className={'subdomain-btn'}
+                        className={'widget-btn btn-collapsed'}
                     ><TableIcon className={'w-6 h-6'}/>
                     </button>
 
@@ -363,7 +350,7 @@ function MapPageContent() {
                     <button
                         onClick={() => setLayerManagerClicked(!layerManagerClicked)}
                         title="Layers"
-                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${layerManagerClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        className={`widget-btn ${layerManagerClicked ? 'btn-expanded' : 'btn-collapsed'}`}>
                         <LayersIcon className={'w-8 h-8'}/>
                     </button>
                     <LayerManagerWidget
@@ -375,7 +362,7 @@ function MapPageContent() {
                     <button
                         onClick={() => setIsUploadExpanded(!isUploadExpanded)}
                         title={"Upload Data"}
-                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isUploadExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        className={`widget-btn ${isUploadExpanded ? 'btn-expanded' : 'btn-collapsed'}`}>
                         <UploadIcon className={'w-8 h-8'}/>
                     </button>
                     {isUploadExpanded && !isClicked && (
@@ -398,20 +385,7 @@ function MapPageContent() {
                                     ))}
                                 </select>
                             </div>
-                            <Separator.Root className="seperator-minor"
-                                            decorative/>
-                            <input
-                                type="file"
-                                title="Upload a CSV or Excel file with latitude and longitude columns."
-                                accept=".csv,.xlsx,.xls"
-                                onChange={handleFileUpload}
-                                className="block text-sm text-stone-500
-                              file:mr-4 file:py-2 file:px-4
-                              file:rounded-md file:border-0
-                              file:text-sm file:font-semibold
-                              file:bg-peach-8 file:text-peach-5
-                              hover:file:bg-peach-7"
-                            />
+                            <CSVReader onUpload={setUploadedData}/>
                         </div>
                     )}
                 </div>
@@ -419,7 +393,7 @@ function MapPageContent() {
                     <button
                         onClick={() => setIsClicked(!isClicked)}
                         title={'Add Points'}
-                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isClicked ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        className={`widget-btn ${isClicked ? 'btn-expanded' : 'btn-collapsed'}`}>
                         <CursorArrowIcon className={'w-8 h-8'}/>
                     </button>
 
@@ -450,7 +424,7 @@ function MapPageContent() {
                     <button
                         onClick={() => setToolboxOpen(!toolboxOpen)}
                         title={'Analysis Tools'}
-                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${toolboxOpen ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
+                        className={`widget-btn ${toolboxOpen ? 'btn-expanded' : 'btn-collapsed'}`}>
                         <BackpackIcon className={'w-8 h-8'}/>
                     </button>
 
@@ -459,15 +433,15 @@ function MapPageContent() {
                             <button
                                 onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
                                 title={'Measure Tool'}
-                                className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${mode === MeasureDistanceMode ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                                <RulerHorizontalIcon className={'w-8 h-8'}/>
+                                className={`row-span-1 widget-btn ${mode === MeasureDistanceMode ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
+                                <RulerHorizontalIcon className={'w-6 h-6'}/>
                             </button>
 
                             <button
                                 onClick={() => setSearchRingSelected(!searchRingSelected)}
                                 title={'Search Area'}
-                                className={`row-span-1 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${searchRingSelected ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}>
-                                <RadiobuttonIcon className={'w-8 h-8'}/>
+                                className={`row-span-1 widget-btn ${searchRingSelected ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
+                                <RadiobuttonIcon className={'w-6 h-6'}/>
                             </button>
                             {searchRingSelected && (
                                 <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
@@ -546,7 +520,7 @@ function MapPageContent() {
                     <button
                         onClick={() => setIsBaseMapExpanded(!isBaseMapExpanded)}
                         title={'Preferences'}
-                        className={`my-2 rounded-full shadow-md hover:shadow-lg transition-shadow bg-base ${isBaseMapExpanded ? 'p-4 w-16 h-16' : 'p-2 w-12 h-12'}`}
+                        className={`widget-btn ${isBaseMapExpanded ? 'btn-expanded' : 'btn-collapsed'}`}
                     >
                         <MixerHorizontalIcon className={'w-8 h-8 rounded-full'}/>
                     </button>

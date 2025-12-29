@@ -516,8 +516,16 @@ h1 {
   border-radius: 1.5rem;
 }
 
-.subdomain-btn {
-  @apply p-2 h-10 w-10 rounded-full shadow-md hover:shadow-lg transition-shadow bg-zinc-950;
+.widget-btn {
+  @apply my-2 flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base;
+}
+
+.btn-expanded {
+  @apply p-4 w-16 h-16 hover:w-18 hover:h-18 transition-all duration-200;
+}
+
+.btn-collapsed {
+  @apply p-2 w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200;
 }
 
 .legend-container {
@@ -596,10 +604,10 @@ button-menu-container {
   position: absolute;
   bottom: 10%; 
   left: 100%;
-  padding: 10px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   opacity: 0;
   transform: scale(0.9); 
   transform-origin: bottom center; 
@@ -612,11 +620,16 @@ button-menu-container {
   transform: scale(1);
 }
 
+.menu-popover-btn-expanded {
+  @apply p-2 w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200;
+}
+
+.menu-popover-btn-collapsed {
+  @apply p-1 w-10 h-10 hover:w-12 hover:h-12 transition-all duration-200;
+}
+
 .seperator-minor {
   @apply my-1 bg-zinc-200 data-[orientation=horizontal]:h-px;
-}
-.seperator-minor-vertical {
-  @apply my-1 bg-zinc-200 data-[orientation=vertical]:h-px;
 }
 
 .seperator-major {

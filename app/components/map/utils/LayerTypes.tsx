@@ -24,10 +24,9 @@ export type BaseLayerData = {
 
 export type ScatterPoint = {
     name: string
-    state: string
     latitude: number
     longitude: number
-    status: string
+    status?: string
 }
 
 export interface CompResults {

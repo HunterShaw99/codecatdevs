@@ -3,7 +3,7 @@ import Draggable from 'react-draggable';
 import {Separator} from 'radix-ui';
 import {EyeNoneIcon, EyeOpenIcon, TrashIcon, PlusIcon} from '@radix-ui/react-icons';
 import {useLayerContext} from "@/app/context/layerContext";
-import {hexToRGB, randomHex} from "@/app/utils/color";
+import {randomHex} from "@/app/utils/color";
 
 interface LayerManagerWidgetProps {
     isOpen: boolean;
@@ -81,31 +81,33 @@ export function LayerManagerWidget({isOpen, onClose}: LayerManagerWidgetProps) {
                             addNewLayer({name: `${layerName}`, type: 'labelled-scatter', data: []});
                             setLayerName('');
                         }}
-                        className="p-1 max-h-10 text-peach-5 flex-row flex items-center justify-center"
+                        className="p-1 max-h-10 text-lg text-peach-5 flex-row flex items-center justify-center cursor-pointer hover:text-peach-4"
                     >
                         <PlusIcon className={'w-4 h-4'}/> Layer
                     </button>
                 </div>
                 <Separator.Root className="seperator-major" decorative/>
-                <div className="mt-2 text-stone-500 overflow-y-auto max-h-112 p-2">
+                <div className="mt-2 text-stone-500 text-sm p-2">
                     {layerManager.map(layer => (
                         <div key={layer.id}
-                             className="flex items-center justify-between mb-1 space-x-4 h-5">
-                            <span className="mr-2 w-25">{layer.name}</span>
+                             className="flex items-center justify-between">
+                            <span className="mr-2 w-35">{layer.name}</span>
                             <div className="relative">
                                 <input
                                     type="color"
                                     value={layer.colors?.fill ? layer.colors.fill.slice(0, 7) : randomHex()}
                                     onChange={(e) => updateLayerColorDebounced(layer.id, {fill: e.target.value})}
-                                    className="w-5 h-5 rounded-full border-0 cursor-pointer appearance-none bg-transparent hover:shadow-lg transition-shadow duration-200 absolute opacity-0"
+                                    className="w-4 h-4 appearance-none rounded-full shadow-sm shadow-stone-600 hover:shadow-md
+                                    transition-shadow duration-200 cursor-pointer bg-transparent absolute
+                                    [&::-webkit-color-swatch-wrapper]:p-0
+                                        [&::-webkit-color-swatch]:border-none
+                                        [&::-moz-color-swatch]:border-none"
                                     style={{
-                                        WebkitAppearance: 'none',
-                                        MozAppearance: 'none',
                                         backgroundColor: layer.colors?.fill || randomHex()
                                     }}
                                 />
                                 <div
-                                    className="w-5 h-5 rounded-full cursor-pointer hover:shadow-md transition-shadow duration-200"
+                                    className="w-4 h-4 rounded-full cursor-pointer"
                                     style={{
                                         backgroundColor: layer.colors?.fill || randomHex(),
                                     }}
@@ -115,14 +117,9 @@ export function LayerManagerWidget({isOpen, onClose}: LayerManagerWidgetProps) {
                                     }}
                                 />
                             </div>
-                            <Separator.Root
-                                className="mx-8 bg-stone-400 data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px"
-                                decorative
-                                orientation="vertical"
-                            />
                             <button
                                 onClick={() => toggleLayerVisibility(layer.id)}
-                                className="p-1 w-6 h-6 rounded text-stone-700 focus:outline-none"
+                                className="w-4 h-4 rounded cursor-pointer text-stone-700 hover:text-stone-900"
                                 title="Toggle Visibility"
                             >
                                 {layer.visible ? (
@@ -131,19 +128,13 @@ export function LayerManagerWidget({isOpen, onClose}: LayerManagerWidgetProps) {
                                     <EyeNoneIcon className="w-full h-full"/>
                                 )}
                             </button>
-                            <Separator.Root
-                                className="mx-8 bg-stone-400 data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px"
-                                decorative
-                                orientation="vertical"
-                            />
                             <button
                                 onClick={() => deleteLayer(layer.id)}
                                 aria-label={`Delete layer ${layer.name}`}
-                                className="p-1 w-6 h-6 rounded text-red-400 hover:text-red-700 focus:outline-none"
+                                className="w-4 h-4 rounded cursor-pointer text-red-400 hover:text-red-700"
                             >
                                 <TrashIcon className="w-full h-full"/>
                             </button>
-
                         </div>
                     ))}
                 </div>
