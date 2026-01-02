@@ -17,3 +17,5 @@ export const INITIAL_VIEW_STATE = {
     latitude: 40.4419,
     zoom: 10.5,
   };
+
+export const ROUTING_PREFERENCES = ['distance', 'duration'];

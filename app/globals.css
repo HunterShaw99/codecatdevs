@@ -551,17 +551,15 @@ h1 {
 }
 
 .RadioGroupItem {
-	background-color: white;
-	width: 14px;
-	height: 14px;
-	border-radius: 100%;
-	box-shadow: 0 2px 10px var(--black-a7);
+  @apply bg-white w-3.5 h-3.5 rounded-full shadow-sm;
 }
+
 .RadioGroupItem:hover {
-	background-color: var(--color-peach-6);
+	background-color: var(--color-peach-7);
 }
+
 .RadioGroupItem:focus {
-	box-shadow: 0 0 0 2px black;
+	@apply shadow-md;
 }
 
 .RadioGroupIndicator {
@@ -573,25 +571,17 @@ h1 {
 	position: relative;
 }
 .RadioGroupIndicator::after {
+  @apply block w-2 h-2 rounded-sm bg-stone-700;
 	content: "";
-	display: block;
-	width: 10px;
-	height: 10px;
-	border-radius: 50%;
-	background-color: var(--color-gray-800);
 }
 
-.Label {
-	color: var(--color-gray-600);
-	font-size: 15px;
-	line-height: 1;
-	padding-left: 15px;
+.radio-label {
+  @apply text-xs text-stone-500 pl-1;
 }
 
 /* Table */
 table, th, td, tr {
-  border: 1px solid lightgray;
-  padding: 4px
+  @apply p-2 border border-stone-300;
 }
 
 /* Analysis Menu */
@@ -620,12 +610,16 @@ button-menu-container {
   transform: scale(1);
 }
 
+.menu-popover-btn {
+  @apply flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base;
+}
+
 .menu-popover-btn-expanded {
-  @apply p-2 w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200;
+  @apply w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200;
 }
 
 .menu-popover-btn-collapsed {
-  @apply p-1 w-10 h-10 hover:w-12 hover:h-12 transition-all duration-200;
+  @apply w-10 h-10 hover:w-11 hover:h-11 transition-all duration-200;
 }
 
 .seperator-minor {

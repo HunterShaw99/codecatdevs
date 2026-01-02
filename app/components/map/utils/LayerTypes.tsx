@@ -41,3 +41,9 @@ export type SearchRing = {
   searchedDistance: number
   compareResults: Record<string, CompResults[]>
 }
+
+export type RouteLine = {
+  distance: number
+  duration: number
+  geometry: {coordinates: [number, number][]; type: string},
+  }

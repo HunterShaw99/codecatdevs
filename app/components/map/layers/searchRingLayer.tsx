@@ -10,7 +10,7 @@ export class SearchRingLayer extends CompositeLayer<{ data: SearchRing[], color?
             data: this.props.data,
             getPosition: (d: any) => d.originCoords,
             getRadius: (d: any) => d.searchedDistance * 1609.34,
-            getFillColor: [...hexToRGB(this.props.color), 160],
+            getFillColor: [...hexToRGB(this.props.color), 120],
             pickable: true,
             // ensure layer updates when data changes
             updateTriggers: {getPosition: this.props.data, getFillColor: this.props.color}
