@@ -112,13 +112,15 @@ function MapPageContent() {
         const selectedLayer = layerManager.find(layer => layer.name === selectedLayerName);
         if (!selectedLayer) return;
 
+        const pointCount = selectedLayer.data.length;
+
         setLayerManager(prevLayers =>
             prevLayers.map(layer =>
                 layer.name === selectedLayerName ? {
                     ...layer,
                     data: [...layer?.data, {
                         latitude: lat, longitude: lng,
-                        name: `${lng.toFixed(2)}, ${lat.toFixed(2)}`, status: 'new'
+                        name: `${selectedLayerName}-${pointCount}`, status: 'new'
                     }]
                 } : layer
             )
