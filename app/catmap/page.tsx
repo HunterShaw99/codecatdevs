@@ -225,6 +225,7 @@ function MapPageContent() {
                 'originName': row.name,
                 'originCoords': [row.longitude, row.latitude],
                 'searchedDistance': searchDistance,
+                'compareLayer': locationB,
                 'compareResults': getDistance(row, layerB)
             }))
 
@@ -369,7 +370,7 @@ function MapPageContent() {
             {/* Attribute Table */}
             <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
                 {isTableExpanded ?
-                    <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[50vw] max-h-[30vh]
+                    <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[70vw] max-h-[30vh]
                         overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
                         <div className="flex flex-row">
                             <button

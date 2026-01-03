@@ -39,6 +39,7 @@ export type SearchRing = {
   originName: string
   originCoords: [number, number]
   searchedDistance: number
+  compareLayer: string
   compareResults: Record<string, CompResults[]>
 }
 

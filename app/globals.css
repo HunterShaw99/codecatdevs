@@ -581,7 +581,7 @@ h1 {
 
 /* Table */
 table, th, td, tr {
-  @apply p-2 border border-stone-300;
+  @apply p-1 border border-stone-300;
 }
 
 /* Analysis Menu */
@@ -645,4 +645,8 @@ select:focus-visible {
 
 select::selection {
   @apply border-zinc-400;
+}
+
+.attribute-table {
+  @apply p-1 mb-2 mx-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs whitespace-nowrap;
 }

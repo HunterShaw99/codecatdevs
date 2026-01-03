@@ -22,6 +22,8 @@ const getPopUpContent = (props : any) => {
     const layerName = props.layer.constructor.name 
     const [name, lat, long] = getPopUpValues(props);
 
+    console.log(props.object);
+
     if (layerName === 'LabelledLayer') {
         return (
             <div>
@@ -33,65 +35,18 @@ const getPopUpContent = (props : any) => {
     else if (layerName === 'SearchRingLayer') {
         return (
             <div>
-            <p><span className="font-bold">Name:</span> {name}</p>
+            <p><span className="font-bold">Origin Point Name:</span> {name}</p>
             <p><span className="font-bold">Coordinates:</span> {lat.toFixed(3)}, {long.toFixed(3)}</p>
-            {props.object.compareResults.length > 0 ?
-                    <table>
-                        <thead>
-                            <tr>
-                                {Object.keys(props.object.compareResults[0]).filter(resKey => resKey !== 'coordinates').map((resKey) =>
-                                    <th>{resKey}</th>)}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {props.object.compareResults.map((result: any) =>
-                                <tr key={crypto.randomUUID()}>
-                                    {Object.keys(result).filter(resKey => resKey !== 'coordinates').map((resKey) =>
-                                        <td>
-                                            {typeof result[resKey] === 'number' ?
-                                                result[resKey].toFixed(2) :
-                                                result[resKey]
-                                            }</td>
-                                    )}
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                    : <p>No Results for selected search area.</p>}
+            <p><span className="font-bold">Search Distance:</span> {props.object.searchedDistance} miles</p>
+            <p><span className="font-bold">{props.object.compareLayer} Points Within Area:</span> {props.object.compareResults.length} </p>
             </div>
     ); 
     } else if (layerName === 'RouteLineLayer') {
         return (
             <div>
-                <p><span className="font-bold">Name:</span> {name}</p>
+                <p><span className="font-bold">Route Name:</span> {name}</p>
                 <p><span className="font-bold">Total Distance:</span> {(props.object.distance / 1606.34).toFixed(2)} miles</p> 
                 <p><span className="font-bold">Total Duration:</span> {Math.ceil((props.object.duration / 60))} minutes</p>
-                {props.object.legs.length > 0 ?
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Route Start Location</th>
-                                <th>Distance</th>
-                                <th>Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {props.object.legs.map((result: any, index: number) =>
-                                <tr key={crypto.randomUUID()}>
-                                        <td>
-                                            {props.object.points[index]}
-                                        </td>
-                                        <td>
-                                            {(result.distance / 1606.34).toFixed(2)} miles
-                                        </td>
-                                        <td>
-                                            {Math.ceil((result.duration / 60))} minutes
-                                        </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                    : null}
             </div>
         );
     }
