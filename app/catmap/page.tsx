@@ -20,19 +20,20 @@ import { PickingInfo } from '@deck.gl/core';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Separator } from "radix-ui";
-import { distance, point, points } from "@turf/turf";
+import { distance, point } from "@turf/turf";
 
 import { hexToRGB, randomHex } from '../utils/color';
 import { PopUpWindow } from "@components/map/popup/PopUp";
 import AttributeTable from "@components/map/table/AttributeTable";
 import { BASEMAP_KEYS, BASEMAPS, ROUTING_PREFERENCES } from './constants';
-import { LabelledLayer, SearchRingLayer, RouteLineLayer, measureLayer} from "@components/map/layers";
-import { BaseLayerData, CompResults, ScatterPoint, RouteLine } from "@components/map/utils/LayerTypes";
+import { LabelledLayer, SearchRingLayer, RouteLineLayer, measureLayer } from "@components/map/layers";
+import { BaseLayerData, CompResults, ScatterPoint } from "@components/map/utils/LayerTypes";
 import CodeCatLine from "../components/icons/CodeCatLine";
 import { LayerProvider, useLayerContext } from '../context/layerContext';
 import { LayerManagerWidget } from "@map/widgets/LayerManager";
+import { useWidgetManager, WidgetProvider } from "../context/widgetManager";
+import WidgetButton from "@components/WidgetButton";
 import CSVReader from "@map/widgets/csvReader";
-import { da } from "zod/locales";
 
 function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
@@ -45,14 +46,10 @@ function MapPageContent() {
     } as const;
 
     const deckRef = useRef<any>(null);
-    const [isUploadExpanded, setIsUploadExpanded] = useState(false);
     const [uploadedData, setUploadedData] = useState<any>(null);
-    const [isClicked, setIsClicked] = useState(false);
     const [isLegendExpanded, setIsLegendExpanded] = useState(false);
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
-    const [isBaseMapExpanded, setIsBaseMapExpanded] = useState(false);
     const [isTableExpanded, setIsTableExpanded] = useState(false);
-    const [toolboxOpen, setToolboxOpen] = useState(false)
     const [tableName, setTableName] = useState('Default')
 
     // layer state
@@ -64,7 +61,8 @@ function MapPageContent() {
         addNewLayer,
     } = useLayerContext();
 
-    const [layerManagerClicked, setLayerManagerClicked] = useState(false);
+    const { isExpanded } = useWidgetManager();
+
     const [popupData, setPopupData] = useState<PickingInfo<BaseLayerData>>()
 
     // search ring state
@@ -251,7 +249,7 @@ function MapPageContent() {
         const service = layer && layer?.data.length > 2 ? 'trip' : 'route';
 
         const url = `http://router.project-osrm.org/${service}/v1/driving/${coordinates}?annotations=${routePreference}&geometries=geojson&overview=full`;
-        
+
         fetch(url)
             .then((response) => {
                 if (!response.ok) {
@@ -260,16 +258,16 @@ function MapPageContent() {
 
                 return response.json()
             })
-            .then((data : any) => {
+            .then((data: any) => {
                 if (data) {
-                    const routeData =  { ...data[service === 'trip' ? 'trips' : 'routes'][0], points: pointNames }
-                        addNewLayer({
-                            name: `Route - ${layerName} (${routePreference})`,
-                            type: 'route-line',
-                            colors: { fill: randomHex() },
-                            data: [routeData],
-                            visible: true
-                        });
+                    const routeData = { ...data[service === 'trip' ? 'trips' : 'routes'][0], points: pointNames }
+                    addNewLayer({
+                        name: `Route - ${layerName} (${routePreference})`,
+                        type: 'route-line',
+                        colors: { fill: randomHex() },
+                        data: [routeData],
+                        visible: true
+                    });
                 }
             })
             .catch((error) => {
@@ -278,7 +276,7 @@ function MapPageContent() {
     }
 
     const handleCursorClick = (info: any) => {
-        if (isClicked) {
+        if (isExpanded('add-points')) {
             handleAddPointClick(info)
         } else if (mode === MeasureDistanceMode) {
             setPopupData(undefined)
@@ -409,276 +407,250 @@ function MapPageContent() {
 
             {/* Widgets Section */}
             <div className="pl-4 pt-4 pb-4 rounded-lg z-100 flex flex-col absolute top-[30%] left-0">
-                <div className="flex items-start relative">
-                    <button
-                        onClick={() => setLayerManagerClicked(!layerManagerClicked)}
-                        title="Layers"
-                        className={`widget-btn ${layerManagerClicked ? 'btn-expanded' : 'btn-collapsed'}`}>
-                        <LayersIcon className={'w-8 h-8'} />
-                    </button>
-                    <LayerManagerWidget
-                        isOpen={layerManagerClicked}
-                        onClose={() => setLayerManagerClicked(false)}
-                    />
-                </div>
-                <div className="flex items-start relative">
-                    <button
-                        onClick={() => setIsUploadExpanded(!isUploadExpanded)}
-                        title={"Upload Data"}
-                        className={`widget-btn ${isUploadExpanded ? 'btn-expanded' : 'btn-collapsed'}`}>
-                        <UploadIcon className={'w-8 h-8'} />
-                    </button>
-                    {isUploadExpanded && !isClicked && (
-                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                            <label className="text-stone-500 text-sm">Upload Locations:</label>
-                            <Separator.Root className="seperator-major"
-                                decorative />
-                            <div className="flex flex-row items-center">
-                                <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
-                                <select
-                                    value={selectedLayerName}
-                                    onChange={(e) => setSelectedLayerName(e.target.value)}
-                                    className="p-1 ml-1">
-                                    {layerManager.filter((layer: {
-                                        type: string;
-                                    }) => layer.type === 'labelled-scatter').map(layer => (
-                                        <option key={layer.name} value={layer.name}>
-                                            {layer.name}
-                                        </option>
-                                    ))}
-                                </select>
+                    <div className="flex items-start relative">
+                        <WidgetButton id={'layer-manager'} label={'Manage Layers'} iconType="layers" />
+                        <LayerManagerWidget
+                            isOpen={isExpanded('layer-manager')
+                            }
+                        />
+                    </div>
+                    <div className="flex items-start relative">
+                        <WidgetButton id={'upload-data'} label={"Upload Data"} iconType="upload" />
+                        {isExpanded('upload-data') && (
+                            <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                                <label className="text-stone-500 text-sm">Upload Locations:</label>
+                                <Separator.Root className="seperator-major"
+                                    decorative />
+                                <div className="flex flex-row items-center">
+                                    <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
+                                    <select
+                                        value={selectedLayerName}
+                                        onChange={(e) => setSelectedLayerName(e.target.value)}
+                                        className="p-1 ml-1">
+                                        {layerManager.filter((layer: {
+                                            type: string;
+                                        }) => layer.type === 'labelled-scatter').map(layer => (
+                                            <option key={layer.name} value={layer.name}>
+                                                {layer.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <CSVReader onUpload={setUploadedData} />
                             </div>
-                            <CSVReader onUpload={setUploadedData} />
-                        </div>
-                    )}
-                </div>
-                <div className="flex items-start relative">
-                    <button
-                        onClick={() => setIsClicked(!isClicked)}
-                        title={'Add Points'}
-                        className={`widget-btn ${isClicked ? 'btn-expanded' : 'btn-collapsed'}`}>
-                        <CursorArrowIcon className={'w-8 h-8'} />
-                    </button>
+                        )}
+                    </div>
+                    <div className="flex items-start relative">
+                        <WidgetButton id={'add-points'} label={'Add Points to Map'} iconType="click"/>
 
-                    {isClicked &&
-                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                            <label className="text-stone-500 text-sm">Add points:</label>
-                            <Separator.Root className="seperator-major"
-                                decorative />
-                            <div className="flex flex-row items-center">
-                                <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
-                                <select
-                                    value={selectedLayerName}
-                                    onChange={(e) => setSelectedLayerName(e.target.value)}
-                                    className="p-1 ml-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
-                                >
-                                    {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
-                                        <option key={layer.name} value={layer.name}>
-                                            {layer.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>}
-                </div>
+                        {isExpanded('add-points') &&
+                            <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                                <label className="text-stone-500 text-sm">Add points:</label>
+                                <Separator.Root className="seperator-major"
+                                    decorative />
+                                <div className="flex flex-row items-center">
+                                    <p className="p-2 text-stone-500 font-bold text-xs">Select Layer:</p>
+                                    <select
+                                        value={selectedLayerName}
+                                        onChange={(e) => setSelectedLayerName(e.target.value)}
+                                        className="p-1 ml-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
+                                    >
+                                        {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
+                                            <option key={layer.name} value={layer.name}>
+                                                {layer.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>}
+                    </div>
 
-                {/* Analysis Section */}
-                <div className="button-menu-container">
-                    <button
-                        onClick={() => setToolboxOpen(!toolboxOpen)}
-                        title={'Analysis Tools'}
-                        className={`widget-btn ${toolboxOpen ? 'btn-expanded' : 'btn-collapsed'}`}>
-                        <BackpackIcon className={'w-8 h-8'} />
-                    </button>
+                    {/* Analysis Section */}
+                    <div className="button-menu-container">
+                        <WidgetButton id={'analysis'} label={'Analysis Tools'} iconType="analysis"/>
 
-                    {toolboxOpen &&
-                        (<div className={`menu-popover open`}>
-                            <button
-                                onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
-                                title={'Measure Tool'}
-                                className={`row-span-1 menu-popover-btn ${mode === MeasureDistanceMode ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
-                                <RulerHorizontalIcon className={'w-6 h-6'} />
-                            </button>
+                        {isExpanded('analysis') &&
+                            (<div className={`menu-popover open`}>
+                                <button
+                                    onClick={() => mode === ViewMode ? setMode(() => MeasureDistanceMode) : setMode(() => ViewMode)}
+                                    title={'Measure Tool'}
+                                    className={`row-span-1 menu-popover-btn ${mode === MeasureDistanceMode ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
+                                    <RulerHorizontalIcon className={'w-6 h-6'} />
+                                </button>
 
-                            <button
-                                onClick={() => setSearchRingSelected(!searchRingSelected)}
-                                title={'Search Area'}
-                                className={`row-span-1 menu-popover-btn ${searchRingSelected ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
-                                <TargetIcon className={'w-6 h-6'} />
-                            </button>
-                            {searchRingSelected && (
-                                <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
-                                    <label className="ml-2 text-sm text-stone-500">Search Area Tool:</label>
-                                    <Separator.Root className="seperator-major"
-                                        decorative />
-                                    <div className="text-stone-500 overflow-y-auto max-h-112 p-2">
-                                        <div className="flex flex-row items-center">
-                                            <p className="font-bold text-xs">Input Layer:</p>
-                                            <select
-                                                value={searchLocationA}
-                                                onChange={(e) => setSearchLocationA(e.target.value)}
-                                                className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
-                                            >
-                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
-                                                    undefined
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <Separator.Root className="seperator-minor"
+                                <button
+                                    onClick={() => setSearchRingSelected(!searchRingSelected)}
+                                    title={'Search Area'}
+                                    className={`row-span-1 menu-popover-btn ${searchRingSelected ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
+                                    <TargetIcon className={'w-6 h-6'} />
+                                </button>
+                                {searchRingSelected && (
+                                    <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
+                                        <label className="ml-2 text-sm text-stone-500">Search Area Tool:</label>
+                                        <Separator.Root className="seperator-major"
                                             decorative />
-                                        <div className="flex flex-row items-center">
-                                            <p className="font-bold text-xs">Comparison Layer:</p>
-                                            <select
-                                                value={searchLocationB}
-                                                onChange={(e) => setSearchLocationB(e.target.value)}
-                                                className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
-                                            >
-                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
-                                                    undefined
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <Separator.Root className="seperator-minor"
-                                            decorative />
-                                        <div className="flex flex-row items-center">
-                                            <p className="font-bold text-xs">Distance (miles):</p>
-                                            <input
-                                                type={'number'}
-                                                className={"p-2 ml-1 border border-zinc-500 text-xs text-stone-500 rounded-lg h-6 w-16"}
-                                                id={'sr-distance-input'}
-                                                min={"1"}
-                                                max={"10"}
-                                                step={"0.2"}
-                                                value={searchDistance}
-                                                onChange={(e) => {
-                                                    setSearchDistance(Number(e.target.value));
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <button
-                                                onClick={() => runSearchRingAnalysis(searchLocationA, searchLocationB)}
-                                                title={isRingDisabled ? 'Select distinct layers to run analysis' : 'Run Area Analysis'}
-                                                disabled={isRingDisabled}
-                                                className={`mt-2 py-2 px-4 text-sm rounded-md font-semibold ${isRingDisabled ?
-                                                    ' text-red-700 bg-red hover:bg-red-400' :
-                                                    ' text-peach-5 bg-peach-8 hover:bg-peach-7'}`}>
-                                                Run Analysis
-                                            </button>
+                                        <div className="text-stone-500 overflow-y-auto max-h-112 p-2">
+                                            <div className="flex flex-row items-center">
+                                                <p className="font-bold text-xs">Input Layer:</p>
+                                                <select
+                                                    value={searchLocationA}
+                                                    onChange={(e) => setSearchLocationA(e.target.value)}
+                                                    className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
+                                                >
+                                                    {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option> :
+                                                        undefined
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <Separator.Root className="seperator-minor"
+                                                decorative />
+                                            <div className="flex flex-row items-center">
+                                                <p className="font-bold text-xs">Comparison Layer:</p>
+                                                <select
+                                                    value={searchLocationB}
+                                                    onChange={(e) => setSearchLocationB(e.target.value)}
+                                                    className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
+                                                >
+                                                    {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option> :
+                                                        undefined
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <Separator.Root className="seperator-minor"
+                                                decorative />
+                                            <div className="flex flex-row items-center">
+                                                <p className="font-bold text-xs">Distance (miles):</p>
+                                                <input
+                                                    type={'number'}
+                                                    className={"p-2 ml-1 border border-zinc-500 text-xs text-stone-500 rounded-lg h-6 w-16"}
+                                                    id={'sr-distance-input'}
+                                                    min={"1"}
+                                                    max={"10"}
+                                                    step={"0.2"}
+                                                    value={searchDistance}
+                                                    onChange={(e) => {
+                                                        setSearchDistance(Number(e.target.value));
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="flex justify-end">
+                                                <button
+                                                    onClick={() => runSearchRingAnalysis(searchLocationA, searchLocationB)}
+                                                    title={isRingDisabled ? 'Select distinct layers to run analysis' : 'Run Area Analysis'}
+                                                    disabled={isRingDisabled}
+                                                    className={`mt-2 py-2 px-4 text-sm rounded-md font-semibold ${isRingDisabled ?
+                                                        ' text-red-700 bg-red hover:bg-red-400' :
+                                                        ' text-peach-5 bg-peach-8 hover:bg-peach-7'}`}>
+                                                    Run Analysis
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                            <button
-                                onClick={() => setRoutingOpen(!routingOpen)}
-                                title={'Route Planner'}
-                                className={`row-span-1 menu-popover-btn ${routingOpen ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
-                                <Share1Icon className={'w-6 h-6'} />
-                            </button>
-                            {routingOpen && (
-                                <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
-                                    <label className="ml-2 text-sm text-stone-500">Route Points Tool:</label>
-                                    <Separator.Root className="seperator-major"
-                                        decorative />
-                                    <div className="text-stone-500 overflow-y-auto max-h-112 p-2">
-                                        <div className="flex flex-row items-center">
-                                            <p className="font-bold text-xs">Input Layer:</p>
-                                            <select
-                                                value={routingLayer}
-                                                onChange={(e) => setRoutingLayer(e.target.value)}
-                                                className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
-                                            >
-                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
-                                                    undefined
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <Separator.Root className="seperator-minor"
+                                )}
+                                <button
+                                    onClick={() => setRoutingOpen(!routingOpen)}
+                                    title={'Route Planner'}
+                                    className={`row-span-1 menu-popover-btn ${routingOpen ? 'menu-popover-btn-expanded' : 'menu-popover-btn-collapsed'}`}>
+                                    <Share1Icon className={'w-6 h-6'} />
+                                </button>
+                                {routingOpen && (
+                                    <div className="absolute left-full p-2 bg-white border rounded-lg shadow-md shrink-0">
+                                        <label className="ml-2 text-sm text-stone-500">Route Points Tool:</label>
+                                        <Separator.Root className="seperator-major"
                                             decorative />
-                                        <div className="flex flex-row items-center">
-                                            <RadioGroup.Root
-                                                className="RadioGroupRoot"
-                                                value={routePreference}
-                                                onValueChange={(value) => setRoutingPreference(value as 'distance' | 'duration')}
-                                                aria-label="Routing Preference"
-                                            >
-                                                {ROUTING_PREFERENCES.map((key) => (
-                                                    <div key={key} className="flex items-center">
-                                                        <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
-                                                            <RadioGroup.Indicator className="RadioGroupIndicator" />
-                                                        </RadioGroup.Item>
-                                                        <label className="radio-label" htmlFor={`${key}`}>
-                                                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                                                        </label>
-                                                    </div>
-                                                ))}
-                                            </RadioGroup.Root>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <button
-                                                onClick={() => routePoints(routingLayer)}
-                                                title={isRoutingDisabled ? 'Select a layer with at least 2 points' : 'Route Selected Points'}
-                                                disabled={isRoutingDisabled}
-                                                className={`mt-2 py-2 px-4 text-sm rounded-md font-semibold ${isRoutingDisabled ?
-                                                    ' text-red-700 bg-red hover:bg-red-400' :
-                                                    ' text-peach-5 bg-peach-8 hover:bg-peach-7'}`}>
-                                                Route Points
-                                            </button>
+                                        <div className="text-stone-500 overflow-y-auto max-h-112 p-2">
+                                            <div className="flex flex-row items-center">
+                                                <p className="font-bold text-xs">Input Layer:</p>
+                                                <select
+                                                    value={routingLayer}
+                                                    onChange={(e) => setRoutingLayer(e.target.value)}
+                                                    className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
+                                                >
+                                                    {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option> :
+                                                        undefined
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <Separator.Root className="seperator-minor"
+                                                decorative />
+                                            <div className="flex flex-row items-center">
+                                                <RadioGroup.Root
+                                                    className="RadioGroupRoot"
+                                                    value={routePreference}
+                                                    onValueChange={(value) => setRoutingPreference(value as 'distance' | 'duration')}
+                                                    aria-label="Routing Preference"
+                                                >
+                                                    {ROUTING_PREFERENCES.map((key) => (
+                                                        <div key={key} className="flex items-center">
+                                                            <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
+                                                                <RadioGroup.Indicator className="RadioGroupIndicator" />
+                                                            </RadioGroup.Item>
+                                                            <label className="radio-label" htmlFor={`${key}`}>
+                                                                {key.charAt(0).toUpperCase() + key.slice(1)}
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup.Root>
+                                            </div>
+                                            <div className="flex justify-end">
+                                                <button
+                                                    onClick={() => routePoints(routingLayer)}
+                                                    title={isRoutingDisabled ? 'Select a layer with at least 2 points' : 'Route Selected Points'}
+                                                    disabled={isRoutingDisabled}
+                                                    className={`mt-2 py-2 px-4 text-sm rounded-md font-semibold ${isRoutingDisabled ?
+                                                        ' text-red-700 bg-red hover:bg-red-400' :
+                                                        ' text-peach-5 bg-peach-8 hover:bg-peach-7'}`}>
+                                                    Route Points
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>)
-                    }
-                </div>
+                                )}
+                            </div>)
+                        }
+                    </div>
 
-                <div className="flex items-start relative">
-                    <button
-                        onClick={() => setIsBaseMapExpanded(!isBaseMapExpanded)}
-                        title={'Preferences'}
-                        className={`widget-btn ${isBaseMapExpanded ? 'btn-expanded' : 'btn-collapsed'}`}
-                    >
-                        <MixerHorizontalIcon className={'w-8 h-8 rounded-full'} />
-                    </button>
+                    <div className="flex items-start relative">
+                        <WidgetButton id={'settings'} label={'Basemap Selection'} iconType="settings"/>
 
-                    {isBaseMapExpanded && (
-                        <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
-                            <h3 className="text-sm text-stone-500">
-                                Basemap Selection
-                            </h3>
-                            <Separator.Root className="seperator-major"
-                                decorative />
-                            <form>
-                                <RadioGroup.Root
-                                    className="RadioGroupRoot"
-                                    value={baseMap}
-                                    onValueChange={(value) => setBaseMap(value as 'light' | 'dark' | 'standard' | 'hybrid')}
-                                    aria-label="Basemap Selection"
-                                >
-                                    {BASEMAP_KEYS.map((key) => (
-                                        <div key={key} style={{ display: "flex", alignItems: "center" }}>
-                                            <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
-                                                <RadioGroup.Indicator className="RadioGroupIndicator" />
-                                            </RadioGroup.Item>
-                                            <label className="radio-label" htmlFor={`${key}`}>
-                                                {key.charAt(0).toUpperCase() + key.slice(1)}
-                                            </label>
-                                        </div>
-                                    ))}
-                                </RadioGroup.Root>
-                            </form>
-                        </div>
-                    )}
-                </div>
+                        {isExpanded('settings') && (
+                            <div className="absolute left-full ml-2 p-4 bg-white border rounded-lg shadow-md shrink-0">
+                                <h3 className="text-sm text-stone-500">
+                                    Basemap Selection
+                                </h3>
+                                <Separator.Root className="seperator-major"
+                                    decorative />
+                                <form>
+                                    <RadioGroup.Root
+                                        className="RadioGroupRoot"
+                                        value={baseMap}
+                                        onValueChange={(value) => setBaseMap(value as 'light' | 'dark' | 'standard' | 'hybrid')}
+                                        aria-label="Basemap Selection"
+                                    >
+                                        {BASEMAP_KEYS.map((key) => (
+                                            <div key={key} style={{ display: "flex", alignItems: "center" }}>
+                                                <RadioGroup.Item className="RadioGroupItem" value={key} id={`${key}`}>
+                                                    <RadioGroup.Indicator className="RadioGroupIndicator" />
+                                                </RadioGroup.Item>
+                                                <label className="radio-label" htmlFor={`${key}`}>
+                                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </RadioGroup.Root>
+                                </form>
+                            </div>
+                        )}
+                    </div>
             </div>
 
             <DeckGL
@@ -710,7 +682,9 @@ function MapPageContent() {
 export default function MapPage() {
     return (
         <LayerProvider>
-            <MapPageContent />
+            <WidgetProvider>
+                <MapPageContent />
+            </WidgetProvider>
         </LayerProvider>
     );
 }

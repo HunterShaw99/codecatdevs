@@ -7,10 +7,9 @@ import {randomHex} from "@/app/utils/color";
 
 interface LayerManagerWidgetProps {
     isOpen: boolean;
-    onClose: () => void;
 }
 
-export function LayerManagerWidget({isOpen, onClose}: LayerManagerWidgetProps) {
+export function LayerManagerWidget({isOpen}: LayerManagerWidgetProps) {
     const {
         layerManager,
         selectedLayerName,
