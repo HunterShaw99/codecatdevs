@@ -25,7 +25,7 @@ import { distance, point } from "@turf/turf";
 import { hexToRGB, randomHex } from '../utils/color';
 import { PopUpWindow } from "@components/map/popup/PopUp";
 import AttributeTable from "@components/map/table/AttributeTable";
-import { BASEMAP_KEYS, BASEMAPS, ROUTING_PREFERENCES } from './constants';
+import { BASEMAP_KEYS, BASEMAPS, ROUTING_PREFERENCES } from '../constants';
 import { LabelledLayer, SearchRingLayer, RouteLineLayer, measureLayer } from "@components/map/layers";
 import { BaseLayerData, CompResults, ScatterPoint } from "@components/map/utils/LayerTypes";
 import CodeCatLine from "../components/icons/CodeCatLine";
@@ -34,6 +34,7 @@ import { LayerManagerWidget } from "@map/widgets/LayerManager";
 import { useWidgetManager, WidgetProvider } from "../context/widgetManager";
 import WidgetButton from "@components/WidgetButton";
 import CSVReader from "@map/widgets/csvReader";
+import { downloadCsv } from "../helpers";
 
 function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
@@ -290,56 +291,9 @@ function MapPageContent() {
     const handleDownloadClick = () => {
         const layer = layerManager.find(layer => layer.name === tableName);
         const data = layer?.data || [];
+        const type = layer?.type || 'labelled-scatter'
 
-        let headers = Object.keys(data[0]).join(",");
-
-        if (layer?.type === 'search-ring') {
-            headers = headers.replace('compareResults', 'compareResultsName,compareResultsCoordinates,compareResultsDistance');
-        }
-
-        const rows = data.map(obj =>
-            Object.entries(obj).map(([key, val]) => {
-                if (key === 'compareResults' && Array.isArray(val)) {
-                    if (val.length > 0) {
-                        let first = true;
-                        const compResult = val.map((compVal) => {
-                            if (first) {
-                                first = false;
-                                return Object.values(compVal).map(
-                                    v => String(v).replace(/,/g, ' ')).join(",")
-                            }
-                            else {
-                                return `\n${obj['originName'].replace(/,/, ' ')},${obj['originCoords'].join(';')},${obj['searchedDistance']},${Object.values(compVal).map(v => String(v).replace(/,/g, ' ')).join(",")}`
-                            }
-                        })
-                        return compResult.join(",");
-                    }
-                    else {
-                        return ",,,";
-                    }
-                }
-                if (key === 'originCoords' && Array.isArray(val)) {
-                    return val.join(";");
-                }
-                else {
-                    return String(val).replace(/,/g, ''); // remove commas to avoid CSV issues
-                }
-            }).join(",").trim()
-        ).join("\n");
-
-        const csvContent = `${headers}\n${rows}`;
-
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-
-        link.setAttribute("href", url);
-        link.setAttribute("download", "exported_data.csv");
-        link.style.visibility = "hidden";
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        downloadCsv(data, type)
     };
 
     return (
