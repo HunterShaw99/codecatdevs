@@ -21,8 +21,8 @@ export const INITIAL_VIEW_STATE = {
 export const ROUTING_PREFERENCES = ['distance', 'duration'];
 
 export const HEADERS_MAPPING: Record<string,string[]> = {
-  'labelled-scatter' : ['Name','Latitude','Longitude'],
+  'labelled-scatter' : ['Name','Latitude','Longitude','Status'],
   'search-ring': ['Input Name','Input Latitude','Input Longitude','Search Distance'
-      ,'Search Results - Name','Search Results - Coordinates','Search Results - Distance'],
+      ,'Search Results - Layer','Search Results - Name','Search Results - Coordinates','Search Results - Distance'],
   'route-line': ['Route Start Name', 'Route End Name', 'Route Segment Distance', 'Route Segment Duration']
 }

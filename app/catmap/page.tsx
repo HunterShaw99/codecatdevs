@@ -4,17 +4,13 @@ import DeckGL from "@deck.gl/react";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MeasureDistanceMode, ViewMode } from '@deck.gl-community/editable-layers';
 import {
-    BackpackIcon,
-    CursorArrowIcon,
     DownloadIcon,
     LayersIcon,
     ListBulletIcon,
-    MixerHorizontalIcon,
     RulerHorizontalIcon,
     Share1Icon,
     TableIcon,
     TargetIcon,
-    UploadIcon
 } from "@radix-ui/react-icons"
 import { PickingInfo } from '@deck.gl/core';
 import * as RadioGroup from '@radix-ui/react-radio-group';
@@ -65,7 +61,7 @@ function MapPageContent() {
     const { isExpanded } = useWidgetManager();
 
     const [popupData, setPopupData] = useState<PickingInfo<BaseLayerData>>()
-    const [layersOpen, setLayersOpen] = useState(true)
+    const [layersOpen, setLayersOpen] = useState(false)
 
     // search ring state
     const [searchRingSelected, setSearchRingSelected] = useState(false)
@@ -160,12 +156,13 @@ function MapPageContent() {
             <div className="p-2 text-left text-stone-500 bg-white border rounded-lg">
                 <h3 className="font-bold text-m mb-2 underline">Legend</h3>
                 <ul className="text-xs space-y-1">
-                    {legendItems.map((layer: any) => (
+                    {legendItems.length >0 ? legendItems.map((layer: any) => (
                         <li key={layer.name} className="mb-1 flex items-center">
                             {getLegendColor(hexToRGB(layer.colors.fill))}
                             <span>{layer.name}</span>
                         </li>
-                    ))}
+                    )):
+                    <span className='italic'>No Layers currently visible</span>}
                 </ul>
             </div>
         );

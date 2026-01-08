@@ -87,7 +87,7 @@ export function LayerManagerWidget({isOpen}: LayerManagerWidgetProps) {
                 </div>
                 <Separator.Root className="seperator-major" decorative/>
                 <div className="mt-2 text-stone-500 text-sm p-2">
-                    {layerManager.map(layer => (
+                    {layerManager.length > 0 ? layerManager.map(layer => (
                         <div key={layer.id}
                              className="flex items-center justify-between">
                             <span className="mr-2 w-35">{layer.name}</span>
@@ -135,7 +135,8 @@ export function LayerManagerWidget({isOpen}: LayerManagerWidgetProps) {
                                 <TrashIcon className="w-full h-full"/>
                             </button>
                         </div>
-                    ))}
+                    )):
+                    <span className='italic'>No layers currently added. Click "+Layer" button above to add layer.</span>}
                 </div>
             </div>
         </Draggable>

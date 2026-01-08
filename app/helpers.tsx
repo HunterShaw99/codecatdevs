@@ -22,7 +22,7 @@ export const downloadCsv = (data: any[], type: string) => {
                                     v => String(v).replace(/,/g, ' ')).join(",")
                             }
                             else {
-                                return `\n${obj['originName'].replace(/,/, ' ')},${obj['originCoords'].join(';')},${obj['searchedDistance']},${Object.values(compVal).map(v => String(v).replace(/,/g, ' ')).join(",")}`
+                                return `\n${obj['originName'].replace(/,/, ' ')},${obj['originCoords'].join(',')},${obj['searchedDistance']},${obj['compareLayer']},${Object.values(compVal).map(v => String(v).replace(/,/g, ' ')).join(",")}`
                             }
                         })
                         return compResult.join(",");
@@ -32,7 +32,7 @@ export const downloadCsv = (data: any[], type: string) => {
                     }
                 }
                 if (key === 'originCoords' && Array.isArray(val)) {
-                    return val.join(";");
+                    return val.join(",");
                 }
                 else {
                     return String(val).replace(/,/g, ''); // remove commas to avoid CSV issues
