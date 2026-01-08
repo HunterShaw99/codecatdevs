@@ -59,3 +59,13 @@ export const downloadCsv = (data: any[], type: string) => {
         document.body.removeChild(link);
 
 }
+
+export const validateName = (newName: string, layers: string[]) => {
+    if (layers.includes(newName)) {
+        const occurrences = layers.filter(layer => layer.startsWith(newName)).length
+        return `${newName} (${occurrences})`
+    }
+        else {
+            return newName
+        }
+}

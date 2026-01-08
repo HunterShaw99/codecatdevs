@@ -30,7 +30,7 @@ import { LayerManagerWidget } from "@map/widgets/LayerManager";
 import { useWidgetManager, WidgetProvider } from "../context/widgetManager";
 import WidgetButton from "@components/WidgetButton";
 import CSVReader from "@map/widgets/csvReader";
-import { downloadCsv } from "../helpers";
+import { downloadCsv, validateName } from "../helpers";
 
 function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
@@ -158,13 +158,13 @@ function MapPageContent() {
             <div className="p-2 text-left text-stone-500 bg-white border rounded-lg">
                 <h3 className="font-bold text-m mb-2 underline">Legend</h3>
                 <ul className="text-xs space-y-1">
-                    {legendItems.length >0 ? legendItems.map((layer: any) => (
+                    {legendItems.length > 0 ? legendItems.map((layer: any) => (
                         <li key={layer.name} className="mb-1 flex items-center">
                             {getLegendColor(hexToRGB(layer.colors.fill))}
                             <span>{layer.name}</span>
                         </li>
-                    )):
-                    <span className='italic'>No Layers currently visible</span>}
+                    )) :
+                        <span className='italic'>No Layers currently visible</span>}
                 </ul>
             </div>
         );
@@ -230,7 +230,7 @@ function MapPageContent() {
             }))
 
         addNewLayer({
-            name: `${locationA}-${locationB} ${searchDistance} mile`,
+            name: validateName(`${locationA}-${locationB} ${searchDistance} mile`, layerManager.map(layer => layer.name)),
             type: 'search-ring',
             colors: { fill: randomHex() },
             data: results,
@@ -272,7 +272,7 @@ function MapPageContent() {
                 if (data) {
                     const routeData = { ...data[service === 'trip' ? 'trips' : 'routes'][0], points: pointNames }
                     addNewLayer({
-                        name: `Route - ${layerName} (${routePreference})`,
+                        name: validateName(`Route - ${layerName} (${routePreference})`, layerManager.map(layer => layer.name)),
                         type: 'route-line',
                         colors: { fill: randomHex() },
                         data: [routeData],
@@ -375,8 +375,8 @@ function MapPageContent() {
                         className={`widget-btn ${layersOpen ? 'btn-expanded' : 'btn-collapsed'}`}
                         title={'Layer Manager'}
                         onClick={() => setLayersOpen(!layersOpen)}
-                        >
-                        <LayersIcon className={'w-8 h-8'}/>
+                    >
+                        <LayersIcon className={'w-8 h-8'} />
                     </button>
                     <LayerManagerWidget
                         isOpen={layersOpen
@@ -545,14 +545,16 @@ function MapPageContent() {
                                                 onChange={(e) => setRoutingLayer(e.target.value)}
                                                 className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
                                             >
-                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
+                                                {layerManager.filter(layer => (layer.type === 'labelled-scatter')).length > 0
+                                                    ? layerManager.filter(layer => (layer.type === 'labelled-scatter')).map(layer =>
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option>
+                                                    )
+                                                    :
                                                     <option>
-                                                    No valid layer(s)
-                                                    </option>
-                                                ))}
+                                                        No valid layer(s)
+                                                    </option>}
                                             </select>
                                         </div>
                                         <Separator.Root className="seperator-minor"
@@ -564,14 +566,18 @@ function MapPageContent() {
                                                 onChange={(e) => setRoutingStart(e.target.value)}
                                                 className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
                                             >
-                                                {layerManager.map(layer => (layer.name === routingLayer && layer.data.length > 0 ?
-                                                    layer.data.map(point => 
-                                                    <option key={point.name} value={point.name}>
-                                                        {point.name}
-                                                    </option>) :
-                                                    <option>
-                                                    No data
-                                                    </option>
+                                                {layerManager.map(layer => (layer.name === routingLayer ?
+                                                    layer.data.length > 0 ?
+                                                        layer.data.map(point =>
+                                                            <option key={point.name} value={point.name}>
+                                                                {point.name}
+                                                            </option>
+                                                        ) :
+                                                        <option>
+                                                            No data
+                                                        </option>
+                                                    :
+                                                    undefined
                                                 ))}
                                             </select>
                                         </div>
