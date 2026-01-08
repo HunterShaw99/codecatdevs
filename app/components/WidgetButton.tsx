@@ -3,7 +3,6 @@ import { useWidgetManager } from '@/app/context/widgetManager';
 import {
     BackpackIcon,
     CursorArrowIcon,
-    LayersIcon,
     MixerHorizontalIcon,
     RulerHorizontalIcon,
     Share1Icon,
@@ -14,7 +13,6 @@ import {
 const ICON_MAPPING : Record<string, any> = {
     analysis: BackpackIcon,
     click: CursorArrowIcon,
-    layers: LayersIcon,
     settings: MixerHorizontalIcon,
     measure: RulerHorizontalIcon,
     route: Share1Icon,
