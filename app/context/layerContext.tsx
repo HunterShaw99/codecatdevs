@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import {BaseLayerData} from "@map/utils/LayerTypes";
 import {randomHex} from "@/app/utils/color";
 
@@ -41,6 +41,7 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     visible: true,
     data: []
   }]);
+
   const [selectedLayerName, setSelectedLayerName] = useState('Default');
 
   const layerMap = useMemo(() => {
@@ -54,15 +55,21 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
   }, [layerMap]);
 
   const addNewLayer = useCallback((newLayer: any) => {
-    setLayerManager(prevLayers => [...prevLayers, {
-      id: generateLayerId(),
+    const id = generateLayerId();
+    const created = {
+      id,
       name: newLayer.name,
       type: newLayer.type || 'labelled-scatter',
       colors: { fill: newLayer.colors?.fill ?? randomHex() },
       data: newLayer.data || [],
       visible: true,
       layer: newLayer.layer || undefined
-    }]);
+    } as BaseLayerData;
+
+    setLayerManager(prevLayers => [...prevLayers, created]);
+
+    // Make the newly added layer the selected layer if the current selection is invalid
+    setSelectedLayerName(created.name);
   }, []);
 
   const toggleLayerVisibility = useCallback((layerId: string) => {
@@ -118,6 +125,18 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateLayerColorDebounced = useMemo(() => debounce(updateLayerColor, 300), [updateLayerColor, debounce]);
   const updateLayerOpacity = useMemo(() => debounce(updateLayerColor, 10), [updateLayerColor, debounce]);
+
+  // Keep selectedLayerName in-sync with available layers: fallback to first existing layer when needed
+  useEffect(() => {
+    const exists = layerManager.some(l => l.name === selectedLayerName);
+    if (!exists) {
+      if (layerManager.length > 0) {
+        setSelectedLayerName(layerManager[0].name);
+      } else {
+        setSelectedLayerName('');
+      }
+    }
+  }, [layerManager, selectedLayerName]);
 
   const value = useMemo(() => ({
     layerManager,

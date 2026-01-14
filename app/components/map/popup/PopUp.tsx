@@ -22,8 +22,6 @@ const getPopUpContent = (props : any) => {
     const layerName = props.layer.constructor.name 
     const [name, lat, long] = getPopUpValues(props);
 
-    console.log(props.object);
-
     if (layerName === 'LabelledLayer') {
         return (
             <div>

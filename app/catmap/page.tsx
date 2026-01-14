@@ -47,7 +47,6 @@ function MapPageContent() {
     const [isLegendExpanded, setIsLegendExpanded] = useState(false);
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
     const [isTableExpanded, setIsTableExpanded] = useState(false);
-    const [tableName, setTableName] = useState('Default')
 
     // layer state
     const {
@@ -96,6 +95,14 @@ function MapPageContent() {
             }
         }
     }, [routingLayer, layerManager]);
+
+    useMemo(() => {
+        const layer = layerManager.find(layer => layer.name === selectedLayerName);
+        if (layer && layer.type === 'labelled-scatter') {
+            setRoutingLayer(selectedLayerName)
+            setSearchLocationA(selectedLayerName)
+        } 
+    }, [selectedLayerName])
 
     // meaurement state
     const [mode, setMode] = useState<any>(() => ViewMode);
@@ -298,7 +305,7 @@ function MapPageContent() {
     };
 
     const handleDownloadClick = () => {
-        const layer = layerManager.find(layer => layer.name === tableName);
+        const layer = layerManager.find(layer => layer.name === selectedLayerName);
         const data = layer?.data || [];
         const type = layer?.type || 'labelled-scatter'
 
@@ -340,8 +347,8 @@ function MapPageContent() {
                             ><TableIcon className={'w-6 h-6'} />
                             </button>
                             <select
-                                value={tableName}
-                                onChange={(e) => setTableName(e.target.value)}
+                                value={selectedLayerName}
+                                onChange={(e) => setSelectedLayerName(e.target.value)}
                                 className="p-1 m-2 rounded-lg border border-zinc-500 text-stone-500 bg-white"
                             >
                                 {layerManager.map(layer => (
@@ -356,7 +363,7 @@ function MapPageContent() {
                                 <DownloadIcon className={'w-6 h-6'} />
                             </button>
                         </div>
-                        <AttributeTable layer={layerManager.filter(layer => layer.name === tableName)} />
+                        <AttributeTable layer={layerManager.filter(layer => layer.name === selectedLayerName)} />
                     </div>
                     :
                     <button
