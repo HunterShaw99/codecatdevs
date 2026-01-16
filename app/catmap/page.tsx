@@ -341,7 +341,7 @@ function MapPageContent() {
             <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
                 {isTableExpanded ?
                     <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[70vw] max-h-[30vh]
-                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
+                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-base">
                         <div className="flex flex-row">
                             <button
                                 onClick={() => setIsTableExpanded(!isTableExpanded)}
@@ -353,11 +353,16 @@ function MapPageContent() {
                                 onChange={(e) => setSelectedLayerName(e.target.value)}
                                 className="p-1 m-2 rounded-lg border border-zinc-500 text-stone-500 bg-white"
                             >
-                                {layerManager.map(layer => (
-                                    <option key={layer.name} value={layer.name}>
-                                        {layer.name}
+                                {layerManager.length > 0 ?
+                                    layerManager.map(layer => (
+                                        <option key={layer.name} value={layer.name}>
+                                            {layer.name}
+                                        </option>))
+                                    :
+                                    <option>
+                                        No valid layer(s)
                                     </option>
-                                ))}
+                                }
                             </select>
                             <button
                                 onClick={handleDownloadClick}
@@ -409,13 +414,19 @@ function MapPageContent() {
                                     value={selectedLayerName}
                                     onChange={(e) => setSelectedLayerName(e.target.value)}
                                     className="p-1 ml-1">
-                                    {layerManager.filter((layer: {
-                                        type: string;
-                                    }) => layer.type === 'labelled-scatter').map(layer => (
-                                        <option key={layer.name} value={layer.name}>
-                                            {layer.name}
+                                    {layerManager.length > 0 ?
+                                        layerManager.filter((layer: {
+                                            type: string;
+                                        }) => layer.type === 'labelled-scatter').map(layer => (
+                                            <option key={layer.name} value={layer.name}>
+                                                {layer.name}
+                                            </option>
+                                        ))
+                                        :
+                                        <option>
+                                            No valid layer(s)
                                         </option>
-                                    ))}
+                                    }
                                 </select>
                             </div>
                             <CSVReader onUpload={setUploadedData} />
@@ -437,11 +448,16 @@ function MapPageContent() {
                                     onChange={(e) => setSelectedLayerName(e.target.value)}
                                     className="p-1 ml-1 rounded-lg border border-zinc-500 text-stone-500 text-sm"
                                 >
-                                    {layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
-                                        <option key={layer.name} value={layer.name}>
-                                            {layer.name}
-                                        </option>
-                                    ))}
+                                    {layerManager.length > 0 ?
+                                        layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
+                                            <option key={layer.name} value={layer.name}>
+                                                {layer.name}
+                                            </option>
+                                        ))
+                                        :
+                                        <option>
+                                            No valid layer(s)
+                                        </option>}
                                 </select>
                             </div>
                         </div>}
@@ -479,12 +495,16 @@ function MapPageContent() {
                                                 onChange={(e) => setSearchLocationA(e.target.value)}
                                                 className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
                                             >
-                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
-                                                    undefined
-                                                ))}
+                                                {layerManager.filter(layer => (layer.type === 'labelled-scatter')).length > 0
+                                                    ? layerManager.filter(layer => (layer.type === 'labelled-scatter')).map(layer =>
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option>
+                                                    )
+                                                    :
+                                                    <option>
+                                                        No valid layer(s)
+                                                    </option>}
                                             </select>
                                         </div>
                                         <Separator.Root className="seperator-minor"
@@ -496,12 +516,16 @@ function MapPageContent() {
                                                 onChange={(e) => setSearchLocationB(e.target.value)}
                                                 className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
                                             >
-                                                {layerManager.map(layer => (layer.type === 'labelled-scatter' ?
-                                                    <option key={layer.name} value={layer.name}>
-                                                        {layer.name}
-                                                    </option> :
-                                                    undefined
-                                                ))}
+                                                {layerManager.filter(layer => (layer.type === 'labelled-scatter')).length > 0
+                                                    ? layerManager.filter(layer => (layer.type === 'labelled-scatter')).map(layer =>
+                                                        <option key={layer.name} value={layer.name}>
+                                                            {layer.name}
+                                                        </option>
+                                                    )
+                                                    :
+                                                    <option>
+                                                        No valid layer(s)
+                                                    </option>}
                                             </select>
                                         </div>
                                         <Separator.Root className="seperator-minor"
@@ -575,19 +599,21 @@ function MapPageContent() {
                                                 onChange={(e) => setRoutingStart(e.target.value)}
                                                 className="p-1 m-1 rounded-lg border border-zinc-500 text-stone-500 text-xs"
                                             >
-                                                {layerManager.map(layer => (layer.name === routingLayer ?
-                                                    layer.data.length > 0 ?
+                                                {layerManager.length > 0 ?
+                                                    layerManager.map(layer => (layer.name === routingLayer && layer.data.length > 0 ?
                                                         layer.data.map(point =>
                                                             <option key={point.name} value={point.name}>
                                                                 {point.name}
                                                             </option>
                                                         ) :
                                                         <option>
-                                                            No data
-                                                        </option>
-                                                    :
-                                                    undefined
-                                                ))}
+                                                            No Points in Layer
+                                                        </option>))
+                                                        :
+                                                    <option>
+                                                        No data
+                                                    </option>
+                                                }
                                             </select>
                                         </div>
                                         <Separator.Root className="seperator-minor"
