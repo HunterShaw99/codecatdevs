@@ -517,11 +517,11 @@ h1 {
 }
 
 .widget-btn {
-  @apply my-2 flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base;
+  @apply border-2 my-2 flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base;
 }
 
 .btn-expanded {
-  @apply p-4 w-16 h-16 hover:w-18 hover:h-18 transition-all duration-200;
+  @apply p-4 w-16 h-16 hover:w-18 hover:h-18 transition-all duration-200 border-2 border-peach;
 }
 
 .btn-collapsed {
@@ -529,9 +529,8 @@ h1 {
 }
 
 .legend-container {
-  @apply border shadow-md hover:shadow-lg transition-shadow bg-zinc-950;
+  @apply border-2 shadow-md flex items-center justify-center hover:shadow-lg bg-base transition-all duration-100;
   overflow: hidden;
-  transition: max-height 0.5s max-width 0.5s ease-in-out padding 0.5s;
   height: 100%; 
   width: 100%;
 }
@@ -541,7 +540,7 @@ h1 {
 }
 
 .collapsed {
-  @apply p-2 rounded-full max-h-fit max-w-fit;
+  @apply p-2 rounded-full w-12 h-12 hover:w-14 hover:h-14;
 }
 
 .RadioGroupRoot {

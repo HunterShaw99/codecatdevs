@@ -101,6 +101,7 @@ function MapPageContent() {
         if (layer && layer.type === 'labelled-scatter') {
             setRoutingLayer(selectedLayerName)
             setSearchLocationA(selectedLayerName)
+            setSearchLocationB(selectedLayerName)
         } 
     }, [selectedLayerName])
 
@@ -326,7 +327,7 @@ function MapPageContent() {
             </div>
 
             {/* Legend Section */}
-            <div className="rounded-lg mr-2 z-100 flex flex-col absolute top-2 right-0">
+            <div className="rounded-lg mr-2 z-100 absolute top-2 right-0">
                 <button
                     onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                     className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
@@ -339,7 +340,7 @@ function MapPageContent() {
             <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
                 {isTableExpanded ?
                     <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[70vw] max-h-[30vh]
-                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
+                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-base">
                         <div className="flex flex-row">
                             <button
                                 onClick={() => setIsTableExpanded(!isTableExpanded)}
