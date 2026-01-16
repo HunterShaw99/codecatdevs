@@ -2,11 +2,11 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {hexToRGB} from '@/app/utils/color';
 import {CompositeLayer} from '@deck.gl/core';
 import { SearchRing } from '../utils/LayerTypes';
+import {generateLayerId} from "@/app/context/layerContext";
 
 export class SearchRingLayer extends CompositeLayer<{ data: SearchRing[], color?: any}> {
     renderLayers() {
         return [new ScatterplotLayer<SearchRing>({
-            id: `sr-${crypto.randomUUID()}`,
             data: this.props.data,
             getPosition: (d: any) => d.originCoords,
             getRadius: (d: any) => d.searchedDistance * 1609.34,

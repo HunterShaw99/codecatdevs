@@ -114,7 +114,7 @@ export const PopUpWindow = ({props, handleClose}: any) => {
             </div>
             <hr className={'px-1'}/>
             {content}
-            {layerType === 'LabelledLayer' && (
+            {layerType !== 'RouteLineLayer' && (
                 <div className="absolute bottom-2 right-2">
                     <button
                         onClick={handleDelete}

@@ -182,6 +182,7 @@ function MapPageContent() {
     const layers = useMemo(() => {
         const visible = layerManager.filter(layer => layer.visible);
         const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => [new SearchRingLayer({
+            id: l.id,
             data: l.data,
             color: l.colors.fill
         })])
@@ -191,7 +192,7 @@ function MapPageContent() {
             color: l.colors.fill
         })])
         const routeLayers = visible.filter(l => l.type === 'route-line').map(l => [new RouteLineLayer({
-            id: l.name,
+            id: l.id,
             data: l.data as any,
             color: l.colors.fill
         })])
@@ -229,13 +230,13 @@ function MapPageContent() {
         const layerA = layerManager.find(layer => layer.name === locationA);
         const layerB = layerManager.find(layer => layer.name === locationB);
 
-        const results = layerA?.data.map(row => (
-            {
+        const results = layerA?.data.map((row, index) => ({
                 'originName': row.name,
                 'originCoords': [row.longitude, row.latitude],
                 'searchedDistance': searchDistance,
                 'compareLayer': locationB,
-                'compareResults': getDistance(row, layerB)
+                'compareResults': getDistance(row, layerB),
+                'id': `${layerA.id}-${index}`
             }))
 
         addNewLayer({
@@ -355,7 +356,7 @@ function MapPageContent() {
                             >
                                 {layerManager.length > 0 ?
                                     layerManager.map(layer => (
-                                        <option key={layer.name} value={layer.name}>
+                                        <option key={layer.id} value={layer.name}>
                                             {layer.name}
                                         </option>))
                                     :
@@ -418,7 +419,7 @@ function MapPageContent() {
                                         layerManager.filter((layer: {
                                             type: string;
                                         }) => layer.type === 'labelled-scatter').map(layer => (
-                                            <option key={layer.name} value={layer.name}>
+                                            <option key={layer.id} value={layer.name}>
                                                 {layer.name}
                                             </option>
                                         ))
@@ -450,7 +451,7 @@ function MapPageContent() {
                                 >
                                     {layerManager.length > 0 ?
                                         layerManager.filter(layer => layer.type === 'labelled-scatter').map(layer => (
-                                            <option key={layer.name} value={layer.name}>
+                                            <option key={layer.id} value={layer.name}>
                                                 {layer.name}
                                             </option>
                                         ))
@@ -497,7 +498,7 @@ function MapPageContent() {
                                             >
                                                 {layerManager.filter(layer => (layer.type === 'labelled-scatter')).length > 0
                                                     ? layerManager.filter(layer => (layer.type === 'labelled-scatter')).map(layer =>
-                                                        <option key={layer.name} value={layer.name}>
+                                                        <option key={layer.id} value={layer.name}>
                                                             {layer.name}
                                                         </option>
                                                     )
@@ -518,7 +519,7 @@ function MapPageContent() {
                                             >
                                                 {layerManager.filter(layer => (layer.type === 'labelled-scatter')).length > 0
                                                     ? layerManager.filter(layer => (layer.type === 'labelled-scatter')).map(layer =>
-                                                        <option key={layer.name} value={layer.name}>
+                                                        <option key={layer.id} value={layer.name}>
                                                             {layer.name}
                                                         </option>
                                                     )
@@ -580,7 +581,7 @@ function MapPageContent() {
                                             >
                                                 {layerManager.filter(layer => (layer.type === 'labelled-scatter')).length > 0
                                                     ? layerManager.filter(layer => (layer.type === 'labelled-scatter')).map(layer =>
-                                                        <option key={layer.name} value={layer.name}>
+                                                        <option key={layer.id} value={layer.name}>
                                                             {layer.name}
                                                         </option>
                                                     )
@@ -602,7 +603,7 @@ function MapPageContent() {
                                                 {layerManager.length > 0 ?
                                                     layerManager.map(layer => (layer.name === routingLayer && layer.data.length > 0 ?
                                                         layer.data.map(point =>
-                                                            <option key={point.name} value={point.name}>
+                                                            <option key={point.id} value={point.name}>
                                                                 {point.name}
                                                             </option>
                                                         ) :

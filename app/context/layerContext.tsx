@@ -2,7 +2,7 @@ import {createContext, useCallback, useContext, useEffect, useMemo, useState} fr
 import {BaseLayerData} from "@map/utils/LayerTypes";
 import {randomHex} from "@/app/utils/color";
 
-const generateLayerId = () => {
+export const generateLayerId = () => {
     const timestamp = Date.now().toString(16); // Hex timestamp
     const randomHex = Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'); // 6-digit hex
     return `${timestamp}${randomHex}`;
@@ -90,15 +90,25 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
 
     const deleteLayerFeature = useCallback((layerId: string, featureId: any) => {
         setLayerManager(prevLayers => {
-            return prevLayers.map(layer => {
-                if (layer.id === layerId) {
-                    const newData = layer.data.filter((item: any) =>
-                        item.id !== featureId
-                    );
-                    return {...layer, data: newData};
-                }
-                return layer;
-            });
+            const layerIndex = prevLayers.findIndex(layer => layer.id === layerId);
+
+            if (layerIndex === -1) {
+                return prevLayers;
+            }
+
+            const layer = prevLayers[layerIndex];
+            const newData = layer.data.filter((item: any) => item.id !== featureId);
+
+            if (layer.type === 'search-ring' && newData.length === 0) {
+                return prevLayers.filter((_, index) => index !== layerIndex);
+            }
+
+            const updatedLayer = {...layer, data: newData};
+
+            const newLayers = [...prevLayers];
+            newLayers[layerIndex] = updatedLayer;
+
+            return newLayers;
         });
     }, []);
 
