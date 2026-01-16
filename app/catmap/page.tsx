@@ -102,7 +102,7 @@ function MapPageContent() {
             setRoutingLayer(selectedLayerName)
             setSearchLocationA(selectedLayerName)
             setSearchLocationB(selectedLayerName)
-        } 
+        }
     }, [selectedLayerName])
 
     // meaurement state
@@ -143,7 +143,8 @@ function MapPageContent() {
                     ...layer,
                     data: [...layer?.data, {
                         latitude: lat, longitude: lng,
-                        name: `${selectedLayerName}-${pointCount}`, status: 'new'
+                        name: `${selectedLayerName}-${pointCount}`, status: 'new',
+                        id: `${layer.id}-${pointCount}`
                     }]
                 } : layer
             )
@@ -185,7 +186,7 @@ function MapPageContent() {
             color: l.colors.fill
         })])
         const labelledLayers = visible.filter(l => l.type === 'labelled-scatter').map(l => [new LabelledLayer({
-            id: l.name,
+            id: l.id,
             data: l.data,
             color: l.colors.fill
         })])
@@ -327,7 +328,7 @@ function MapPageContent() {
             </div>
 
             {/* Legend Section */}
-            <div className="rounded-lg mr-2 z-100 absolute top-2 right-0">
+            <div className="rounded-lg mr-2 z-100 flex flex-col absolute top-2 right-0">
                 <button
                     onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                     className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
@@ -340,7 +341,7 @@ function MapPageContent() {
             <div className="rounded-lg z-100 absolute bottom-2 left-1/2 transform -translate-x-1/2">
                 {isTableExpanded ?
                     <div className="absolute bottom-2 m-2 left-1/2 transform -translate-x-1/2 z-50 max-w-[70vw] max-h-[30vh]
-                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-base">
+                        overflow-auto grid place-items-center rounded-lg shadow-md hover:shadow-lg transition-shadow bg-zinc-950">
                         <div className="flex flex-row">
                             <button
                                 onClick={() => setIsTableExpanded(!isTableExpanded)}
@@ -660,6 +661,11 @@ function MapPageContent() {
                         </div>
                     )}
                 </div>
+                {popupData?.object && (
+                    <PopUpWindow props={popupData} deckRef={deckRef} handleClose={() => {
+                        setPopupData(undefined);
+                    }}/>
+                )}
             </div>
 
             <DeckGL
@@ -672,9 +678,6 @@ function MapPageContent() {
                 onClick={(info) => handleCursorClick(info)}
                 layers={layers}
             >
-                {popupData?.object && (
-                    <PopUpWindow props={popupData} />
-                )}
                 <Map
                     maxPitch={0}
                     minZoom={INITIAL_VIEW_STATE.minZoom}
