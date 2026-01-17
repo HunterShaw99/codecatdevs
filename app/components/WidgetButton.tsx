@@ -21,15 +21,16 @@ const ICON_MAPPING : Record<string, any> = {
 }
 
 const WidgetButton: React.FC<{ id: string; label: string; iconType: string }> = ({ id, label, iconType }) => {
-  const { isExpanded, toggle } = useWidgetManager();
+  const { isExpanded, isActive, toggleWidget } = useWidgetManager();
   const expanded = isExpanded(id);
+  const active = isActive(id);
   const SelectedIcon = ICON_MAPPING[iconType]
 
   return (
     <button
-      className={`widget-btn ${expanded ? 'btn-expanded' : 'btn-collapsed'}`}
+      className={`widget-btn ${expanded ? 'btn-expanded' : 'btn-collapsed'} ${active ? 'btn-active' : ''}`}
       title={label}
-      onClick={() => toggle(id)}
+      onClick={() => toggleWidget(id)}
     >
       <SelectedIcon className={'w-8 h-8'}/>
     </button>
