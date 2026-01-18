@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useReducer } from 'react';
 
+/**
+ * Represents the state of the widget manager.
+ */
 type WidgetState = {
   expandedId: string | null;
   activeWidget: string | null;
@@ -12,6 +15,9 @@ type WidgetState = {
   };
 };
 
+/**
+ * Defines the possible actions that can be dispatched to update the widget state.
+ */
 type Action =
   | { type: 'TOGGLE_WIDGET'; id: string }
   | { type: 'SET_ACTIVE_WIDGET'; id: string }
@@ -19,6 +25,9 @@ type Action =
   | { type: 'TOGGLE_SUB_WIDGET'; widgetId: string; subWidgetId: string }
   | { type: 'COLLAPSE_ALL' };
 
+/**
+ * The initial state of the widget manager.
+ */
 const initialState: WidgetState = {
   expandedId: null,
   activeWidget: null,
@@ -31,10 +40,15 @@ const initialState: WidgetState = {
   }
 };
 
+/**
+ * Reducer function that handles state transitions based on dispatched actions.
+ * @param state - The current state of the widget manager.
+ * @param action - The action to be performed.
+ * @returns The new state after applying the action.
+ */
 const reducer = (state: WidgetState, action: Action): WidgetState => {
   switch (action.type) {
     case 'TOGGLE_WIDGET':
-      // If toggling the same widget, collapse it
       if (state.expandedId === action.id) {
         return {
           ...state,
@@ -43,12 +57,10 @@ const reducer = (state: WidgetState, action: Action): WidgetState => {
         };
       }
 
-      // If toggling a different widget, expand it and set as active
       return {
         ...state,
         expandedId: action.id,
         activeWidget: action.id,
-        // Reset sub-widgets when switching main widgets
         subWidgets: {
           ...state.subWidgets,
           analysis: initialState.subWidgets.analysis
@@ -73,10 +85,8 @@ const reducer = (state: WidgetState, action: Action): WidgetState => {
 
     case 'TOGGLE_SUB_WIDGET':
       if (action.widgetId === 'analysis') {
-        // Handle analysis sub-widgets specifically
         const currentSubWidget = state.subWidgets.analysis[action.subWidgetId as keyof typeof state.subWidgets.analysis];
 
-        // If toggling the same sub-widget, turn it off
         if (currentSubWidget) {
           return {
             ...state,
@@ -90,7 +100,6 @@ const reducer = (state: WidgetState, action: Action): WidgetState => {
           };
         }
 
-        // Otherwise, turn on the requested sub-widget and turn off others
         return {
           ...state,
           subWidgets: {
@@ -115,6 +124,9 @@ const reducer = (state: WidgetState, action: Action): WidgetState => {
   }
 };
 
+/**
+ * Context for the widget manager, providing state and actions to components.
+ */
 const WidgetContext = createContext<{
   state: WidgetState;
   isExpanded: (id: string) => boolean;
@@ -127,6 +139,10 @@ const WidgetContext = createContext<{
   collapseAll: () => void;
 } | null>(null);
 
+/**
+ * Provider component that wraps the application and provides the widget manager context.
+ * @param children - The child components that will have access to the widget manager.
+ */
 export const WidgetProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -151,6 +167,11 @@ export const WidgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   return <WidgetContext.Provider value={value}>{children}</WidgetContext.Provider>;
 };
 
+/**
+ * Custom hook to access the widget manager context.
+ * @returns The widget manager context.
+ * @throws Will throw an error if used outside of a WidgetProvider.
+ */
 export const useWidgetManager = () => {
   const ctx = useContext(WidgetContext);
   if (!ctx) throw new Error('useWidgetManager must be used inside WidgetProvider');

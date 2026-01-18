@@ -2,9 +2,13 @@ import {createContext, useCallback, useContext, useEffect, useMemo, useState} fr
 import {BaseLayerData} from "@map/utils/LayerTypes";
 import {randomHex} from "@/app/utils/color";
 
-export const generateLayerId = () => {
-    const timestamp = Date.now().toString(16); // Hex timestamp
-    const randomHex = Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'); // 6-digit hex
+/**
+ * Generates a unique layer ID by combining a hexadecimal timestamp and a random 6-digit hexadecimal string.
+ * @returns {string} A unique layer ID
+ */
+export const generateLayerId = (): string => {
+    const timestamp = Date.now().toString(16);
+    const randomHex = Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
     return `${timestamp}${randomHex}`;
 };
 
@@ -25,6 +29,11 @@ interface LayerContextType {
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
 
+/**
+ * Custom hook to access the LayerContext.
+ * @returns {LayerContextType} The layer context
+ * @throws {Error} If used outside of a LayerProvider
+ */
 export const useLayerContext = () => {
     const context = useContext(LayerContext);
     if (!context) {
@@ -33,6 +42,12 @@ export const useLayerContext = () => {
     return context;
 };
 
+/**
+ * Provider component for the LayerContext.
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element} The provider component
+ */
 export const LayerProvider = ({children}: { children: React.ReactNode }) => {
     const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
         id: generateLayerId(),
@@ -45,16 +60,28 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
 
     const [selectedLayerName, setSelectedLayerName] = useState('Default');
 
+    /**
+     * Memoized map of layers by their IDs for efficient lookup.
+     */
     const layerMap = useMemo(() => {
         const map = new Map<string, BaseLayerData>();
         layerManager.forEach(layer => map.set(layer.id, layer));
         return map;
     }, [layerManager]);
 
+    /**
+     * Retrieves a layer by its ID.
+     * @param {string} layerId - The ID of the layer to retrieve
+     * @returns {BaseLayerData | undefined} The layer data or undefined if not found
+     */
     const getLayerById = useCallback((layerId: string) => {
         return layerMap.get(layerId);
     }, [layerMap]);
 
+    /**
+     * Adds a new layer to the layer manager.
+     * @param {any} newLayer - The new layer configuration
+     */
     const addNewLayer = useCallback((newLayer: any) => {
         const id = generateLayerId();
         const created = {
@@ -68,11 +95,13 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
         } as BaseLayerData;
 
         setLayerManager(prevLayers => [...prevLayers, created]);
-
-        // Make the newly added layer the selected layer if the current selection is invalid
         setSelectedLayerName(created.name);
     }, []);
 
+    /**
+     * Toggles the visibility of a layer.
+     * @param {string} layerId - The ID of the layer to toggle
+     */
     const toggleLayerVisibility = useCallback((layerId: string) => {
         setLayerManager(prevLayers => {
             const layer = getLayerById(layerId);
@@ -84,10 +113,19 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
         });
     }, [getLayerById]);
 
+    /**
+     * Deletes a layer by its ID.
+     * @param {string} layerId - The ID of the layer to delete
+     */
     const deleteLayer = useCallback((layerId: string) => {
         setLayerManager(prev => prev.filter(l => l.id !== layerId));
     }, []);
 
+    /**
+     * Deletes a feature from a layer.
+     * @param {string} layerId - The ID of the layer containing the feature
+     * @param {any} featureId - The ID of the feature to delete
+     */
     const deleteLayerFeature = useCallback((layerId: string, featureId: any) => {
         setLayerManager(prevLayers => {
             const layerIndex = prevLayers.findIndex(layer => layer.id === layerId);
@@ -112,6 +150,13 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
         });
     }, []);
 
+    /**
+     * Updates the color of a layer.
+     * @param {string} layerId - The ID of the layer to update
+     * @param {Object} newColors - The new color configuration
+     * @param {string} [newColors.fill] - The fill color
+     * @param {number} [opacity] - The opacity value (0-100)
+     */
     const updateLayerColor = useCallback((layerId: string, newColors: { fill?: string }, opacity?: number) => {
         setLayerManager(prevLayers => {
             const layer = getLayerById(layerId);
@@ -134,6 +179,13 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
         });
     }, [getLayerById]);
 
+    /**
+     * Creates a debounced version of a function.
+     * @template T - The function type
+     * @param {T} callback - The function to debounce
+     * @param {number} delay - The debounce delay in milliseconds
+     * @returns {T} The debounced function
+     */
     const debounce = useCallback(<T extends (...args: any[]) => void>(callback: T, delay: number) => {
         let timeoutId: NodeJS.Timeout | null = null;
 
@@ -148,10 +200,20 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
         };
     }, []);
 
+    /**
+     * Debounced version of updateLayerColor with a 300ms delay.
+     */
     const updateLayerColorDebounced = useMemo(() => debounce(updateLayerColor, 300), [updateLayerColor, debounce]);
+
+    /**
+     * Debounced version of updateLayerColor with a 10ms delay for opacity updates.
+     */
     const updateLayerOpacity = useMemo(() => debounce(updateLayerColor, 10), [updateLayerColor, debounce]);
 
-    // Keep selectedLayerName in-sync with available layers: fallback to first existing layer when needed
+    /**
+     * Effect to keep selectedLayerName in sync with available layers.
+     * Falls back to the first existing layer when the current selection is invalid.
+     */
     useEffect(() => {
         const exists = layerManager.some(l => l.name === selectedLayerName);
         if (!exists) {
@@ -163,6 +225,9 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
         }
     }, [layerManager, selectedLayerName]);
 
+    /**
+     * Memoized context value containing all layer management functions and state.
+     */
     const value = useMemo(() => ({
         layerManager,
         setLayerManager,
