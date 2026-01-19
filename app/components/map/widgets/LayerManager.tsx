@@ -5,6 +5,8 @@ import {EyeNoneIcon, EyeOpenIcon, PlusIcon, TrashIcon} from '@radix-ui/react-ico
 import {useLayerContext} from "@/app/context/layerContext";
 import {randomHex} from "@/app/utils/color";
 
+const MAX_LAYERS = 10
+
 interface LayerManagerWidgetProps {
     isOpen: boolean;
 }
@@ -25,7 +27,18 @@ export function LayerManagerWidget({isOpen}: LayerManagerWidgetProps) {
     const [layerName, setLayerName] = useState('');
     const [position, setPosition] = useState({x: 0, y: 0});
     const [error, setError] = useState('');
+    const [isDisabled, setIsDisabled] = useState(false);
     const nodeRef = useRef(null);
+
+    useEffect(() => {
+        if (layerManager.length > MAX_LAYERS) {
+            setIsDisabled(true)
+            setError('Layer List has reached maximum')
+        } else {
+            setIsDisabled(false)
+            setError('')
+        }
+    }, [layerManager]);
 
     const loadPosition = useCallback(() => {
         const savedPosition = localStorage.getItem('layerManagerPosition');
@@ -114,7 +127,9 @@ export function LayerManagerWidget({isOpen}: LayerManagerWidgetProps) {
                             setLayerName('');
                             setError('');
                         }}
-                        className="p-1 mb-2 max-h-10 text-lg text-peach-5 flex-row flex items-center justify-center cursor-pointer hover:text-peach-4"
+                        disabled={isDisabled}
+                        className={`p-1 mb-2 max-h-10 text-lg flex-row flex items-center justify-center cursor-pointer ${!isDisabled ? 
+                            ' text-peach-5 hover:text-peach-4' : ' text-red-700 hover:text-red-400'}`}
                     >
                         <PlusIcon className={'w-4 h-4'}/> Layer
                     </button>
