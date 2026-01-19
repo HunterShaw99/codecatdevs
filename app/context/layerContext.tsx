@@ -13,6 +13,20 @@ export const generateLayerId = (): string => {
     return `${timestamp}${randomHex}`;
 };
 
+/**
+ * Ensures all data entries have an ID. If a data entry doesn't have an 'id' field,
+ * generates one using the layer ID and the index of the row.
+ * @param {any[]} data - The data array to process
+ * @param {string} layerId - The ID of the layer
+ * @returns {any[]} The data array with all entries having IDs
+ */
+export const ensureDataHasIds = (data: any[], layerId: string): any[] => {
+    return data.map((entry, index) => ({
+        ...entry,
+        id: entry.id || `${layerId}-${index}`
+    }));
+};
+
 interface LayerContextType {
     layerManager: BaseLayerData[];
     setLayerManager: React.Dispatch<React.SetStateAction<BaseLayerData[]>>;
@@ -90,7 +104,7 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
             name: newLayer.name,
             type: newLayer.type || 'labelled-scatter',
             colors: {fill: newLayer.colors?.fill ?? randomHex()},
-            data: newLayer.data || [],
+            data: ensureDataHasIds(newLayer.data || [], id),
             visible: true,
             layer: newLayer.layer || undefined,
             parentLayerId: newLayer.parentLayerId || undefined
@@ -138,6 +152,7 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
             }
 
             const layer = prevLayers[layerIndex];
+
             const newData = layer.data.filter((item: any) => item.id !== featureId);
 
             if (layer.type === 'search-ring' && newData.length === 0) {
