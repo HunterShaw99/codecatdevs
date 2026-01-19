@@ -1,3 +1,4 @@
+'use client';
 import {createContext, useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {BaseLayerData} from "@map/utils/LayerTypes";
 import {randomHex} from "@/app/utils/color";

@@ -47,6 +47,12 @@ function MapPageContent() {
     const [isLegendExpanded, setIsLegendExpanded] = useState(true);
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
     const [isTableExpanded, setIsTableExpanded] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Ensure hydration matches by deferring render until client mounts
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // layer state
     const {
@@ -347,7 +353,7 @@ function MapPageContent() {
                     onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                     className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
                 >
-                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'}/> : getLegendList}
+                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'}/> : isMounted && getLegendList}
                 </button>
             </div>
 
