@@ -44,7 +44,7 @@ function MapPageContent() {
 
     const deckRef = useRef<any>(null);
     const [uploadedData, setUploadedData] = useState<any>(null);
-    const [isLegendExpanded, setIsLegendExpanded] = useState(false);
+    const [isLegendExpanded, setIsLegendExpanded] = useState(true);
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
     const [isTableExpanded, setIsTableExpanded] = useState(false);
 
@@ -162,7 +162,7 @@ function MapPageContent() {
         ></span>);
     }
 
-    const getLegendList = () => {
+    const getLegendList = useMemo(() => {
         const legendItems = layerManager.filter(layer => layer.visible);
 
         return (
@@ -179,7 +179,7 @@ function MapPageContent() {
                 </ul>
             </div>
         );
-    };
+    }, [layerManager]);
 
     const layers = useMemo(() => {
         const visible = layerManager.filter(layer => layer.visible);
@@ -242,13 +242,13 @@ function MapPageContent() {
         const layerA = layerManager.find(layer => layer.name === locationA);
         const layerB = layerManager.find(layer => layer.name === locationB);
 
-        const results = layerA?.data.map((row, index) => ({
+        const results = layerA?.data.map((row) => ({
             'originName': row.name,
             'originCoords': [row.longitude, row.latitude],
             'searchedDistance': searchDistance,
             'compareLayer': locationB,
             'compareResults': getDistance(row, layerB),
-            'id': `${layerA.id}-${index}`
+            'parentRowId': `${row.id}`
         }))
 
         addNewLayer({
@@ -256,7 +256,8 @@ function MapPageContent() {
             type: 'search-ring',
             colors: {fill: randomHex()},
             data: results,
-            visible: true
+            visible: true,
+            parentLayerId: `${layerA?.id}`,
         })
     };
 
@@ -346,7 +347,7 @@ function MapPageContent() {
                     onClick={() => setIsLegendExpanded(!isLegendExpanded)}
                     className={`legend-container ${isLegendExpanded ? 'expanded' : 'collapsed'}`}
                 >
-                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'}/> : getLegendList()}
+                    {!isLegendExpanded ? <ListBulletIcon className={'w-6 h-6'}/> : getLegendList}
                 </button>
             </div>
 

@@ -18,8 +18,9 @@ export type BaseLayerData = {
         name: string;
         type: string;
         colors: { fill?: string; stroke?: string };
-        data: any[]
+        data: any[];
         visible: boolean;
+        parentLayerId?: string;
     }
 
 export type ScatterPoint = {

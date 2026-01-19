@@ -610,11 +610,11 @@ button-menu-container {
 }
 
 .menu-popover-btn {
-  @apply flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base;
+  @apply flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base border-2;
 }
 
 .menu-popover-btn-expanded {
-  @apply w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200;
+  @apply w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200 border-peach;
 }
 
 .menu-popover-btn-collapsed {

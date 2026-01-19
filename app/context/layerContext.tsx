@@ -91,7 +91,8 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
             colors: {fill: newLayer.colors?.fill ?? randomHex()},
             data: newLayer.data || [],
             visible: true,
-            layer: newLayer.layer || undefined
+            layer: newLayer.layer || undefined,
+            parentLayerId: newLayer.parentLayerId || undefined
         } as BaseLayerData;
 
         setLayerManager(prevLayers => [...prevLayers, created]);
@@ -128,6 +129,7 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
      */
     const deleteLayerFeature = useCallback((layerId: string, featureId: any) => {
         setLayerManager(prevLayers => {
+            const newLayers = [...prevLayers];
             const layerIndex = prevLayers.findIndex(layer => layer.id === layerId);
 
             if (layerIndex === -1) {
@@ -143,8 +145,22 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
 
             const updatedLayer = {...layer, data: newData};
 
-            const newLayers = [...prevLayers];
             newLayers[layerIndex] = updatedLayer;
+
+            if (layer.type === 'labelled-scatter') {
+                const searchRingIndex = prevLayers.findIndex(layer => layer.parentLayerId === layerId);
+
+                if (searchRingIndex !== -1) {
+                    const searchLayer = prevLayers[searchRingIndex]
+                    const newSearchData = prevLayers[searchRingIndex].data.filter((item: any) => item.parentRowId !== featureId);
+
+                    if (newSearchData.length === 0) {
+                        return newLayers.filter((_, index) => index !== searchRingIndex);
+                    }
+
+                    newLayers[searchRingIndex] = {...searchLayer, data: newSearchData}
+                }
+            }
 
             return newLayers;
         });

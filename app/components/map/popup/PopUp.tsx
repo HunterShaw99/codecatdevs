@@ -97,8 +97,8 @@ export const PopUpWindow = ({props, handleClose}: any) => {
     return (
         <div
             ref={popupRef}
-            className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs min-h-25
-                overflow-y-auto min-w-48`}
+            className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs min-h-fit
+                overflow-y-auto min-w-50`}
         >
             <div className="flex justify-between items-center mb-1">
                 <h3 className="font-bold text-sm">{header}</h3>
@@ -113,9 +113,9 @@ export const PopUpWindow = ({props, handleClose}: any) => {
                 </button>
             </div>
             <hr className={'px-1'}/>
-            {content}
+            <div className="flex justify-between items-end-safe">
+                {content}
             {layerType !== 'RouteLineLayer' && (
-                <div className="absolute bottom-2 right-2">
                     <button
                         onClick={handleDelete}
                         className="text-red-500 hover:text-red-700"
@@ -123,8 +123,8 @@ export const PopUpWindow = ({props, handleClose}: any) => {
                     >
                         <TrashIcon className={'h-4 w-4'}/>
                     </button>
-                </div>
             )}
+            </div>
         </div>
     )
 };
