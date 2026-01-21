@@ -287,7 +287,7 @@ function MapPageContent() {
 
         const service = layer && layer?.data.length > 2 ? 'trip' : 'route';
 
-        const url = `http://router.project-osrm.org/${service}/v1/driving/${coordinates}?annotations=${routePreference}&geometries=geojson&overview=full`;
+        const url = `/routing?service=${service}&coordinates=${coordinates}&annotations=${routePreference}&geometries=geojson&overview=full`;
 
         fetch(url)
             .then((response) => {
