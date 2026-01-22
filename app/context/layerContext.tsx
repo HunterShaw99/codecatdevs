@@ -1,7 +1,8 @@
 'use client';
-import {createContext, useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {BaseLayerData} from "@map/utils/LayerTypes";
-import {randomHex} from "@/app/utils/color";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { BaseLayerData } from "@map/utils/LayerTypes";
+import { randomHex } from "@/app/utils/color";
+import { getAllIndicesByProperty } from "@/app/helpers";
 
 /**
  * Generates a unique layer ID by combining a hexadecimal timestamp and a random 6-digit hexadecimal string.
@@ -63,12 +64,12 @@ export const useLayerContext = () => {
  * @param {React.ReactNode} props.children - Child components
  * @returns {JSX.Element} The provider component
  */
-export const LayerProvider = ({children}: { children: React.ReactNode }) => {
+export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
         id: generateLayerId(),
         name: 'Default',
         type: 'labelled-scatter',
-        colors: {fill: randomHex()},
+        colors: { fill: randomHex() },
         visible: true,
         data: []
     }]);
@@ -103,7 +104,7 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
             id,
             name: newLayer.name,
             type: newLayer.type || 'labelled-scatter',
-            colors: {fill: newLayer.colors?.fill ?? randomHex()},
+            colors: { fill: newLayer.colors?.fill ?? randomHex() },
             data: ensureDataHasIds(newLayer.data || [], id),
             visible: true,
             layer: newLayer.layer || undefined,
@@ -124,17 +125,22 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
             if (!layer) return prevLayers;
 
             return prevLayers.map(l =>
-                l.id === layerId ? {...l, visible: !l.visible} : l
+                l.id === layerId ? { ...l, visible: !l.visible } : l
             );
         });
     }, [getLayerById]);
 
     /**
-     * Deletes a layer by its ID.
+     * Deletes a layer by its ID. If layer has children, also removes them.
      * @param {string} layerId - The ID of the layer to delete
      */
     const deleteLayer = useCallback((layerId: string) => {
-        setLayerManager(prev => prev.filter(l => l.id !== layerId));
+        setLayerManager(prev => {
+            const childIndices = getAllIndicesByProperty(prev, 'parentLayerId', layerId);
+            const newLayers = prev.filter((_, index) => !childIndices.includes(index));
+
+            return newLayers.filter(l => l.id !== layerId);
+        })
     }, []);
 
     /**
@@ -159,7 +165,7 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
                 return prevLayers.filter((_, index) => index !== layerIndex);
             }
 
-            const updatedLayer = {...layer, data: newData};
+            const updatedLayer = { ...layer, data: newData };
 
             newLayers[layerIndex] = updatedLayer;
 
@@ -174,7 +180,7 @@ export const LayerProvider = ({children}: { children: React.ReactNode }) => {
                         return newLayers.filter((_, index) => index !== searchRingIndex);
                     }
 
-                    newLayers[searchRingIndex] = {...searchLayer, data: newSearchData}
+                    newLayers[searchRingIndex] = { ...searchLayer, data: newSearchData }
                 }
             }
 

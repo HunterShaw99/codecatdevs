@@ -305,7 +305,8 @@ function MapPageContent() {
                         type: 'route-line',
                         colors: {fill: randomHex()},
                         data: [routeData],
-                        visible: true
+                        visible: true,
+                        parentLayerId: `${layer?.id}`
                     });
                 }
             })
