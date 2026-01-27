@@ -31,6 +31,7 @@ import {useWidgetManager, WidgetProvider} from "../context/widgetManager";
 import WidgetButton from "@components/WidgetButton";
 import CSVReader from "@map/widgets/csvReader";
 import {downloadCsv, validateName} from "../helpers";
+import { ensureDataHasIds } from "../context/layerContext";
 
 function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
@@ -127,7 +128,7 @@ function MapPageContent() {
                 prevLayers.map(layer =>
                     layer.name === selectedLayerName ? {
                         ...layer,
-                        data: [...layer?.data, ...uploadedData.data]
+                        data: ensureDataHasIds([...layer?.data, ...uploadedData.data], layer.id)
                     } : layer
                 )
             );
@@ -559,7 +560,7 @@ function MapPageContent() {
                                                 id={'sr-distance-input'}
                                                 min={"1"}
                                                 max={"10"}
-                                                step={"0.2"}
+                                                step={"0.1"}
                                                 value={searchDistance}
                                                 onChange={(e) => {
                                                     setSearchDistance(Number(e.target.value));
