@@ -207,7 +207,7 @@ export default function HomePage() {
                                     <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
                                         We believe in show, don't tell, so here are a few workflows you can experience in our app:
                                     </p>
-                                        <Card className='w-200 mb-6'>
+                                        <Card className='w-100 md:w-150 lg:w-200 mb-6'>
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Create layers to house your data, and upload points from a spreadsheet.</li>
                                             </ul>
@@ -216,7 +216,7 @@ export default function HomePage() {
                                                 Your browser does not support the video tag.
                                             </video>
                                         </Card>
-                                        <Card className='w-200 mb-6'>
+                                        <Card className='w-100 md:w-150 lg:w-200 mb-6'>
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Add Layers, click to add points on the map, and perform spatial analysis.</li>
                                             </ul>
@@ -225,7 +225,7 @@ export default function HomePage() {
                                                 Your browser does not support the video tag.
                                             </video>
                                         </Card>
-                                        <Card className='w-200 mb-6'>
+                                        <Card className='w-100 md:w-150 lg:w-200 mb-6'>
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Change your basemap, and route points within a layer.</li>
                                             </ul>
@@ -234,7 +234,7 @@ export default function HomePage() {
                                                 Your browser does not support the video tag.
                                             </video>
                                         </Card>
-                                        <Card className='w-200 mb-6'>
+                                        <Card className='w-100 md:w-150 lg:w-200 mb-6'>
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Measure distances on the map using the measure tool.</li>
                                             </ul>
