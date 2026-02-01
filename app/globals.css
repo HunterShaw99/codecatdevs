@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Vibur&display=swap");
 @import "tailwindcss";
 @import "@radix-ui/themes/styles.css";
-
+@tailwind utilities;
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Define keyframes animation at the root level */
@@ -114,6 +114,15 @@
   --secondary: #2a2a2a;
   --secondary-foreground: #ededed;
 }
+
+@layer base {
+  .cursor-pointer-custom {
+    cursor: pointer;
+  }
+
+  .cursor-crosshair-custom {
+    cursor: crosshair;
+  }}
 
 @theme inline {
   --color-background: var(--background);
@@ -338,6 +347,21 @@ body {
     box-shadow: 0 4px 12px rgba(250, 179, 135, 0.3);
   }
 
+  .btn-app-launcher {
+    @apply px-6 py-3 rounded-lg text-2xl font-bold transition-all duration-300 border-2;
+    background: linear-gradient(135deg, var(--color-peach-3), var(--color-peach-6));
+    color: var(--color-peach-8);
+    border-color: var(--color-peach-5);
+  }
+
+  .btn-app-launcher:hover {
+    background:linear-gradient(135deg, var(--color-peach-6), var(--color-peach-3));
+    color: var(--color-peach-9);
+    border-color: var(--color-peach-6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(250, 179, 135, 0.3);
+  }
+
   /* Gradients */
   .gradient-cta {
     @apply rounded-3xl shadow-2xl p-8 text-center text-white mb-2;
@@ -490,4 +514,138 @@ body {
 h1 {
   border: 0.15rem solid peachpuff;
   border-radius: 1.5rem;
+}
+
+.widget-btn {
+  @apply border-2 my-2 flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base;
+}
+
+.btn-expanded {
+  @apply p-4 w-16 h-16 hover:w-18 hover:h-18 transition-all duration-200 border-2 border-peach;
+}
+
+.btn-collapsed {
+  @apply p-2 w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200;
+}
+
+.legend-container {
+  @apply border-2 shadow-md flex items-center justify-center hover:shadow-lg bg-base transition-all duration-100;
+  overflow: hidden;
+  height: 100%; 
+  width: 100%;
+}
+
+.expanded {
+  @apply p-1 rounded-lg max-h-fit max-w-fit;
+}
+
+.collapsed {
+  @apply p-2 rounded-full w-12 h-12 hover:w-14 hover:h-14;
+}
+
+.RadioGroupRoot {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.RadioGroupItem {
+  @apply bg-white w-3.5 h-3.5 rounded-full shadow-sm;
+}
+
+.RadioGroupItem:hover {
+	background-color: var(--color-peach-7);
+}
+
+.RadioGroupItem:focus {
+	@apply shadow-md;
+}
+
+.RadioGroupIndicator {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+.RadioGroupIndicator::after {
+  @apply block w-2 h-2 rounded-sm bg-stone-700;
+	content: "";
+}
+
+.radio-label {
+  @apply text-xs text-stone-500 pl-1;
+}
+
+/* Table */
+table, th, td, tr {
+  @apply p-1 border border-stone-300;
+}
+
+/* Analysis Menu */
+button-menu-container {
+  position: relative; /* Important for positioning the popover */
+  display: inline-block;
+}
+
+.menu-popover {
+  position: absolute;
+  bottom: 10%; 
+  left: 100%;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  transform: scale(0.9); 
+  transform-origin: bottom center; 
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+  z-index: 10;
+}
+
+.menu-popover.open { /* Class added when isOpen is true */
+  opacity: 1;
+  transform: scale(1);
+}
+
+.menu-popover-btn {
+  @apply flex items-center justify-center rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 bg-base border-2;
+}
+
+.menu-popover-btn-expanded {
+  @apply w-12 h-12 hover:w-14 hover:h-14 transition-all duration-200 border-peach;
+}
+
+.menu-popover-btn-collapsed {
+  @apply w-10 h-10 hover:w-11 hover:h-11 transition-all duration-200;
+}
+
+.seperator-minor {
+  @apply my-1 bg-zinc-200 data-[orientation=horizontal]:h-px;
+}
+
+.seperator-major {
+  @apply my-[5px] bg-zinc-300 data-[orientation=horizontal]:h-px;
+}
+
+select {
+  @apply border border-zinc-500 text-stone-500 text-sm rounded-sm;  
+}
+
+select:focus {
+  @apply ring-1 ring-zinc-400;
+}
+
+select:focus-visible {
+  @apply ring-2 ring-zinc-300
+      transition-all duration-300 ease-in-out;
+}
+
+select::selection {
+  @apply border-zinc-400;
+}
+
+.attribute-table {
+  @apply p-1 mb-2 mx-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs whitespace-nowrap;
 }

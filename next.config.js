@@ -8,6 +8,21 @@ const nextConfig = {
       'node_modules/@esbuild/linux-x64',
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'map.localhost',
+          },
+        ],
+        destination: '/catmap',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

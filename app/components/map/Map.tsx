@@ -39,7 +39,6 @@ const CardMap = () => {
   const [tooltipHtml, setTooltipHtml] = useState<any | null>(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [cluster, setCluster] = useState<any>(null);
-  const [prevZoom, setPrevZoom] = useState<number>(INITIAL_VIEW_STATE.zoom);
 
   const hiddenPointNames = useMemo(() => {
     const index = getIndexClusters(dataArray, 40);
@@ -193,25 +192,26 @@ const CardMap = () => {
         >
           <CustomAttribution />
         </Map>
-      </DeckGL> 
-      {tooltipHtml && (
-        <div
-          className="absolute top-3 right-3 z-50"
-          style={{
-            pointerEvents: 'none',
-            maxWidth: 240,
-            maxHeight: 160,
-            overflow: 'hidden',
-            boxSizing: 'border-box',
-            borderRadius: 8,
-            border: '1px solid var(--ctp-surface0)',
-            background: 'var(--ctp-mantle)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-            padding: 0,
-          }}>
-        {tooltipHtml}
-    </div>
-      )}
+      </DeckGL>
+
+        {tooltipHtml && (
+          <div
+            className="absolute top-3 right-3 z-50"
+            style={{
+              pointerEvents: 'none',
+              maxWidth: 240,
+              maxHeight: 160,
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              borderRadius: 8,
+              border: '1px solid var(--ctp-surface0)',
+              background: 'var(--ctp-mantle)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              padding: 0,
+            }}>
+            {tooltipHtml}
+          </div>
+        )}
   </div>
   );
 };

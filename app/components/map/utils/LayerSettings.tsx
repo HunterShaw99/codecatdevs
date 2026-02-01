@@ -1,6 +1,6 @@
 'use client';
 
-import {IconLayer, ScatterplotLayer, TextLayer, IconLayerProps} from '@deck.gl/layers';
+import {IconLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 import {CompositeLayer} from '@deck.gl/core';
 
 import { coffeeBeanSVG, forkSVG } from '@map/data/icons';

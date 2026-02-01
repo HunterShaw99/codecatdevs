@@ -12,3 +12,40 @@ export interface ClusterObject {
   point_count: number;
   points: Point[];
 }
+
+export type BaseLayerData = {
+        id: string;
+        name: string;
+        type: string;
+        colors: { fill?: string; stroke?: string };
+        data: any[];
+        visible: boolean;
+        parentLayerId?: string;
+    }
+
+export type ScatterPoint = {
+    name: string
+    latitude: number
+    longitude: number
+    status?: string
+}
+
+export interface CompResults {
+  name: string;
+  coordinates: [number, number];
+  distance: number;
+}
+
+export type SearchRing = {
+  originName: string
+  originCoords: [number, number]
+  searchedDistance: number
+  compareLayer: string
+  compareResults: Record<string, CompResults[]>
+}
+
+export type RouteLine = {
+  distance: number
+  duration: number
+  geometry: {coordinates: [number, number][]; type: string},
+  }

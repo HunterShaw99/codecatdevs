@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 
 interface ButtonProps {
   children: ReactNode;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'app-launcher';
   className?: string;
   onClick?: () => void;
   disabled?: boolean;
@@ -21,7 +21,8 @@ export const Button = ({
 }: ButtonProps) => {
   const buttonClasses = {
     primary: 'btn-primary',
-    secondary: 'btn-secondary'
+    secondary: 'btn-secondary',
+    'app-launcher': 'btn-app-launcher'
   };
 
   return (

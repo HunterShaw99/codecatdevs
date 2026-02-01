@@ -15,10 +15,10 @@ export default function HomePage() {
     const navigationItems = [
         {label: 'About', href: '#about'},
         {label: 'Mission & Vision', href: '#mission-vision'},
-        {label: 'Solutions', href: '#solutions'},
+        {label: 'Cat Map Demo App', href: '#catmap'},
+        {label: 'Our Solutions', href: '#solutions'},
         {label: 'Values', href: '#values'},
-        {label: 'Map', href: '#map'},
-        {label: 'Contact', href: '#contact'}
+        {label: 'Contact', href: '#contact'},
     ];
 
     const coreValues = [
@@ -199,6 +199,62 @@ export default function HomePage() {
                         </Section>
 
                         {/* Solutions Section */}
+                        <Section id="catmap">
+                            <div className='m-6 flex flex-col items-center justify-center text-center'>
+                                    <h2 className="heading-section">
+                                        Cat Map - Demo Spatial Analytics Product
+                                    </h2>
+                                    <p className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
+                                        We believe in show, don't tell, so here are a few workflows you can experience in our app:
+                                    </p>
+                                        <Card className='w-200 mb-6'>
+                                            <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
+                                                <li>Create layers to house your data, and upload points from a spreadsheet.</li>
+                                            </ul>
+                                            <video autoPlay loop muted>
+                                                <source src="upload_clean.mp4" type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </Card>
+                                        <Card className='w-200 mb-6'>
+                                            <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
+                                                <li>Add Layers, click to add points on the map, and perform spatial analysis.</li>
+                                            </ul>
+                                            <video autoPlay loop muted>
+                                                <source src="search_rings_clean.mp4" type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </Card>
+                                        <Card className='w-200 mb-6'>
+                                            <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
+                                                <li>Change your basemap, and route points within a layer.</li>
+                                            </ul>
+                                            <video autoPlay loop muted>
+                                                <source src="routing_clean.mp4" type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </Card>
+                                        <Card className='w-200 mb-6'>
+                                            <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
+                                                <li>Measure distances on the map using the measure tool.</li>
+                                            </ul>
+                                            <video autoPlay loop muted>
+                                                <source src="measure_clean.mp4" type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </Card>
+
+                                    <div className="m-4 flex-col items-center justify-center text-center">
+                                            <h2 className='heading-subsection m-2'>
+                                                Ready to check it out for yourself? Click the button below to open Cat Map in a new tab.
+                                            </h2>
+                                            <Button variant="app-launcher" onClick={() => window.open('/catmap', '_blank', 'noopener,noreferrer')}>
+                                                Launch the Cat Map Application
+                                            </Button>
+                                    </div>
+                            </div>
+                        </Section>
+
                         <Section id="solutions">
                             <div>
                                 <h2 className="heading-section">Our Solutions</h2>
@@ -240,22 +296,6 @@ export default function HomePage() {
                                         ))}
                                     </div>
                                 </div>
-                            </div>
-                        </Section>
-                        <Section id="map">
-                            <div>
-                                <div className="heading-section mb-4">Our Local Haunts</div>
-                                <h2 className="text-subtext1 mb-6 text-center max-w-4xl mx-auto">
-                                    The map below not only highlights some of our favorite local spots around Pittsburgh, but also
-                                    serves to demonstrate some of our basic capabilities in creating custom embedded mapping solutions, such as: 
-                                </h2>
-                                  <ul className="list-disc list-inside mb-6 text-subtext1 text-center max-w-4xl mx-auto">
-                                    <li>Dynamic rendering of labels based on zoom.</li>
-                                    <li>Customizable pop-ups when hovered over a feature.</li>
-                                    <li>Clustering based on spatial proximity.</li>
-                                    <li>Zoom and Panning limits.</li>
-                                </ul>
-                                <CardMap/>
                             </div>
                         </Section>
 
