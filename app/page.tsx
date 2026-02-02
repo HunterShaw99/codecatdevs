@@ -8,8 +8,8 @@ import {SolutionCard} from '@/app/components/SolutionCard';
 import {Button} from '@/app/components/Button';
 import {ContactModal} from '@/app/components/ContactModal';
 import CodeCatLine from '@/app/components/icons/CodeCatLine';
-import CardMap from './components/map/Map';
 import { LightningBoltIcon, GearIcon, MixerHorizontalIcon, EyeOpenIcon, UpdateIcon, StarIcon, LockClosedIcon, MagicWandIcon, PersonIcon } from "@radix-ui/react-icons"
+import posthog from 'posthog-js'
 
 export default function HomePage() {
     const navigationItems = [
@@ -141,7 +141,7 @@ export default function HomePage() {
                                         <br/>
 
                                         We love our 3 C's: Code, Cats, and Coffee. With a good
-                                        frsh cup of coffee (or espresso), one of our furry friends
+                                        fresh cup of coffee (or espresso), one of our furry friends
                                         napping nearby, and some good tunes in the background, we're in our element.
                                         It's our not-so-secret weapon for staying focused and productive,
                                         delivering the best possible results for you.<br/>
@@ -248,7 +248,10 @@ export default function HomePage() {
                                             <h2 className='heading-subsection m-2'>
                                                 Ready to check it out for yourself? Click the button below to open Cat Map in a new tab.
                                             </h2>
-                                            <Button variant="app-launcher" onClick={() => window.open('/catmap', '_blank', 'noopener,noreferrer')}>
+                                            <Button variant="app-launcher" onClick={() => {
+                                                posthog.capture('CatMap button clicked')
+                                                window.open('/catmap', '_blank', 'noopener,noreferrer')
+                                            }}>
                                                 Launch the Cat Map Application
                                             </Button>
                                     </div>
