@@ -5,6 +5,8 @@ import { CompositeLayer } from '@deck.gl/core';
 import {generateLayerId} from "@/app/context/layerContext";
 
 export class RouteLineLayer extends CompositeLayer<{ data: RouteLine[], color?: any}> {
+    static layerName = 'RouteLineLayer'
+
     renderLayers() {
         return [new PathLayer<RouteLine>({
             data: this.props.data,
