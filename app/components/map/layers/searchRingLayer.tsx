@@ -5,6 +5,8 @@ import { SearchRing } from '../utils/LayerTypes';
 import {generateLayerId} from "@/app/context/layerContext";
 
 export class SearchRingLayer extends CompositeLayer<{ data: SearchRing[], color?: any}> {
+    static layerName = 'SearchRingLayer'
+
     renderLayers() {
         return [new ScatterplotLayer<SearchRing>({
             data: this.props.data,

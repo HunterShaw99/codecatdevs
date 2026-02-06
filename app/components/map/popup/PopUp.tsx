@@ -5,15 +5,15 @@ import {useLayerContext} from "@/app/context/layerContext";
 const getPopUpValues = (props: any) => {
     let name, lat, long;
 
-    if (props.layer.constructor.name === 'LabelledLayer') {
+    if (props.layer.constructor.layerName === 'LabelledLayer') {
         name = props.object.name;
         lat = props.object.latitude;
         long = props.object.longitude;
-    } else if (props.layer.constructor.name === 'SearchRingLayer') {
+    } else if (props.layer.constructor.layerName === 'SearchRingLayer') {
         name = props.object.originName;
         [long, lat] = props.object.originCoords;
-    } else if (props.layer.constructor.name === 'RouteLineLayer') {
-        name = props.layer.id;
+    } else if (props.layer.constructor.layerName === 'RouteLineLayer') {
+        name = props.object.points[0];
         [long, lat] = [0, 0];
     }
 
@@ -57,7 +57,7 @@ const getPopUpContent = (layerType: string, props: any) => {
     } else if (layerType === 'RouteLineLayer') {
         return (
             <div>
-                <p><span className="font-bold">Route Name:</span> {name}</p>
+                <p><span className="font-bold">Starting Point:</span> {name}</p>
                 <p><span
                     className="font-bold">Total Distance:</span> {(props.object.distance / 1606.34).toFixed(2)} miles
                 </p>
@@ -74,7 +74,8 @@ export const PopUpWindow = ({props, handleClose}: any) => {
     const {
         deleteLayerFeature
     } = useLayerContext();
-    const layerType = props.layer.constructor.name;
+
+    const layerType = props.layer.constructor.layerName;
     const header = getPopUpHeader(layerType);
     const content = useMemo(() => getPopUpContent(layerType, props), [props]);
     const popupRef = useRef<HTMLDivElement>(null);

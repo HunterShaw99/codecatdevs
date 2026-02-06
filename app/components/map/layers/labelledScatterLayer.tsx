@@ -7,7 +7,8 @@ import {hexToRGB} from '@/app/utils/color';
 
 export class LabelledLayer extends CompositeLayer<{ data: any[], color?: any }> {
     fontSize = 12
-
+    static layerName = 'LabelledLayer'
+    
     renderLayers() {
         return [new ScatterplotLayer({
             id: `${this.props.id}-points`,

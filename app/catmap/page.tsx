@@ -18,20 +18,20 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import {Separator} from "radix-ui";
 import {distance, point} from "@turf/turf";
 
-import {hexToRGB, randomHex} from '../utils/color';
+import {hexToRGB, randomHex} from '@/app/utils/color';
 import {PopUpWindow} from "@components/map/popup/PopUp";
 import AttributeTable from "@components/map/table/AttributeTable";
-import {BASEMAP_KEYS, BASEMAPS, ROUTING_PREFERENCES} from '../constants';
+import {BASEMAP_KEYS, BASEMAPS, ROUTING_PREFERENCES} from '@/app/constants';
 import {LabelledLayer, measureLayer, RouteLineLayer, SearchRingLayer} from "@components/map/layers";
 import {BaseLayerData, CompResults, ScatterPoint} from "@components/map/utils/LayerTypes";
-import CodeCatLine from "../components/icons/CodeCatLine";
-import {LayerProvider, useLayerContext} from '../context/layerContext';
+import CodeCatLine from "@components/icons/CodeCatLine";
+import {LayerProvider, useLayerContext} from '@/app/context/layerContext';
 import {LayerManagerWidget} from "@map/widgets/LayerManager";
-import {useWidgetManager, WidgetProvider} from "../context/widgetManager";
+import {useWidgetManager, WidgetProvider} from "@/app/context/widgetManager";
 import WidgetButton from "@components/WidgetButton";
 import CSVReader from "@map/widgets/csvReader";
-import {downloadCsv, validateName} from "../helpers";
-import { ensureDataHasIds } from "../context/layerContext";
+import {downloadCsv, validateName} from "@/app/helpers";
+import { ensureDataHasIds } from "@/app/context/layerContext";
 
 function MapPageContent() {
     // set minZoom and MaxZoom for both Map and Deck component
