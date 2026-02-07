@@ -61,6 +61,7 @@ export function LayerManagerWidget({isOpen}: LayerManagerWidgetProps) {
     return (
         <Draggable
             handle=".drag-handle"
+            cancel=".input, .button"
             nodeRef={nodeRef}
             position={position}
             onStop={(e, data) => {
