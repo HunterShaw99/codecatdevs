@@ -112,7 +112,10 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
         } as BaseLayerData;
 
         setLayerManager(prevLayers => [...prevLayers, created]);
+
+        if (created.type === 'labelled-scatter') {
         setSelectedLayerName(created.name);
+        }
     }, []);
 
     /**
