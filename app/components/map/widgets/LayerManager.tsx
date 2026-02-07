@@ -11,20 +11,6 @@ interface LayerManagerWidgetProps {
     isOpen: boolean;
 }
 
-type CallbackFunction = (result: any) => void;
-
-const isMobile = navigator.maxTouchPoints > 1
-
-const eventHandler = (cb: CallbackFunction) => {
-    return (event: any) => {
-        if (isMobile && event.type === 'touchstart') {
-            cb(event);
-        } else if (!isMobile && event.type === 'click') {
-            cb(event);
-        }
-    };
-};
-
 export function LayerManagerWidget({ isOpen }: LayerManagerWidgetProps) {
     const {
         layerManager,
@@ -158,8 +144,7 @@ export function LayerManagerWidget({ isOpen }: LayerManagerWidgetProps) {
                         {error && <span className="text-red-500 text-xs absolute -bottom-4 left-0">{error}</span>}
                     </div>
                     <button
-                        onClick={eventHandler(() => handleButtonClick())}
-                        onTouchStart={eventHandler(() => handleButtonClick())}
+                        onClick={() => handleButtonClick()}
                         disabled={isDisabled}
                         className={`p-1 mb-2 max-h-10 text-lg flex-row flex items-center justify-center cursor-pointer ${!isDisabled ?
                             ' text-peach-5 hover:text-peach-4' : ' text-red-700 hover:text-red-400'}`}
@@ -192,19 +177,14 @@ export function LayerManagerWidget({ isOpen }: LayerManagerWidgetProps) {
                                     style={{
                                         backgroundColor: layer.colors?.fill || randomHex(),
                                     }}
-                                    onClick={eventHandler((e) => {
+                                    onClick={(e) => {
                                         const input = e.currentTarget.previousElementSibling as HTMLInputElement;
                                         input.click();
-                                    })}
-                                    onTouchStart={eventHandler((e) => {
-                                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                                        input.click();
-                                    })}
+                                    }}
                                 />
                             </div>
                             <button
-                                onClick={eventHandler(() => toggleLayerVisibility(layer.id))}
-                                onTouchStart={eventHandler(() => toggleLayerVisibility(layer.id))}
+                                onClick={() => toggleLayerVisibility(layer.id)}
                                 className="w-4 h-4 rounded cursor-pointer text-stone-700 hover:text-stone-900"
                                 title="Toggle Visibility"
                             >
@@ -215,8 +195,7 @@ export function LayerManagerWidget({ isOpen }: LayerManagerWidgetProps) {
                                 )}
                             </button>
                             <button
-                                onClick={eventHandler(() => deleteLayer(layer.id))}
-                                onTouchStart={eventHandler(() => deleteLayer(layer.id))}
+                                onClick={() => deleteLayer(layer.id)}
                                 aria-label={`Delete layer ${layer.name}`}
                                 className="w-4 h-4 rounded cursor-pointer text-red-400 hover:text-red-700"
                             >
