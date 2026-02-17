@@ -211,7 +211,7 @@ export default function HomePage() {
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Create layers to house your data, and upload points from a spreadsheet.</li>
                                             </ul>
-                                            <video autoPlay loop muted>
+                                            <video autoPlay loop muted playsInline>
                                                 <source src="upload_clean.mp4" type="video/mp4" />
                                                 Your browser does not support the video tag.
                                             </video>
@@ -220,7 +220,7 @@ export default function HomePage() {
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Add Layers, click to add points on the map, and perform spatial analysis.</li>
                                             </ul>
-                                            <video autoPlay loop muted>
+                                            <video autoPlay loop muted playsInline>
                                                 <source src="search_rings_clean.mp4" type="video/mp4" />
                                                 Your browser does not support the video tag.
                                             </video>
@@ -229,7 +229,7 @@ export default function HomePage() {
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Change your basemap, and route points within a layer.</li>
                                             </ul>
-                                            <video autoPlay loop muted>
+                                            <video autoPlay loop muted playsInline>
                                                 <source src="routing_clean.mp4" type="video/mp4" />
                                                 Your browser does not support the video tag.
                                             </video>
@@ -238,7 +238,7 @@ export default function HomePage() {
                                             <ul className="list-disc list-inside mb-1 text-subtext1 text-center max-w-4xl mx-auto">
                                                 <li>Measure distances on the map using the measure tool.</li>
                                             </ul>
-                                            <video autoPlay loop muted>
+                                            <video autoPlay loop muted playsInline>
                                                 <source src="measure_clean.mp4" type="video/mp4" />
                                                 Your browser does not support the video tag.
                                             </video>
