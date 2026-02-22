@@ -2,7 +2,6 @@ import {PathLayer} from '@deck.gl/layers';
 import {hexToRGB} from '@/app/utils/color';
 import { RouteLine } from '../utils/LayerTypes';
 import { CompositeLayer } from '@deck.gl/core';
-import {generateLayerId} from "@/app/context/layerContext";
 
 export class RouteLineLayer extends CompositeLayer<{ data: RouteLine[], color?: any}> {
     static layerName = 'RouteLineLayer'

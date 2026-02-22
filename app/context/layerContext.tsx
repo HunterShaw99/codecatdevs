@@ -33,7 +33,7 @@ interface LayerContextType {
     setLayerManager: React.Dispatch<React.SetStateAction<BaseLayerData[]>>;
     selectedLayerName: string;
     setSelectedLayerName: React.Dispatch<React.SetStateAction<string>>;
-    addNewLayer: (newLayer: any) => void;
+    addNewLayer: (newLayer: any) => string;
     toggleLayerVisibility: (layerId: string) => void;
     deleteLayer: (layerId: string) => void;
     deleteLayerFeature: (layerId: string, feature: any) => void;
@@ -116,6 +116,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
         if (created.type === 'labelled-scatter') {
         setSelectedLayerName(created.name);
         }
+
+        return id;
     }, []);
 
     /**
