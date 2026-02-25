@@ -649,3 +649,11 @@ select::selection {
 .attribute-table {
   @apply p-1 mb-2 mx-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs whitespace-nowrap;
 }
+
+.custom-file-upload-button {
+  @apply my-1 py-1 px-2 text-xs rounded-lg font-semibold text-stone-500 border border-zinc-500
+}
+
+.hidden-input {
+  display: none
+}

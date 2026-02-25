@@ -21,6 +21,7 @@ export type BaseLayerData = {
         data: any[];
         visible: boolean;
         parentLayerId?: string;
+        photoUrl?: string;
     }
 
 export type ScatterPoint = {

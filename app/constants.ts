@@ -26,3 +26,6 @@ export const HEADERS_MAPPING: Record<string,string[]> = {
       ,'Search Results - Layer','Search Results - Name','Search Results - Coordinates','Search Results - Distance'],
   'route-line': ['Route Start Name', 'Route End Name', 'Route Segment Distance', 'Route Segment Duration']
 }
+
+export const DB_NAME = 'file-db'
+export const DB_VERSION = 2
