@@ -1,8 +1,5 @@
 'use client';
-import Map from "react-map-gl/maplibre";
-import DeckGL from "@deck.gl/react";
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MeasureDistanceMode, ViewMode } from '@deck.gl-community/editable-layers';
 import {
     DownloadIcon,
     LayersIcon,
@@ -17,12 +14,13 @@ import * as RadioGroup from '@radix-ui/react-radio-group';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Separator } from "radix-ui";
 import { distance, point } from "@turf/turf";
+import { useAtomValue } from 'jotai';
 
 import { hexToRGB, randomHex } from '@/app/utils/color';
+import MapComponent from "@components/map/Map";
 import { PopUpWindow } from "@components/map/popup/PopUp";
 import AttributeTable from "@components/map/table/AttributeTable";
-import { BASEMAP_KEYS, BASEMAPS, ROUTING_PREFERENCES } from '@/app/constants';
-import { LabelledLayer, measureLayer, RouteLineLayer, SearchRingLayer, LocationLayer } from "@components/map/layers";
+import { BASEMAP_KEYS, ROUTING_PREFERENCES } from '@/app/constants';
 import { BaseLayerData, CompResults, ScatterPoint } from "@components/map/utils/LayerTypes";
 import CodeCatLine from "@components/icons/CodeCatLine";
 import { LayerProvider, useLayerContext } from '@/app/context/layerContext';
@@ -32,24 +30,16 @@ import WidgetButton from "@components/WidgetButton";
 import CSVReader from "@map/widgets/csvReader";
 import { downloadCsv, validateName } from "@/app/helpers";
 import { ensureDataHasIds } from "@/app/context/layerContext";
+import { refAtom } from '@/app/atoms';
 
 function MapPageContent() {
-    // set minZoom and MaxZoom for both Map and Deck component
-    const INITIAL_VIEW_STATE = {
-        longitude: -79.9915,
-        latitude: 40.4419,
-        zoom: 10.5,
-        maxZoom: 17,
-        minZoom: 5
-    } as const;
-
-    const deckRef = useRef<any>(null);
     const [isLoading, setIsLoading] = useState(false)
     const [uploadedData, setUploadedData] = useState<any>(null);
     const [isLegendExpanded, setIsLegendExpanded] = useState(true);
     const [baseMap, setBaseMap] = useState<'light' | 'dark' | 'standard' | 'hybrid'>('light');
     const [isTableExpanded, setIsTableExpanded] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const deckRef = useAtomValue(refAtom)
 
     // Ensure hydration matches by deferring render until client mounts
     useEffect(() => {
@@ -163,10 +153,7 @@ function MapPageContent() {
         }
     }, [selectedLayerName])
 
-    const measurementLayer = measureLayer({
-        type: 'FeatureCollection',
-        features: []
-    }, isSubWidgetActive('analysis', 'measure') ? MeasureDistanceMode : ViewMode);
+
 
     useEffect(() => {
         if (uploadedData && uploadedData.data) {
@@ -234,44 +221,7 @@ function MapPageContent() {
         );
     }, [layerManager]);
 
-    const layers = useMemo(() => {
-        const visible = layerManager.filter(layer => layer.visible);
-        const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => [new SearchRingLayer({
-            id: l.id,
-            data: l.data,
-            color: l.colors.fill
-        })])
-        const labelledLayers = visible.filter(l => l.type === 'labelled-scatter').map(l => [new LabelledLayer({
-            id: l.id,
-            data: l.data,
-            color: l.colors.fill
-        })])
-        const routeLayers = visible.filter(l => l.type === 'route-line').map(l => [new RouteLineLayer({
-            id: l.id,
-            data: l.data as any,
-            color: l.colors.fill
-        })])
-        const locationLayers = visible.filter(l => l.type === 'user-location').map(l => [new LocationLayer({
-            id: l.id,
-            data: l.data as any,
-            color: l.colors.fill
-        })])
 
-        type AllLayerTypes = RouteLineLayer | SearchRingLayer | LabelledLayer | any;
-
-        const allLayers: AllLayerTypes[] = [
-            ...routeLayers,
-            ...searchLayers,
-            ...labelledLayers,
-            ...locationLayers
-        ];
-
-        if (isSubWidgetActive('analysis', 'measure')) {
-            allLayers.push(measurementLayer);
-        }
-
-        return allLayers;
-    }, [layerManager, measurementLayer, isSubWidgetActive]);
 
     const getDistance = (inputPoint: ScatterPoint, compareLayer?: BaseLayerData): CompResults[] => {
         if (!compareLayer || !compareLayer.data) return [];
@@ -373,17 +323,7 @@ function MapPageContent() {
             });
     }
 
-    const handleCursorClick = (info: any) => {
-        if (isExpanded('add-points')) {
-            handleAddPointClick(info)
-        } else if (isSubWidgetActive('analysis', 'measure')) {
-            setPopupData(undefined)
-        } else if (info.object) {
-            setPopupData(info);
-        } else {
-            setPopupData(undefined)
-        }
-    };
+
 
     const handleDownloadClick = () => {
         const layer = layerManager.find(layer => layer.name === selectedLayerName);
@@ -808,25 +748,16 @@ function MapPageContent() {
                 )}
             </div>
 
-            <DeckGL
-                ref={deckRef}
-                initialViewState={INITIAL_VIEW_STATE}
-                controller={{
-                    doubleClickZoom: false,
-                    inertia: false
-                }}
-                onClick={(info) => handleCursorClick(info)}
-                layers={layers}
-            >
-                <Map
-                    maxPitch={0}
-                    minZoom={INITIAL_VIEW_STATE.minZoom}
-                    maxZoom={INITIAL_VIEW_STATE.maxZoom}
-                    mapStyle={BASEMAPS[baseMap]}
-                    reuseMaps
-                >
-                </Map>
-            </DeckGL>
+            <MapComponent
+                baseMap={baseMap}
+                layerManager={layerManager}
+                isSubWidgetActive={isSubWidgetActive}
+                isExpanded={isExpanded}
+                popupData={popupData}
+                setPopupData={setPopupData}
+                handleAddPointClick={handleAddPointClick}
+                onMapClick={() => {}}
+            />
         </div>
     );
 }

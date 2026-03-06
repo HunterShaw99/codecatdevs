@@ -1,219 +1,130 @@
 'use client';
-
-import { useCallback, useMemo, useState } from 'react';
-import DeckGL from '@deck.gl/react';
+import React, { useRef, useMemo } from 'react';
+import DeckGL from "@deck.gl/react";
+import MapLibre from "react-map-gl/maplibre";
+import { MeasureDistanceMode, ViewMode } from '@deck.gl-community/editable-layers';
 import { PickingInfo } from '@deck.gl/core';
-import Map, { useControl } from 'react-map-gl/maplibre';
-import { AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { useAtomValue } from 'jotai';
 
-import dataArray from '@map/data/data';
-import type { Point, ClusterObject } from '@map/utils/LayerTypes';
-import { createClusteredLayer } from '@map/layers/clusterLayer';
-import { createIconLayer } from '@map/layers/iconLayer';
-import { getIndexClusters } from '@map/utils/ClusterSettings';
-
-const ICON_ATLAS = '/location-icon-atlas.png';
-
-const BOUNDS = [
-  [-80.1, 40.3], 
-  [-79.8, 40.6]
-];
+import { BASEMAPS } from '@/app/constants';
+import { LabelledLayer, measureLayer, RouteLineLayer, SearchRingLayer, LocationLayer } from "@components/map/layers";
+import { BaseLayerData } from "@components/map/utils/LayerTypes";
+import { refAtom } from '@/app/atoms';
 
 const INITIAL_VIEW_STATE = {
-  longitude: -79.9915,
-  latitude: 40.4419,
-  zoom: 10.5,
-} as const;
+        longitude: -79.9915,
+        latitude: 40.4419,
+        zoom: 10.5,
+        maxZoom: 17,
+        minZoom: 5
+    } as const;
 
-type CustomAttributionProps = {
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-};
+interface MapProps {
+    baseMap: 'light' | 'dark' | 'standard' | 'hybrid';
+    layerManager: BaseLayerData[];
+    isSubWidgetActive: (widget: string, subWidget: string) => boolean;
+    isExpanded: (widget: string) => boolean;
+    popupData: PickingInfo<BaseLayerData> | undefined;
+    setPopupData: (data: PickingInfo<BaseLayerData> | undefined) => void;
+    handleAddPointClick: (event: any) => void;
+    onMapClick: (info: any) => void;
+}
 
-const CustomAttribution = ({ position = 'bottom-right' }: CustomAttributionProps) => {
-  useControl(() => new AttributionControl(), { position });
-  return null;
-};
+const Map = (
+    (
+        {
+            baseMap,
+            layerManager,
+            isSubWidgetActive,
+            isExpanded,
+            popupData,
+            setPopupData,
+            handleAddPointClick,
+            onMapClick,
+        }: MapProps
+    ) => {
+    const deckRef = useAtomValue(refAtom)
 
-const CardMap = () => {
-  const [tooltipHtml, setTooltipHtml] = useState<any | null>(null);
-  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const [cluster, setCluster] = useState<any>(null);
+    const measurementLayer = measureLayer({
+        type: 'FeatureCollection',
+        features: []
+    }, isSubWidgetActive('analysis', 'measure') ? MeasureDistanceMode : ViewMode);
 
-  const hiddenPointNames = useMemo(() => {
-    const index = getIndexClusters(dataArray, 40);
-    const raw = index.getClusters([-180, -90, 180, 90], viewState.zoom) as any[];
-    setCluster(raw);
+    const layers = useMemo(() => {
+        const visible = layerManager.filter(layer => layer.visible);
+        const searchLayers = visible.filter(l => l.type === 'search-ring').map(l => [new SearchRingLayer({
+            id: l.id,
+            data: l.data,
+            color: l.colors.fill
+        })])
+        const labelledLayers = visible.filter(l => l.type === 'labelled-scatter').map(l => [new LabelledLayer({
+            id: l.id,
+            data: l.data,
+            color: l.colors.fill
+        })])
+        const routeLayers = visible.filter(l => l.type === 'route-line').map(l => [new RouteLineLayer({
+            id: l.id,
+            data: l.data as any,
+            color: l.colors.fill
+        })])
+        const locationLayers = visible.filter(l => l.type === 'user-location').map(l => [new LocationLayer({
+            id: l.id,
+            data: l.data as any,
+            color: l.colors.fill
+        })])
 
-    const names = new Set<string>();
-    raw.forEach((feature) => {
-      const props = feature && feature.properties;
-      // Cluster feature: fetch leaves (original points) and read their properties
-      if (props && props.cluster) {
-        const pointCount = props.point_count ?? 0;
-        if (pointCount > 1) {
-          const clusterId = props.cluster_id;
-          const leaves = index.getLeaves(clusterId, Infinity) || [];
-          leaves.forEach((leaf: any) => {
-            const p = leaf && leaf.properties;
-            if (p && 'name' in p) names.add(p.name);
-          });
+        type AllLayerTypes = RouteLineLayer | SearchRingLayer | LabelledLayer | any;
+
+        const allLayers: AllLayerTypes[] = [
+            ...routeLayers,
+            ...searchLayers,
+            ...labelledLayers,
+            ...locationLayers
+        ];
+
+        if (isSubWidgetActive('analysis', 'measure')) {
+            allLayers.push(measurementLayer);
         }
-      }
-      // Non-cluster (single point) features are ignored for hiding since they are not clustered
-    });
-    return names;
-  },[dataArray, viewState.zoom]);
 
-  // 2. Filter data for icon layer (hide points in clusters)
-  const visiblePoints = useMemo(
-    () => dataArray.filter(point => !hiddenPointNames.has(point.name)),
-    [dataArray, hiddenPointNames]
-  );
+        return allLayers;
+    }, [layerManager, isSubWidgetActive]);
 
-  // 3. Pass filtered data to layers
-  const iconLayer = createIconLayer(visiblePoints, viewState);
-  const clusterLayer = createClusteredLayer(cluster, ICON_ATLAS);
+        const handleCursorClick = (info: any) => {
+            if (isExpanded('add-points')) {
+                handleAddPointClick(info)
+            } else if (isSubWidgetActive('analysis', 'measure')) {
+                setPopupData(undefined)
+            } else if (info.object) {
+                setPopupData(info);
+            } else {
+                setPopupData(undefined)
+            }
+            onMapClick(info);
+        };
 
-  const layers = [clusterLayer, iconLayer];
-
-  const onViewStateChange = ({ viewState }: { viewState: any }) => {
-      const newViewState = {
-        ...viewState,
-        longitude: Math.max(Math.min(viewState.longitude, BOUNDS[1][0]), BOUNDS[0][0]),
-        latitude: Math.max(Math.min(viewState.latitude, BOUNDS[1][1]), BOUNDS[0][1]),
-      };
-      setViewState(newViewState);
-      return newViewState;
+        return (
+            <DeckGL
+                ref={deckRef}
+                initialViewState={INITIAL_VIEW_STATE}
+                controller={{
+                    doubleClickZoom: false,
+                    inertia: false
+                }}
+                onClick={(info) => handleCursorClick(info)}
+                layers={layers}
+            >
+                <MapLibre
+                    maxPitch={0}
+                    minZoom={INITIAL_VIEW_STATE.minZoom}
+                    maxZoom={INITIAL_VIEW_STATE.maxZoom}
+                    mapStyle={BASEMAPS[baseMap]}
+                    reuseMaps
+                >
+                </MapLibre>
+            </DeckGL>
+        );
     }
+);
 
-  const buildTooltipHtml = useCallback((object: Point | ClusterObject) => {
-    if (!object) return null;
-
-    if ('cluster' in object && object.cluster) {
-      return (
-        <div
-          style={{
-            boxSizing: 'border-box',
-            maxWidth: 240,
-            maxHeight: 160,
-            overflow: 'auto',
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            padding: '8px 12px'
-          }}
-        >
-          <div style={{
-            fontSize: 13,
-            fontWeight: 600,
-            margin: '0 0 6px 0',
-            color: 'var(--ctp-text)'
-          }}>
-            {object.point_count} Locations
-          </div>
-          <div style={{
-            fontSize: 12,
-            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
-            margin: 0
-          }}>
-            Zoom in to see individual locations.
-          </div>
-        </div>
-      );
-    }
-
-    if ('name' in object) {
-      return (
-        <div
-          style={{
-            boxSizing: 'border-box',
-            maxWidth: 240,
-            maxHeight: 160,
-            overflow: 'auto',
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
-            padding: '8px 12px'
-          }}
-        >
-          <div style={{
-            fontSize: 13,
-            fontWeight: 600,
-            margin: '0 0 6px 0',
-            color: 'var(--ctp-text)'
-          }}>
-            {object.name}
-          </div>
-          <div style={{
-            fontSize: 12,
-            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
-            margin: 0
-          }}>
-            {object.address}
-          </div>
-          <div style={{
-            fontSize: 10,
-            color: 'var(--ctp-subtext0, rgba(255,255,255,0.8))',
-            margin: 0
-          }}>
-            {object.note}
-          </div>
-        </div>
-      );
-    }
-  }, []);
-
-  const handleHover = useCallback(({ object }: PickingInfo<Point>) => {
-    if (object) {
-      setTooltipHtml(buildTooltipHtml(object));
-    } else {
-      setTooltipHtml(null);
-    }
-  }, [buildTooltipHtml]);
-
-    return (
-    <div
-      id="map-container"
-      className="relative h-96 w-full rounded-lg overflow-hidden shadow-[0_0_30px_rgba(128,128,128,0.4),0_0_50px_rgba(128,128,128,0.2)]"
-    >
-      <DeckGL
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={{inertia: false}}
-        layers={layers}
-        onViewStateChange={onViewStateChange}
-        onHover={handleHover}
-      >
-        <Map
-          attributionControl={false}
-          maxPitch={0}
-          minZoom={8}
-          maxZoom={15}
-          mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-          reuseMaps
-        >
-          <CustomAttribution />
-        </Map>
-      </DeckGL>
-
-        {tooltipHtml && (
-          <div
-            className="absolute top-3 right-3 z-50"
-            style={{
-              pointerEvents: 'none',
-              maxWidth: 240,
-              maxHeight: 160,
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-              borderRadius: 8,
-              border: '1px solid var(--ctp-surface0)',
-              background: 'var(--ctp-mantle)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-              padding: 0,
-            }}>
-            {tooltipHtml}
-          </div>
-        )}
-  </div>
-  );
-};
-
-export default CardMap;
+export default Map;

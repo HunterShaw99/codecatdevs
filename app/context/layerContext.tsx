@@ -1,8 +1,10 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useAtom } from 'jotai';
 import { BaseLayerData } from "@map/utils/LayerTypes";
 import { randomHex } from "@/app/utils/color";
 import { getAllIndicesByProperty } from "@/app/helpers";
+import { layersAtom } from "@/app/atoms";
 
 /**
  * Generates a unique layer ID by combining a hexadecimal timestamp and a random 6-digit hexadecimal string.
@@ -65,16 +67,17 @@ export const useLayerContext = () => {
  * @returns {JSX.Element} The provider component
  */
 export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
-    const [layerManager, setLayerManager] = useState<BaseLayerData[]>([{
-        id: generateLayerId(),
-        name: 'Default',
-        type: 'labelled-scatter',
-        colors: { fill: randomHex() },
-        visible: true,
-        data: []
-    }]);
-
+    const [layerManager, setLayerManager] = useAtom(layersAtom);
     const [selectedLayerName, setSelectedLayerName] = useState('Default');
+
+    /**
+     * Set initial selected layer name from persisted layers
+     */
+    useEffect(() => {
+        if (layerManager && layerManager.length > 0) {
+            setSelectedLayerName(layerManager[0].name);
+        }
+    }, []);
 
     /**
      * Memoized map of layers by their IDs for efficient lookup.
