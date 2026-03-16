@@ -1,4 +1,8 @@
 import { HEADERS_MAPPING } from "./constants";
+import React, { useState, useEffect, useRef } from 'react';
+import { useAtom } from 'jotai';
+import { photosAtom } from '@/app/atoms';
+import { ArrowRightIcon, ArrowLeftIcon} from '@radix-ui/react-icons'
 
 /**
  * Converts SVG text to a data URL that can be used in image sources.
@@ -109,3 +113,98 @@ export const getAllIndicesByProperty = (array: any[], propName: string, value: a
     });
     return indices;
 }
+
+export const ImagePreview : React.FC<{ files: any[]; }> = ({files}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const goNext = () => setCurrentIndex((i) => (i + 1) % files.length);
+  const goPrev = () => setCurrentIndex((i) => (i - 1 + files.length) % files.length);
+
+  if (files.length === 0) return null;
+
+  const current = files[currentIndex];
+  const next = files[(currentIndex + 1) % files.length];
+
+  return (
+    <div className="image-preview">
+      <div>
+        <img src={current.file} alt="current" />
+        <div className="file-counter">{currentIndex + 1} / {files.length}</div>
+      </div>
+      {files.length > 1 && (
+        <div className="flex flex-col items-center gap-2">
+            <img src={next.file} alt="next" className="next-preview" />
+            <div className="flex gap-2">
+              <button onClick={goPrev}><ArrowLeftIcon/></button>
+              <button onClick={goNext}><ArrowRightIcon/></button>
+            </div>
+        </div>
+      )
+    }
+    </div>
+  );
+}
+
+export const AddPhotoButton : React.FC<{ featureId: string; }> = ({featureId}) => {
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [hasFiles, setHasFiles] = useState<any>(null);
+    const [photos, setPhotos] = useAtom(photosAtom);
+    const fileInputRef = useRef<HTMLInputElement>(null); 
+
+    const handleClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            setSelectedFile(files[0]);
+        }
+    };
+
+    const addFileToStorage = async (featureId: string, file: File) => {
+        // Convert file to base64 for localStorage persistence
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64Content = reader.result as string;
+            const newPhoto = {
+                id: `${featureId}-${Date.now()}`,
+                featureId: featureId,
+                file: base64Content,
+                filename: file.name,
+                timestamp: Date.now().toString(),
+            };
+
+            setPhotos((prev) => [...prev, newPhoto]);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    useEffect(() => {
+        if (selectedFile && featureId) {
+            addFileToStorage(featureId, selectedFile);
+            setSelectedFile(null);
+        }
+    }, [selectedFile, featureId]);
+
+    useEffect(() => {
+        const featurePhotos = photos.filter((p: any) => p.featureId === featureId);
+        setHasFiles(featurePhotos);
+    }, [featureId, photos]);
+
+    return (
+        <div>
+            {hasFiles && hasFiles.length > 0 && <ImagePreview files={hasFiles}/>}
+            <button onClick={handleClick} className="custom-file-upload-button">
+                Upload Picture
+            </button>
+            <input 
+                type="file" 
+                ref={fileInputRef}
+                className="hidden-input"
+                accept="image/png, image/jpeg, image/gif" 
+                onChange={handleFileChange} 
+            />
+        </div>
+    );
+};

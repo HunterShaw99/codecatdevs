@@ -1,6 +1,7 @@
 import {Cross1Icon, TrashIcon} from "@radix-ui/react-icons";
 import {useEffect, useMemo, useRef} from 'react';
 import {useLayerContext} from "@/app/context/layerContext";
+import { AddPhotoButton } from "@/app/helpers";
 
 const getPopUpValues = (props: any) => {
     let name, lat, long;
@@ -39,6 +40,7 @@ const getPopUpContent = (layerType: string, props: any) => {
     if (layerType === 'LabelledLayer') {
         return (
             <div>
+                <AddPhotoButton featureId={props.object.id as string}/>
                 <p><span className="font-bold">Name:</span> {name}</p>
                 <p><span className="font-bold">Coordinates:</span> {lat.toFixed(3)}, {long.toFixed(3)}</p>
             </div>

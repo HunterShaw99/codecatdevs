@@ -7,7 +7,8 @@ import {
     RulerHorizontalIcon,
     Share1Icon,
     TargetIcon,
-    UploadIcon
+    UploadIcon,
+    SewingPinIcon
 } from "@radix-ui/react-icons"
 
 const ICON_MAPPING : Record<string, any> = {
@@ -17,7 +18,8 @@ const ICON_MAPPING : Record<string, any> = {
     measure: RulerHorizontalIcon,
     route: Share1Icon,
     ring: TargetIcon,
-    upload: UploadIcon
+    upload: UploadIcon,
+    locate: SewingPinIcon
 }
 
 const WidgetButton: React.FC<{ id: string; label: string; iconType: string }> = ({ id, label, iconType }) => {
