@@ -23,6 +23,7 @@ const INITIAL_VIEW_STATE = {
 interface MapProps {
     baseMap: 'light' | 'dark' | 'standard' | 'hybrid';
     layerManager: BaseLayerData[];
+    userLocation?: { latitude: number; longitude: number } | null;
     isSubWidgetActive: (widget: string, subWidget: string) => boolean;
     isExpanded: (widget: string) => boolean;
     popupData: PickingInfo<BaseLayerData> | undefined;
@@ -36,6 +37,7 @@ const Map = (
         {
             baseMap,
             layerManager,
+            userLocation,
             isSubWidgetActive,
             isExpanded,
             popupData,
@@ -68,11 +70,11 @@ const Map = (
             data: l.data as any,
             color: l.colors.fill
         })])
-        const locationLayers = visible.filter(l => l.type === 'user-location').map(l => [new LocationLayer({
-            id: l.id,
-            data: l.data as any,
-            color: l.colors.fill
-        })])
+        const locationLayers = userLocation ? [new LocationLayer({
+            id: 'user-location',
+            data: [userLocation] as any,
+            color: '#FF0000'
+        })] : []
 
         type AllLayerTypes = RouteLineLayer | SearchRingLayer | LabelledLayer | any;
 
@@ -88,7 +90,7 @@ const Map = (
         }
 
         return allLayers;
-    }, [layerManager, isSubWidgetActive]);
+    }, [layerManager, userLocation, isSubWidgetActive]);
 
         const handleCursorClick = (info: any) => {
             if (isExpanded('add-points')) {
@@ -120,7 +122,7 @@ const Map = (
                     maxZoom={INITIAL_VIEW_STATE.maxZoom}
                     mapStyle={BASEMAPS[baseMap]}
                     reuseMaps
-                >
+                >      
                 </MapLibre>
             </DeckGL>
         );

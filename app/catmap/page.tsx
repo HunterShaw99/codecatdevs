@@ -1,9 +1,8 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DownloadIcon,
   LayersIcon,
-  ListBulletIcon,
   RulerHorizontalIcon,
   Share1Icon,
   TableIcon,
@@ -14,11 +13,12 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Separator } from "radix-ui";
 import { distance, point } from "@turf/turf";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useAtom } from "jotai";
 
-import { hexToRGB, randomHex } from "@/app/utils/color";
-import MapComponent from "@components/map/Map";
+import { randomHex } from "@/app/utils/color";
 import { PopUpWindow } from "@components/map/popup/PopUp";
+import { userLocationAtom } from "@/app/atoms";
+import MapComponent from "@components/map/Map";
 import AttributeTable from "@components/map/table/AttributeTable";
 import { BASEMAP_KEYS, ROUTING_PREFERENCES } from "@/app/constants";
 import {
@@ -82,10 +82,7 @@ function MapPageContent() {
   >("distance");
 
   //user location
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [location, setLocation] = useAtom(userLocationAtom);
   const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -135,28 +132,7 @@ function MapPageContent() {
     }
   }, [isExpanded]);
 
-  useEffect(() => {
-    let userId: string | null = null;
-
-    if (location) {
-      userId = addNewLayer({
-        id: "user-location",
-        name: validateName(
-          "User",
-          layerManager.map((layer) => layer.name),
-        ),
-        type: "user-location",
-        data: [location],
-        visible: true,
-      });
-    }
-
-    return () => {
-      if (userId) {
-        deleteLayer(userId);
-      }
-    };
-  }, [location, addNewLayer, deleteLayer]);
+  // User location is now stored in userLocationAtom and not added to layerManager
 
   useMemo(() => {
     const layer = layerManager.find(
@@ -841,10 +817,10 @@ function MapPageContent() {
           />
         )}
       </div>
-
       <MapComponent
         baseMap={baseMap}
         layerManager={layerManager}
+        userLocation={location}
         isSubWidgetActive={isSubWidgetActive}
         isExpanded={isExpanded}
         popupData={popupData}

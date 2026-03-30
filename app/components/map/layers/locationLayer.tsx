@@ -9,6 +9,7 @@ export class LocationLayer extends CompositeLayer<{ data: any[], color?: any, ra
         return [new ScatterplotLayer({
             id: 'points-layer',
             data: this.props.data,
+            pickable: true,
             getPosition:  (d: any) => [d.longitude, d.latitude],
             getFillColor: [...hexToRGB(this.props.color), 150],
             getRadius: this.props.radius || 500,

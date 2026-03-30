@@ -35,3 +35,12 @@ export const photosAtom = atomWithStorage<Array<{
   'codecat-photos',
   []
 );
+
+/**
+ * Non-persisted atom for storing user's current location
+ * This is not saved to localStorage and is cleared on page reload
+ */
+export const userLocationAtom = atom<{
+  latitude: number;
+  longitude: number;
+} | null>(null);
