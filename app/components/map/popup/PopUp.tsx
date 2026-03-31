@@ -134,10 +134,29 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
         if (!popupRef.current) return;
 
         const popup = popupRef.current;
-        const popupWidth = popup.offsetWidth;
 
-        popup.style.left = `${props.x - popupWidth / 2}px`;
-        popup.style.top = `${props.y - 350}px`;
+        const updatePosition = () => {
+            const popupWidth = popup.offsetWidth;
+            const popupHeight = popup.clientHeight - (popup.offsetHeight - popup.clientHeight);
+
+            popup.style.left = `${props.x - popupWidth / 2}px`;
+            //subtract 102 (expected popupHeight) from popupHeight to resize
+            popup.style.top = `${props.y - window.innerHeight / 2 - (popupHeight - 102)}px`;
+        };
+
+        // Initial positioning
+        updatePosition();
+
+        // Use ResizeObserver to reposition when popup content changes
+        const resizeObserver = new ResizeObserver(() => {
+            updatePosition();
+        });
+
+        resizeObserver.observe(popup);
+
+        return () => {
+            resizeObserver.disconnect();
+        };
     }, [props.x, props.y]);
 
     const nearestLayerProps = layerType === 'LocationLayer' ? {
@@ -159,8 +178,8 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
     return (
             <div
             ref={popupRef}
-            className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs min-h-fit
-                overflow-y-auto min-w-50`}
+            className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs
+                h-fit min-w-50`}
         >
                     <div className="flex justify-between items-center mb-1">
                         <h3 className="font-bold text-sm">{header}</h3>

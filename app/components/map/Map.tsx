@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import DeckGL from "@deck.gl/react";
 import MapLibre from "react-map-gl/maplibre";
 import { MeasureDistanceMode, ViewMode } from '@deck.gl-community/editable-layers';
@@ -47,6 +47,12 @@ const Map = (
         }: MapProps
     ) => {
     const deckRef = useAtomValue(refAtom)
+
+     const [viewState, setViewState] = useState(INITIAL_VIEW_STATE)
+    const handleViewStateChange = ({ viewState: newViewState }) => {
+        setViewState(newViewState);
+        setPopupData(undefined);
+    };
 
     const measurementLayer = measureLayer({
         type: 'FeatureCollection',
@@ -108,7 +114,8 @@ const Map = (
         return (
             <DeckGL
                 ref={deckRef}
-                initialViewState={INITIAL_VIEW_STATE}
+                initialViewState={viewState}
+                onViewStateChange={handleViewStateChange}
                 controller={{
                     doubleClickZoom: false,
                     inertia: false
