@@ -1,10 +1,10 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { BaseLayerData } from "@map/utils/LayerTypes";
 import { randomHex } from "@/app/utils/color";
 import { getAllIndicesByProperty } from "@/app/helpers";
-import { layersAtom } from "@/app/atoms";
+import { layersAtom, photosAtom } from "@/app/atoms";
 
 /**
  * Generates a unique layer ID by combining a hexadecimal timestamp and a random 6-digit hexadecimal string.
@@ -43,6 +43,7 @@ interface LayerContextType {
     updateLayerColorDebounced: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
     updateLayerOpacity: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
     getLayerById: (layerId: string) => BaseLayerData | undefined;
+    addPhotos: (layerId: string, featureId: string, photoUrl: { id: string; filename: string }, fileData: string) => void;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -68,6 +69,7 @@ export const useLayerContext = () => {
  */
 export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     const [layerManager, setLayerManager] = useAtom(layersAtom);
+    const setPhotos = useSetAtom(photosAtom);
     const [selectedLayerName, setSelectedLayerName] = useState('Default');
 
     /**
@@ -111,7 +113,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
             data: ensureDataHasIds(newLayer.data || [], id),
             visible: true,
             layer: newLayer.layer || undefined,
-            parentLayerId: newLayer.parentLayerId || undefined
+            parentLayerId: newLayer.parentLayerId || undefined,
+            photoUrls: undefined
         } as BaseLayerData;
 
         setLayerManager(prevLayers => [...prevLayers, created]);
@@ -257,6 +260,43 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     const updateLayerOpacity = useMemo(() => debounce(updateLayerColor, 10), [updateLayerColor, debounce]);
 
     /**
+     * Adds a photo to a data item in a layer's data array.
+     * Photo file data is stored separately to avoid localStorage quota issues.
+     * @param {string} layerId - The ID of the layer
+     * @param {string} featureId - The ID of the feature/data item to add the photo to
+     * @param {{ id: string; filename: string }} photoUrl - The photo metadata (id and filename)
+     * @param {string} fileData - The base64-encoded file data
+     */
+    const addPhotos = useCallback((layerId: string, featureId: string, photoUrl: { id: string; filename: string }, fileData: string) => {
+        setLayerManager(prevLayers => {
+            const layer = getLayerById(layerId);
+            if (!layer) return prevLayers;
+
+            return prevLayers.map(l =>
+                l.id === layerId
+                    ? {
+                        ...l,
+                        data: l.data.map(item =>
+                            item.id === featureId
+                                ? {
+                                    ...item,
+                                    photoUrls: [...(item.photoUrls || []), photoUrl]
+                                }
+                                : item
+                        )
+                    }
+                    : l
+            );
+        });
+
+        // Store file data separately in photosAtom to avoid localStorage quota issues
+        setPhotos(prev => ({
+            ...prev,
+            [photoUrl.id]: fileData
+        }));
+    }, [getLayerById, setPhotos]);
+
+    /**
      * Effect to keep selectedLayerName in sync with available layers.
      * Falls back to the first existing layer when the current selection is invalid.
      */
@@ -286,7 +326,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
         updateLayerColor,
         updateLayerColorDebounced,
         updateLayerOpacity,
-        getLayerById
+        getLayerById,
+        addPhotos
     }), [
         layerManager,
         selectedLayerName,
@@ -297,7 +338,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
         updateLayerColor,
         updateLayerColorDebounced,
         updateLayerOpacity,
-        getLayerById
+        getLayerById,
+        addPhotos
     ]);
 
     return (

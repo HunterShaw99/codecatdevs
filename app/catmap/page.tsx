@@ -39,18 +39,11 @@ import { refAtom } from "@/app/atoms";
 function MapPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedData, setUploadedData] = useState<any>(null);
-  const [isLegendExpanded, setIsLegendExpanded] = useState(true);
   const [baseMap, setBaseMap] = useState<
     "light" | "dark" | "standard" | "hybrid"
   >("light");
   const [isTableExpanded, setIsTableExpanded] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const deckRef = useAtomValue(refAtom);
-
-  // Ensure hydration matches by deferring render until client mounts
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // layer state
   const {
@@ -59,7 +52,6 @@ function MapPageContent() {
     selectedLayerName,
     setSelectedLayerName,
     addNewLayer,
-    deleteLayer,
   } = useLayerContext();
 
   const { isExpanded, isSubWidgetActive, toggleSubWidget } = useWidgetManager();

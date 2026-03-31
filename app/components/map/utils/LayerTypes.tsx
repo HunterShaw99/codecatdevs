@@ -13,6 +13,12 @@ export interface ClusterObject {
   points: Point[];
 }
 
+interface photoUrl {
+  id: string;
+  file: string;
+  filename: string;
+}
+
 export type BaseLayerData = {
         id: string;
         name: string;
@@ -21,7 +27,6 @@ export type BaseLayerData = {
         data: any[];
         visible: boolean;
         parentLayerId?: string;
-        photoUrl?: string;
     }
 
 export type ScatterPoint = {
@@ -29,6 +34,7 @@ export type ScatterPoint = {
     latitude: number
     longitude: number
     status?: string
+    photoUrl?: photoUrl
 }
 
 export interface CompResults {

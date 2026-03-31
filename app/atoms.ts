@@ -22,18 +22,12 @@ export const layersAtom = atomWithStorage<BaseLayerData[]>(
 );
 
 /**
- * Persistent atom for storing photos/files
- * Stores file metadata and base64 encoded file content
+ * Persistent atom for storing photo file data in localStorage
+ * Stores base64-encoded image data keyed by photo ID to avoid quota issues with layersAtom
  */
-export const photosAtom = atomWithStorage<Array<{
-  id: string;
-  featureId: string;
-  file: string; // base64 encoded file content
-  filename: string;
-  timestamp: string;
-}>>(
+export const photosAtom = atomWithStorage<Record<string, string>>(
   'codecat-photos',
-  []
+  {}
 );
 
 /**

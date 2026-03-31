@@ -1,7 +1,7 @@
 import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useMemo, useState, useRef, useEffect } from 'react';
 import { useLayerContext } from "@/app/context/layerContext";
-import { AddPhotoButton } from "@/app/helpers";
+import { AddPhotoButton } from "@/app/components/map/popup/imageHandling";
 import { NearestLayer } from "@/app/components/NearestLayer";
 import { ChangeEvent } from "react";
 import { distance, point, featureCollection, nearestPoint } from "@turf/turf";
@@ -48,7 +48,7 @@ const getPopUpContent = (layerType: string, props: any, nearestLayerProps?: any)
     if (layerType === 'LabelledLayer') {
         return (
             <div>
-                <AddPhotoButton featureId={props.object.id as string} />
+                <AddPhotoButton layerId={props.layer.id} featureId={props.object.id as string} />
                 <p><span className="font-bold">Name:</span> {name}</p>
                 <p><span className="font-bold">Coordinates:</span> {lat.toFixed(3)}, {long.toFixed(3)}</p>
             </div>
