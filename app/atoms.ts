@@ -43,4 +43,4 @@ export const userLocationAtom = atom<{
 /**
  * Non-persisted atom for pop-up controls
  */
-export const popUpAtom = atom<{popupData: PickingInfo<BaseLayerData>} | undefined>(undefined);
+export const popUpAtom = atom<PickingInfo<BaseLayerData> | undefined>(undefined);

@@ -1,10 +1,15 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
 interface AppLayoutProps {
     children: React.ReactNode;
 }
 
 const AppLayout = ({children}: AppLayoutProps) => {
+    const pathname = usePathname();
+    const showFooter = pathname === '/';
+
     return (
         <div className="min-h-screen relative overflow-hidden" style={{ backgroundColor: 'var(--color-dark-gray-1)' }}>
             {/* Animated Slanted Strips Background using Tailwind v4 syntax */}
@@ -17,17 +22,19 @@ const AppLayout = ({children}: AppLayoutProps) => {
                     {children}
                 </main>
 
-                <footer
-                    className="shadow-sm border-t px-6 py-3 flex-col justify-center items-center"
-                    style={{
-                        backgroundColor: 'var(--color-dark-gray-2)',
-                        borderColor: 'var(--color-dark-gray-4)',
-                        color: 'var(--color-foreground)'
-                    }}
-                >
-                    <div className={'flex justify-center items-center'} style={{ color: 'var(--color-muted-foreground)' }}>Proudly made by</div>
-                    <div className={'flex justify-center items-center text-lg'}>⌨️ 🐱 ☕</div>
-                </footer>
+                {showFooter && (
+                    <footer
+                        className="shadow-sm border-t px-6 py-3 flex-col justify-center items-center"
+                        style={{
+                            backgroundColor: 'var(--color-dark-gray-2)',
+                            borderColor: 'var(--color-dark-gray-4)',
+                            color: 'var(--color-foreground)'
+                        }}
+                    >
+                        <div className={'flex justify-center items-center'} style={{ color: 'var(--color-muted-foreground)' }}>Proudly made by</div>
+                        <div className={'flex justify-center items-center text-lg'}>⌨️ 🐱 ☕</div>
+                    </footer>
+                )}
             </div>
         </div>
     );

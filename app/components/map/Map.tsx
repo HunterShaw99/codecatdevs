@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import DeckGL from "@deck.gl/react";
+import { MapViewState } from "@deck.gl/core"
 import MapLibre from "react-map-gl/maplibre";
 import { MeasureDistanceMode, ViewMode } from '@deck.gl-community/editable-layers';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -47,8 +48,8 @@ const Map = (
     const [popupData, setPopupData] = useAtom(popUpAtom)
 
      const [viewState, setViewState] = useState(INITIAL_VIEW_STATE)
-    const handleViewStateChange = ({ viewState: newViewState }) => {
-        setViewState(newViewState);
+    const handleViewStateChange = ({viewState} : {viewState : MapViewState}) => {
+        setViewState(viewState as any);
         setPopupData(undefined);
     };
 
@@ -98,7 +99,7 @@ const Map = (
 
         const handleCursorClick = (info: any, event : MjolnirEvent ) => {
 
-            if (event.srcEvent?.target?.id !== 'view-default-view') {
+            if (event.srcEvent.target instanceof HTMLElement && event.srcEvent.target.id !== 'view-default-view') {
                 return;
             }
             else if (isExpanded('add-points')) {
@@ -117,7 +118,7 @@ const Map = (
                 id='basemap'
                 ref={deckRef}
                 initialViewState={viewState}
-                onViewStateChange={handleViewStateChange}
+                onViewStateChange={handleViewStateChange as any}
                 controller={{
                     doubleClickZoom: false,
                     inertia: false
@@ -125,7 +126,7 @@ const Map = (
                 onClick={(info, event) => handleCursorClick(info, event)}
                 layers={layers}
             >
-            {popupData?.object && (
+            {popupData && popupData.object && (
                 <PopUpWindow
                     props={popupData}
                     deckRef={deckRef}
