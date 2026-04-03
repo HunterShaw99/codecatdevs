@@ -27,7 +27,7 @@ export const ImagePreview : React.FC<{ files: any[]; onDelete: (photoId: string)
   const next = files[(currentIndex + 1) % files.length];
 
   return (
-    <div className="py-1 flex items-center gap-4">
+    <div className="py-1 flex items-center gap-2">
       <div>
         <img src={current.file} alt="current" className="image-preview"/>
         <div className="file-counter flex flex-row">
@@ -41,8 +41,8 @@ export const ImagePreview : React.FC<{ files: any[]; onDelete: (photoId: string)
         <div className="flex flex-col items-center gap-2">
             <img src={next.file} alt="next" className="next-preview" />
             <div className="flex gap-2">
-              <button onClick={goPrev}><ArrowLeftIcon/></button>
-              <button onClick={goNext}><ArrowRightIcon/></button>
+              <button onClick={goPrev} className='hover:scale-125'><ArrowLeftIcon/></button>
+              <button onClick={goNext} className='hover:scale-125'><ArrowRightIcon/></button>
             </div>
         </div>
       )}

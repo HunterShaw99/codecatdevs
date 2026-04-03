@@ -739,7 +739,7 @@ function MapPageContent() {
                         className={`mt-2 py-2 px-4 text-sm rounded-md font-semibold ${
                           isRoutingDisabled
                             ? " text-red-700 bg-red hover:bg-red-400"
-                            : " text-peach-5 bg-peach-8 hover:bg-peach-7"
+                            : " text-peach-5 bg-peach-8 hover:bg-peach-7 hover:text-peach-4"
                         }`}
                       >
                         Route Points
