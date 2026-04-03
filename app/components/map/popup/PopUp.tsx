@@ -29,7 +29,7 @@ export const getPopUpValues = (props: any) => {
     return [name, lat, long];
 }
 
-const getPopUpHeader = (layerType: any) => {
+const getPopUpHeader = (layerType: any, props?: any) => {
 
     if (layerType === 'LabelledLayer') {
         return 'Point Details';
@@ -37,6 +37,8 @@ const getPopUpHeader = (layerType: any) => {
         return 'Search Area Results';
     } else if (layerType === 'RouteLineLayer') {
         return 'Route Information';
+    } else if (layerType === 'LocationLayer') {
+        return `User Location: ${props.object.latitude.toFixed(3)}, ${props.object.longitude.toFixed(3)}`
     } else {
         return 'Layer Details';
     }
@@ -127,7 +129,7 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
     };
 
     const layerType = props.layer.constructor.layerName;
-    const header = getPopUpHeader(layerType);
+    const header = getPopUpHeader(layerType, props);
     const popupRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -206,7 +208,7 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
             <hr className={'px-1'}/>
                     <div className="flex justify-between items-end-safe">
                         {content}
-                        {layerType !== 'RouteLineLayer' && (
+                        {layerType !== 'RouteLineLayer' || layerType !== 'LocationLayer'  && (
                             <button
                                 onClick={handleDelete}
                                 className="text-red-500 hover:text-red-700"
