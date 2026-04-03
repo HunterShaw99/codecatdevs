@@ -4,7 +4,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { BaseLayerData } from "@map/utils/LayerTypes";
 import { randomHex } from "@/app/utils/color";
 import { getAllIndicesByProperty } from "@/app/helpers";
-import { layersAtom, photosAtom } from "@/app/atoms";
+import { layersAtom, photosAtom, popUpAtom } from "@/app/atoms";
 
 /**
  * Generates a unique layer ID by combining a hexadecimal timestamp and a random 6-digit hexadecimal string.
@@ -44,6 +44,7 @@ interface LayerContextType {
     updateLayerOpacity: (layerId: string, newColors: { fill?: string }, opacity?: number) => void;
     getLayerById: (layerId: string) => BaseLayerData | undefined;
     addPhotos: (layerId: string, featureId: string, photoUrl: { id: string; filename: string }, fileData: string) => void;
+    deletePhoto: (layerId: string, featureId: string, photoId: string) => void;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -71,6 +72,7 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     const [layerManager, setLayerManager] = useAtom(layersAtom);
     const setPhotos = useSetAtom(photosAtom);
     const [selectedLayerName, setSelectedLayerName] = useState('Default');
+    const [popupData, setPopupData] = useAtom(popUpAtom);
 
     /**
      * Set initial selected layer name from persisted layers
@@ -130,8 +132,14 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
      * Toggles the visibility of a layer.
      * @param {string} layerId - The ID of the layer to toggle
      */
-    const toggleLayerVisibility = useCallback((layerId: string) => {
+    const toggleLayerVisibility = (layerId: string) => {
+
+        if (popupData && popupData?.layer?.id === layerId) {
+            setPopupData(undefined)
+        };
+
         setLayerManager(prevLayers => {
+
             const layer = getLayerById(layerId);
             if (!layer) return prevLayers;
 
@@ -139,27 +147,37 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
                 l.id === layerId ? { ...l, visible: !l.visible } : l
             );
         });
-    }, [getLayerById]);
+    };
 
     /**
      * Deletes a layer by its ID. If layer has children, also removes them.
      * @param {string} layerId - The ID of the layer to delete
      */
-    const deleteLayer = useCallback((layerId: string) => {
+    const deleteLayer = (layerId: string) => {
+
+        if (popupData && popupData?.layer?.id === layerId) {
+            setPopupData(undefined)
+        };
+
         setLayerManager(prev => {
             const childIndices = getAllIndicesByProperty(prev, 'parentLayerId', layerId);
             const newLayers = prev.filter((_, index) => !childIndices.includes(index));
 
             return newLayers.filter(l => l.id !== layerId);
         })
-    }, []);
+    };
 
     /**
      * Deletes a feature from a layer.
      * @param {string} layerId - The ID of the layer containing the feature
      * @param {any} featureId - The ID of the feature to delete
      */
-    const deleteLayerFeature = useCallback((layerId: string, featureId: any) => {
+    const deleteLayerFeature = (layerId: string, featureId: any) => {
+
+        if (popupData && popupData!.layer?.id === layerId && popupData!.object?.id) {
+            setPopupData(undefined)
+        };
+
         setLayerManager(prevLayers => {
             const newLayers = [...prevLayers];
             const layerIndex = prevLayers.findIndex(layer => layer.id === layerId);
@@ -197,7 +215,7 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
 
             return newLayers;
         });
-    }, []);
+    };
 
     /**
      * Updates the color of a layer.
@@ -297,6 +315,44 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
     }, [getLayerById, setPhotos]);
 
     /**
+     * Deletes a photo from a data item in a layer's data array.
+     * Also removes the associated file data from photosAtom.
+     * @param {string} layerId - The ID of the layer
+     * @param {string} featureId - The ID of the feature/data item
+     * @param {string} photoId - The ID of the photo to delete
+     */
+    const deletePhoto = useCallback((layerId: string, featureId: string, photoId: string) => {
+        setLayerManager(prevLayers => {
+            const layer = getLayerById(layerId);
+            if (!layer) return prevLayers;
+
+
+            return prevLayers.map(l =>
+                l.id === layerId
+                    ? {
+                        ...l,
+                        data: l.data.map(item =>
+                            item.id === featureId
+                                ? {
+                                    ...item,
+                                    photoUrls: (item.photoUrls || []).filter((photo: any) => photo.id !== photoId)
+                                }
+                                : item
+                        )
+                    }
+                    : l
+            );
+        });
+
+        // Remove file data from photosAtom
+        setPhotos(prev => {
+            const updated = { ...prev };
+            delete updated[photoId];
+            return updated;
+        });
+    }, [getLayerById, setPhotos]);
+
+    /**
      * Effect to keep selectedLayerName in sync with available layers.
      * Falls back to the first existing layer when the current selection is invalid.
      */
@@ -327,7 +383,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
         updateLayerColorDebounced,
         updateLayerOpacity,
         getLayerById,
-        addPhotos
+        addPhotos,
+        deletePhoto
     }), [
         layerManager,
         selectedLayerName,
@@ -339,7 +396,8 @@ export const LayerProvider = ({ children }: { children: React.ReactNode }) => {
         updateLayerColorDebounced,
         updateLayerOpacity,
         getLayerById,
-        addPhotos
+        addPhotos,
+        deletePhoto
     ]);
 
     return (

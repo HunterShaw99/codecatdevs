@@ -138,10 +138,11 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
         const updatePosition = () => {
             const popupWidth = popup.offsetWidth;
             const popupHeight = popup.clientHeight - (popup.offsetHeight - popup.clientHeight);
+            const gap = 12;
 
             popup.style.left = `${props.x - popupWidth / 2}px`;
             //subtract 102 (expected popupHeight) from popupHeight to resize
-            popup.style.top = `${props.y - window.innerHeight / 2 - (popupHeight - 102)}px`;
+            popup.style.top = `${props.y - popupHeight - gap }px`;
         };
 
         // Initial positioning
@@ -175,16 +176,25 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
         handleClose();
     };
 
+    const handleEventStop = (e: any) => {
+        e.stopPropagation();
+    };
+
     return (
             <div
             ref={popupRef}
+            onClick={handleEventStop}
+            onMouseDown={handleEventStop}
+            onMouseUp={handleEventStop}
+            onPointerDown={handleEventStop}
             className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs
                 h-fit min-w-50`}
         >
                     <div className="flex justify-between items-center mb-1">
                         <h3 className="font-bold text-sm">{header}</h3>
                         <button
-                    onClick={() => {
+                    onClick={(event) => {
+                        event.stopPropagation();
                         handleClose();
                     }}
                             className="text-stone-500 hover:text-stone-700"

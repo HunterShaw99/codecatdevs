@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { Separator } from 'radix-ui';
 import { EyeNoneIcon, EyeOpenIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+
 import { useLayerContext } from "@/app/context/layerContext";
 import { randomHex } from "@/app/utils/color";
 

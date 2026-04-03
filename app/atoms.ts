@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { createRef } from 'react';
 import { BaseLayerData } from "@map/utils/LayerTypes";
+import { PickingInfo } from '@deck.gl/core';
 
 export const refAtom = atom(createRef<any>());
 
@@ -38,3 +39,8 @@ export const userLocationAtom = atom<{
   latitude: number;
   longitude: number;
 } | null>(null);
+
+/**
+ * Non-persisted atom for pop-up controls
+ */
+export const popUpAtom = atom<{popupData: PickingInfo<BaseLayerData>} | undefined>(undefined);

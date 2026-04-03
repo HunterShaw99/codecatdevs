@@ -8,7 +8,6 @@ import {
   TableIcon,
   TargetIcon,
 } from "@radix-ui/react-icons";
-import { PickingInfo } from "@deck.gl/core";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Separator } from "radix-ui";
@@ -16,7 +15,6 @@ import { distance, point } from "@turf/turf";
 import { useAtomValue, useAtom } from "jotai";
 
 import { randomHex } from "@/app/utils/color";
-import { PopUpWindow } from "@components/map/popup/PopUp";
 import { userLocationAtom } from "@/app/atoms";
 import MapComponent from "@components/map/Map";
 import AttributeTable from "@components/map/table/AttributeTable";
@@ -56,7 +54,6 @@ function MapPageContent() {
 
   const { isExpanded, isSubWidgetActive, toggleSubWidget } = useWidgetManager();
 
-  const [popupData, setPopupData] = useState<PickingInfo<BaseLayerData>>();
   const [layersOpen, setLayersOpen] = useState(false);
 
   // search ring state
@@ -799,15 +796,6 @@ function MapPageContent() {
             </div>
           )}
         </div>
-        {popupData?.object && (
-          <PopUpWindow
-            props={popupData}
-            deckRef={deckRef}
-            handleClose={() => {
-              setPopupData(undefined);
-            }}
-          />
-        )}
       </div>
       <MapComponent
         baseMap={baseMap}
@@ -815,8 +803,6 @@ function MapPageContent() {
         userLocation={location}
         isSubWidgetActive={isSubWidgetActive}
         isExpanded={isExpanded}
-        popupData={popupData}
-        setPopupData={setPopupData}
         handleAddPointClick={handleAddPointClick}
         onMapClick={() => {}}
       />

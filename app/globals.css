@@ -684,7 +684,7 @@ select::selection {
 }
 
 .image-preview {
-  @apply py-1 flex items-center gap-4;
+  @apply py-1 h-30 rounded flex items-center gap-4;
 }
 
 .next-preview {

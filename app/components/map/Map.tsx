@@ -3,14 +3,15 @@ import React, { useState, useMemo } from 'react';
 import DeckGL from "@deck.gl/react";
 import MapLibre from "react-map-gl/maplibre";
 import { MeasureDistanceMode, ViewMode } from '@deck.gl-community/editable-layers';
-import { PickingInfo } from '@deck.gl/core';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 
 import { BASEMAPS } from '@/app/constants';
 import { LabelledLayer, measureLayer, RouteLineLayer, SearchRingLayer, LocationLayer } from "@components/map/layers";
 import { BaseLayerData } from "@components/map/utils/LayerTypes";
-import { refAtom } from '@/app/atoms';
+import { refAtom, popUpAtom } from '@/app/atoms';
+import { PopUpWindow } from "@components/map/popup/PopUp";
+import { MjolnirEvent } from 'mjolnir.js';
 
 const INITIAL_VIEW_STATE = {
         longitude: -79.9915,
@@ -26,8 +27,6 @@ interface MapProps {
     userLocation?: { latitude: number; longitude: number } | null;
     isSubWidgetActive: (widget: string, subWidget: string) => boolean;
     isExpanded: (widget: string) => boolean;
-    popupData: PickingInfo<BaseLayerData> | undefined;
-    setPopupData: (data: PickingInfo<BaseLayerData> | undefined) => void;
     handleAddPointClick: (event: any) => void;
     onMapClick: (info: any) => void;
 }
@@ -40,13 +39,12 @@ const Map = (
             userLocation,
             isSubWidgetActive,
             isExpanded,
-            popupData,
-            setPopupData,
             handleAddPointClick,
             onMapClick,
         }: MapProps
     ) => {
     const deckRef = useAtomValue(refAtom)
+    const [popupData, setPopupData] = useAtom(popUpAtom)
 
      const [viewState, setViewState] = useState(INITIAL_VIEW_STATE)
     const handleViewStateChange = ({ viewState: newViewState }) => {
@@ -98,8 +96,12 @@ const Map = (
         return allLayers;
     }, [layerManager, userLocation, isSubWidgetActive]);
 
-        const handleCursorClick = (info: any) => {
-            if (isExpanded('add-points')) {
+        const handleCursorClick = (info: any, event : MjolnirEvent ) => {
+
+            if (event.srcEvent?.target?.id !== 'view-default-view') {
+                return;
+            }
+            else if (isExpanded('add-points')) {
                 handleAddPointClick(info)
             } else if (isSubWidgetActive('analysis', 'measure')) {
                 setPopupData(undefined)
@@ -108,11 +110,11 @@ const Map = (
             } else {
                 setPopupData(undefined)
             }
-            onMapClick(info);
         };
 
         return (
             <DeckGL
+                id='basemap'
                 ref={deckRef}
                 initialViewState={viewState}
                 onViewStateChange={handleViewStateChange}
@@ -120,9 +122,18 @@ const Map = (
                     doubleClickZoom: false,
                     inertia: false
                 }}
-                onClick={(info) => handleCursorClick(info)}
+                onClick={(info, event) => handleCursorClick(info, event)}
                 layers={layers}
             >
+            {popupData?.object && (
+                <PopUpWindow
+                    props={popupData}
+                    deckRef={deckRef}
+                    handleClose={() => {
+                    setPopupData(undefined);
+                    }}
+                />
+                )}
                 <MapLibre
                     maxPitch={0}
                     minZoom={INITIAL_VIEW_STATE.minZoom}

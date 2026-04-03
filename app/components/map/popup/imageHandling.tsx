@@ -1,15 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRightIcon, ArrowLeftIcon} from '@radix-ui/react-icons'
+import { ArrowRightIcon, ArrowLeftIcon, TrashIcon} from '@radix-ui/react-icons'
 import { useAtom } from 'jotai';
 import { useLayerContext } from "@/app/context/layerContext";
 import { photosAtom } from "@/app/atoms";
 import { compressImage } from "@/app/utils/imageCompression";
 
-export const ImagePreview : React.FC<{ files: any[]; }> = ({files}) => {
+export const ImagePreview : React.FC<{ files: any[]; onDelete: (photoId: string) => void; }> = ({files, onDelete}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const goNext = () => setCurrentIndex((i) => (i + 1) % files.length);
   const goPrev = () => setCurrentIndex((i) => (i - 1 + files.length) % files.length);
+
+  const handleDelete = () => {
+    if (files[currentIndex] && confirm('Are you sure you want to delete this image?')) {
+      onDelete(files[currentIndex].id);
+    }
+
+    if (files.length > 0) {
+        setCurrentIndex(0);
+    }
+  };
 
   if (files.length === 0) return null;
 
@@ -17,10 +27,15 @@ export const ImagePreview : React.FC<{ files: any[]; }> = ({files}) => {
   const next = files[(currentIndex + 1) % files.length];
 
   return (
-    <div className="image-preview">
+    <div className="py-1 flex items-center gap-4">
       <div>
-        <img src={current.file} alt="current" />
-        <div className="file-counter">{currentIndex + 1} / {files.length}</div>
+        <img src={current.file} alt="current" className="image-preview"/>
+        <div className="file-counter flex flex-row">
+            <button onClick={handleDelete} className="delete-image-button mr-2" title="Delete image">
+                <TrashIcon />
+            </button>
+            {currentIndex + 1} / {files.length}
+        </div>
       </div>
       {files.length > 1 && (
         <div className="flex flex-col items-center gap-2">
@@ -30,8 +45,7 @@ export const ImagePreview : React.FC<{ files: any[]; }> = ({files}) => {
               <button onClick={goNext}><ArrowRightIcon/></button>
             </div>
         </div>
-      )
-    }
+      )}
     </div>
   );
 }
@@ -45,12 +59,14 @@ export const AddPhotoButton : React.FC<{ layerId: string, featureId: string; }> 
     // layer state
     const {
         addPhotos,
+        deletePhoto,
         layerManager
     } = useLayerContext();
 
-    const fileInputRef = useRef<HTMLInputElement>(null); 
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleClick = () => {
+    const handleClick = (event : React.MouseEvent ) => {
+        event.stopPropagation();
         fileInputRef.current?.click();
     };
 
@@ -59,6 +75,10 @@ export const AddPhotoButton : React.FC<{ layerId: string, featureId: string; }> 
         if (files && files.length > 0) {
             setSelectedFile(files[0]);
         }
+    };
+
+    const handleDeletePhoto = (photoId: string) => {
+        deletePhoto(layerId, featureId, photoId);
     };
 
     const addFileToStorage = async (layerId:string, featureId: string, file: File) => {
@@ -98,12 +118,14 @@ export const AddPhotoButton : React.FC<{ layerId: string, featureId: string; }> 
                 file: photos[photoMeta.id] || ''
             }));
             setHasFiles(fullPhotos);
+        } else {
+            setHasFiles(null);
         }
     }, [featureId, layerManager, photos]);
 
     return (
         <div>
-            {hasFiles && hasFiles.length > 0 && <ImagePreview files={hasFiles}/>}
+            {hasFiles && hasFiles.length > 0 && <ImagePreview files={hasFiles} onDelete={handleDeletePhoto}/>}
             <button onClick={handleClick} className="custom-file-upload-button">
                 Upload Picture
             </button>
