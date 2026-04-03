@@ -97,9 +97,9 @@ const Map = (
         return allLayers;
     }, [layerManager, userLocation, isSubWidgetActive]);
 
-        const handleCursorClick = (info: any, event : MjolnirEvent ) => {
+        const handleCursorClick = (info: any, event : any ) => {
 
-            if (event.srcEvent.target instanceof HTMLElement && event.srcEvent.target.id !== 'view-default-view') {
+            if (event.srcEvent.target && event.srcEvent.target.id !== 'view-default-view') {
                 return;
             }
             else if (isExpanded('add-points')) {
