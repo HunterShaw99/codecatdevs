@@ -27,5 +27,9 @@ export const HEADERS_MAPPING: Record<string,string[]> = {
   'route-line': ['Route Start Name', 'Route End Name', 'Route Segment Distance', 'Route Segment Duration']
 }
 
-export const DB_NAME = 'file-db'
-export const DB_VERSION = 2
+export const SLIDE_MAPPING: Record<string, string> = {
+  'upload_clean.mp4' : 'Create layers to house your data, and upload points from a spreadsheet.',
+  'search_rings_clean.mp4' : 'Add Layers, click to add points on the map, and perform spatial analysis.',
+  'routing_clean.mp4' : 'Change your basemap, and route points within a layer.',
+  'measure_clean.mp4' : 'Measure distances on the map using the measure tool.'
+}
