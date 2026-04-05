@@ -1,24 +1,22 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DownloadIcon,
   LayersIcon,
-  ListBulletIcon,
   RulerHorizontalIcon,
   Share1Icon,
   TableIcon,
   TargetIcon,
 } from "@radix-ui/react-icons";
-import { PickingInfo } from "@deck.gl/core";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Separator } from "radix-ui";
 import { distance, point } from "@turf/turf";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useAtom } from "jotai";
 
-import { hexToRGB, randomHex } from "@/app/utils/color";
+import { randomHex } from "@/app/utils/color";
+import { userLocationAtom } from "@/app/atoms";
 import MapComponent from "@components/map/Map";
-import { PopUpWindow } from "@components/map/popup/PopUp";
 import AttributeTable from "@components/map/table/AttributeTable";
 import { BASEMAP_KEYS, ROUTING_PREFERENCES } from "@/app/constants";
 import {
@@ -39,18 +37,11 @@ import { refAtom } from "@/app/atoms";
 function MapPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedData, setUploadedData] = useState<any>(null);
-  const [isLegendExpanded, setIsLegendExpanded] = useState(true);
   const [baseMap, setBaseMap] = useState<
     "light" | "dark" | "standard" | "hybrid"
   >("light");
   const [isTableExpanded, setIsTableExpanded] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const deckRef = useAtomValue(refAtom);
-
-  // Ensure hydration matches by deferring render until client mounts
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // layer state
   const {
@@ -59,12 +50,10 @@ function MapPageContent() {
     selectedLayerName,
     setSelectedLayerName,
     addNewLayer,
-    deleteLayer,
   } = useLayerContext();
 
   const { isExpanded, isSubWidgetActive, toggleSubWidget } = useWidgetManager();
 
-  const [popupData, setPopupData] = useState<PickingInfo<BaseLayerData>>();
   const [layersOpen, setLayersOpen] = useState(false);
 
   // search ring state
@@ -82,10 +71,7 @@ function MapPageContent() {
   >("distance");
 
   //user location
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [location, setLocation] = useAtom(userLocationAtom);
   const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -135,28 +121,7 @@ function MapPageContent() {
     }
   }, [isExpanded]);
 
-  useEffect(() => {
-    let userId: string | null = null;
-
-    if (location) {
-      userId = addNewLayer({
-        id: "user-location",
-        name: validateName(
-          "User",
-          layerManager.map((layer) => layer.name),
-        ),
-        type: "user-location",
-        data: [location],
-        visible: true,
-      });
-    }
-
-    return () => {
-      if (userId) {
-        deleteLayer(userId);
-      }
-    };
-  }, [location, addNewLayer, deleteLayer]);
+  // User location is now stored in userLocationAtom and not added to layerManager
 
   useMemo(() => {
     const layer = layerManager.find(
@@ -774,7 +739,7 @@ function MapPageContent() {
                         className={`mt-2 py-2 px-4 text-sm rounded-md font-semibold ${
                           isRoutingDisabled
                             ? " text-red-700 bg-red hover:bg-red-400"
-                            : " text-peach-5 bg-peach-8 hover:bg-peach-7"
+                            : " text-peach-5 bg-peach-8 hover:bg-peach-7 hover:text-peach-4"
                         }`}
                       >
                         Route Points
@@ -831,24 +796,13 @@ function MapPageContent() {
             </div>
           )}
         </div>
-        {popupData?.object && (
-          <PopUpWindow
-            props={popupData}
-            deckRef={deckRef}
-            handleClose={() => {
-              setPopupData(undefined);
-            }}
-          />
-        )}
       </div>
-
       <MapComponent
         baseMap={baseMap}
         layerManager={layerManager}
+        userLocation={location}
         isSubWidgetActive={isSubWidgetActive}
         isExpanded={isExpanded}
-        popupData={popupData}
-        setPopupData={setPopupData}
         handleAddPointClick={handleAddPointClick}
         onMapClick={() => {}}
       />

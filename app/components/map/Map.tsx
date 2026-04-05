@@ -1,16 +1,18 @@
 'use client';
-import React, { useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import DeckGL from "@deck.gl/react";
+import { MapViewState } from "@deck.gl/core"
 import MapLibre from "react-map-gl/maplibre";
 import { MeasureDistanceMode, ViewMode } from '@deck.gl-community/editable-layers';
-import { PickingInfo } from '@deck.gl/core';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 
 import { BASEMAPS } from '@/app/constants';
 import { LabelledLayer, measureLayer, RouteLineLayer, SearchRingLayer, LocationLayer } from "@components/map/layers";
 import { BaseLayerData } from "@components/map/utils/LayerTypes";
-import { refAtom } from '@/app/atoms';
+import { refAtom, popUpAtom } from '@/app/atoms';
+import { PopUpWindow } from "@components/map/popup/PopUp";
+import { MjolnirEvent } from 'mjolnir.js';
 
 const INITIAL_VIEW_STATE = {
         longitude: -79.9915,
@@ -23,10 +25,9 @@ const INITIAL_VIEW_STATE = {
 interface MapProps {
     baseMap: 'light' | 'dark' | 'standard' | 'hybrid';
     layerManager: BaseLayerData[];
+    userLocation?: { latitude: number; longitude: number } | null;
     isSubWidgetActive: (widget: string, subWidget: string) => boolean;
     isExpanded: (widget: string) => boolean;
-    popupData: PickingInfo<BaseLayerData> | undefined;
-    setPopupData: (data: PickingInfo<BaseLayerData> | undefined) => void;
     handleAddPointClick: (event: any) => void;
     onMapClick: (info: any) => void;
 }
@@ -36,15 +37,21 @@ const Map = (
         {
             baseMap,
             layerManager,
+            userLocation,
             isSubWidgetActive,
             isExpanded,
-            popupData,
-            setPopupData,
             handleAddPointClick,
             onMapClick,
         }: MapProps
     ) => {
     const deckRef = useAtomValue(refAtom)
+    const [popupData, setPopupData] = useAtom(popUpAtom)
+
+     const [viewState, setViewState] = useState(INITIAL_VIEW_STATE)
+    const handleViewStateChange = ({viewState} : {viewState : MapViewState}) => {
+        setViewState(viewState as any);
+        setPopupData(undefined);
+    };
 
     const measurementLayer = measureLayer({
         type: 'FeatureCollection',
@@ -68,11 +75,11 @@ const Map = (
             data: l.data as any,
             color: l.colors.fill
         })])
-        const locationLayers = visible.filter(l => l.type === 'user-location').map(l => [new LocationLayer({
-            id: l.id,
-            data: l.data as any,
-            color: l.colors.fill
-        })])
+        const locationLayers = userLocation ? [new LocationLayer({
+            id: 'user-location',
+            data: [userLocation] as any,
+            color: '#FF0000'
+        })] : []
 
         type AllLayerTypes = RouteLineLayer | SearchRingLayer | LabelledLayer | any;
 
@@ -88,10 +95,14 @@ const Map = (
         }
 
         return allLayers;
-    }, [layerManager, isSubWidgetActive]);
+    }, [layerManager, userLocation, isSubWidgetActive]);
 
-        const handleCursorClick = (info: any) => {
-            if (isExpanded('add-points')) {
+        const handleCursorClick = (info: any, event : any ) => {
+
+            if (event.srcEvent.target && event.srcEvent.target.id !== 'view-default-view') {
+                return;
+            }
+            else if (isExpanded('add-points')) {
                 handleAddPointClick(info)
             } else if (isSubWidgetActive('analysis', 'measure')) {
                 setPopupData(undefined)
@@ -100,27 +111,37 @@ const Map = (
             } else {
                 setPopupData(undefined)
             }
-            onMapClick(info);
         };
 
         return (
             <DeckGL
+                id='basemap'
                 ref={deckRef}
-                initialViewState={INITIAL_VIEW_STATE}
+                initialViewState={viewState}
+                onViewStateChange={handleViewStateChange as any}
                 controller={{
                     doubleClickZoom: false,
                     inertia: false
                 }}
-                onClick={(info) => handleCursorClick(info)}
+                onClick={(info, event) => handleCursorClick(info, event)}
                 layers={layers}
             >
+            {popupData && popupData.object && (
+                <PopUpWindow
+                    props={popupData}
+                    deckRef={deckRef}
+                    handleClose={() => {
+                    setPopupData(undefined);
+                    }}
+                />
+                )}
                 <MapLibre
                     maxPitch={0}
                     minZoom={INITIAL_VIEW_STATE.minZoom}
                     maxZoom={INITIAL_VIEW_STATE.maxZoom}
                     mapStyle={BASEMAPS[baseMap]}
                     reuseMaps
-                >
+                >      
                 </MapLibre>
             </DeckGL>
         );

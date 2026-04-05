@@ -1,9 +1,12 @@
-import {Cross1Icon, TrashIcon} from "@radix-ui/react-icons";
-import {useEffect, useMemo, useRef} from 'react';
-import {useLayerContext} from "@/app/context/layerContext";
-import { AddPhotoButton } from "@/app/helpers";
+import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { useMemo, useState, useRef, useEffect } from 'react';
+import { useLayerContext } from "@/app/context/layerContext";
+import { AddPhotoButton } from "@/app/components/map/popup/imageHandling";
+import { NearestLayer } from "@/app/components/NearestLayer";
+import { ChangeEvent } from "react";
+import { distance, point, featureCollection, nearestPoint } from "@turf/turf";
 
-const getPopUpValues = (props: any) => {
+export const getPopUpValues = (props: any) => {
     let name, lat, long;
 
     if (props.layer.constructor.layerName === 'LabelledLayer') {
@@ -17,11 +20,16 @@ const getPopUpValues = (props: any) => {
         name = props.object.points[0];
         [long, lat] = [0, 0];
     }
+    else if (props.layer.constructor.layerName === 'LocationLayer') {
+        name = 'user'
+        lat = props.object.latitude;
+        long = props.object.longitude;
+    }
 
     return [name, lat, long];
 }
 
-const getPopUpHeader = (layerType: any) => {
+const getPopUpHeader = (layerType: any, props?: any) => {
 
     if (layerType === 'LabelledLayer') {
         return 'Point Details';
@@ -29,18 +37,20 @@ const getPopUpHeader = (layerType: any) => {
         return 'Search Area Results';
     } else if (layerType === 'RouteLineLayer') {
         return 'Route Information';
+    } else if (layerType === 'LocationLayer') {
+        return `User Location: ${props.object.latitude.toFixed(3)}, ${props.object.longitude.toFixed(3)}`
     } else {
         return 'Layer Details';
     }
 }
 
-const getPopUpContent = (layerType: string, props: any) => {
+const getPopUpContent = (layerType: string, props: any, nearestLayerProps?: any) => {
     const [name, lat, long] = getPopUpValues(props);
 
     if (layerType === 'LabelledLayer') {
         return (
             <div>
-                <AddPhotoButton featureId={props.object.id as string}/>
+                <AddPhotoButton layerId={props.layer.id} featureId={props.object.id as string} />
                 <p><span className="font-bold">Name:</span> {name}</p>
                 <p><span className="font-bold">Coordinates:</span> {lat.toFixed(3)}, {long.toFixed(3)}</p>
             </div>
@@ -67,67 +77,147 @@ const getPopUpContent = (layerType: string, props: any) => {
                 </p>
             </div>
         );
-    } else {
+    } else if (layerType === 'LocationLayer' && nearestLayerProps) {
+        return (
+            <NearestLayer {...nearestLayerProps} />
+        );
+    }
+    else {
         return null;
     }
 }
 
-export const PopUpWindow = ({props, handleClose}: any) => {
+export const PopUpWindow = ({ props, handleClose }: any) => {
     const {
-        deleteLayerFeature
+        deleteLayerFeature,
+        layerManager
     } = useLayerContext();
 
+    const [popUpLayer, setPopUpLayer] = useState<string>();
+    const [nearestPointData, setNearestPointData] = useState<any>(null);
+    const [nearestDistance, setNearestDistance] = useState<number>();
+
+    const handleNearestLayerChange = (e: ChangeEvent<HTMLSelectElement>) => {
+        setPopUpLayer(e.target.value);
+
+        const layer = layerManager.find(
+            (layer: { name: string }) =>
+                layer.name === e.target.value,
+        );
+
+        if (layer && layer.data.length > 0) {
+            // Create a user location point
+            const userPoint = point([props.object.longitude, props.object.latitude]);
+
+            // Create feature points from layer data
+            const points = layer.data.map((row: any) =>
+                point([row.longitude, row.latitude], row)
+            );
+
+            // Create a feature collection
+            const collection = featureCollection(points);
+
+            // Find the nearest point to the user's location
+            const nearest_point = nearestPoint(userPoint, collection);
+
+            setNearestPointData(nearest_point);
+
+            // Optional: Log the distance to the nearest point
+            const distToNearest = distance(userPoint, nearest_point, { units: "miles" });
+            setNearestDistance(distToNearest);
+        }
+    };
+
     const layerType = props.layer.constructor.layerName;
-    const header = getPopUpHeader(layerType);
-    const content = useMemo(() => getPopUpContent(layerType, props), [props]);
+    const header = getPopUpHeader(layerType, props);
     const popupRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!popupRef.current) return;
 
         const popup = popupRef.current;
-        const popupWidth = popup.offsetWidth;
 
-        popup.style.left = `${props.x - popupWidth / 2}px`;
-        popup.style.top = `${props.y - 350}px`;
+        const updatePosition = () => {
+            const popupWidth = popup.offsetWidth;
+            const popupHeight = popup.clientHeight - (popup.offsetHeight - popup.clientHeight);
+            const gap = 12;
+
+            popup.style.left = `${props.x - popupWidth / 2}px`;
+            //subtract 102 (expected popupHeight) from popupHeight to resize
+            popup.style.top = `${props.y - popupHeight - gap }px`;
+        };
+
+        // Initial positioning
+        updatePosition();
+
+        // Use ResizeObserver to reposition when popup content changes
+        const resizeObserver = new ResizeObserver(() => {
+            updatePosition();
+        });
+
+        resizeObserver.observe(popup);
+
+        return () => {
+            resizeObserver.disconnect();
+        };
     }, [props.x, props.y]);
+
+    const nearestLayerProps = layerType === 'LocationLayer' ? {
+        popUpLayer,
+        nearestPoint: nearestPointData,
+        nearestDistance,
+        onLayerChange: handleNearestLayerChange,
+        userLat: props.object.latitude,
+        userLong: props.object.longitude
+    } : undefined;
+
+    const content = useMemo(() => getPopUpContent(layerType, props, nearestLayerProps), [layerType, props, nearestLayerProps]);
 
     const handleDelete = () => {
         deleteLayerFeature(props.layer.id, props.object.id);
         handleClose();
     };
 
+    const handleEventStop = (e: any) => {
+        e.stopPropagation();
+    };
+
     return (
-        <div
+            <div
             ref={popupRef}
-            className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs min-h-fit
-                overflow-y-auto min-w-50`}
+            onClick={handleEventStop}
+            onMouseDown={handleEventStop}
+            onMouseUp={handleEventStop}
+            onPointerDown={handleEventStop}
+            className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs
+                h-fit min-w-50`}
         >
-            <div className="flex justify-between items-center mb-1">
-                <h3 className="font-bold text-sm">{header}</h3>
-                <button
-                    onClick={() => {
+                    <div className="flex justify-between items-center mb-1">
+                        <h3 className="font-bold text-sm">{header}</h3>
+                        <button
+                    onClick={(event) => {
+                        event.stopPropagation();
                         handleClose();
                     }}
-                    className="text-stone-500 hover:text-stone-700"
-                    aria-label="Close popup"
-                >
+                            className="text-stone-500 hover:text-stone-700"
+                            aria-label="Close popup"
+                        >
                     <Cross1Icon className="w-4 h-4"/>
-                </button>
-            </div>
+                        </button>
+                    </div>
             <hr className={'px-1'}/>
-            <div className="flex justify-between items-end-safe">
-                {content}
-            {layerType !== 'RouteLineLayer' && (
-                    <button
-                        onClick={handleDelete}
-                        className="text-red-500 hover:text-red-700"
-                        aria-label="Delete feature"
-                    >
-                        <TrashIcon className={'h-4 w-4'}/>
-                    </button>
-            )}
-            </div>
-        </div>
+                    <div className="flex justify-between items-end-safe">
+                        {content}
+                        {layerType !== 'RouteLineLayer' || layerType !== 'LocationLayer'  && (
+                            <button
+                                onClick={handleDelete}
+                                className="text-red-500 hover:text-red-700"
+                                aria-label="Delete feature"
+                            >
+                                <TrashIcon className={'h-4 w-4'} />
+                            </button>
+                        )}
+                    </div>
+                </div>
     )
 };

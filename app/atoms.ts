@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { createRef } from 'react';
 import { BaseLayerData } from "@map/utils/LayerTypes";
+import { PickingInfo } from '@deck.gl/core';
 
 export const refAtom = atom(createRef<any>());
 
@@ -22,16 +23,24 @@ export const layersAtom = atomWithStorage<BaseLayerData[]>(
 );
 
 /**
- * Persistent atom for storing photos/files
- * Stores file metadata and base64 encoded file content
+ * Persistent atom for storing photo file data in localStorage
+ * Stores base64-encoded image data keyed by photo ID to avoid quota issues with layersAtom
  */
-export const photosAtom = atomWithStorage<Array<{
-  id: string;
-  featureId: string;
-  file: string; // base64 encoded file content
-  filename: string;
-  timestamp: string;
-}>>(
+export const photosAtom = atomWithStorage<Record<string, string>>(
   'codecat-photos',
-  []
+  {}
 );
+
+/**
+ * Non-persisted atom for storing user's current location
+ * This is not saved to localStorage and is cleared on page reload
+ */
+export const userLocationAtom = atom<{
+  latitude: number;
+  longitude: number;
+} | null>(null);
+
+/**
+ * Non-persisted atom for pop-up controls
+ */
+export const popUpAtom = atom<PickingInfo<BaseLayerData> | undefined>(undefined);

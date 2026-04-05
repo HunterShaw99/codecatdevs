@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { Separator } from 'radix-ui';
 import { EyeNoneIcon, EyeOpenIcon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+
 import { useLayerContext } from "@/app/context/layerContext";
 import { randomHex } from "@/app/utils/color";
 
@@ -146,8 +147,8 @@ export function LayerManagerWidget({ isOpen }: LayerManagerWidgetProps) {
                     <button
                         onClick={() => handleButtonClick()}
                         disabled={isDisabled}
-                        className={`p-1 mb-2 max-h-10 text-lg flex-row flex items-center justify-center cursor-pointer ${!isDisabled ?
-                            ' text-peach-5 hover:text-peach-4' : ' text-red-700 hover:text-red-400'}`}
+                        className={`px-2 py-1 mb-2 max-h-10 text-lg rounded-md flex-row flex items-center justify-center cursor-pointer ${!isDisabled ?
+                            ' text-peach-5 bg-peach-8 hover:bg-peach-7 hover:text-peach-4' : ' text-red-700 bg-red hover:bg-red-400'}`}
                     >
                         <PlusIcon className={'w-4 h-4'} /> Layer
                     </button>
