@@ -57,7 +57,6 @@ export default function HomePage() {
     ];
 
     const OPTIONS: EmblaOptionsType = {}
-    const SLIDE_COUNT = 5
 
     const slides = () => {
         const posts = [];

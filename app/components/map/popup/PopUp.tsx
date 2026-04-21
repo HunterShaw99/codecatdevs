@@ -83,7 +83,13 @@ const getPopUpContent = (layerType: string, props: any, nearestLayerProps?: any)
         );
     }
     else {
-        return null;
+        return (
+            <div>
+                {Object.entries(props.object.properties).map(([key, value] : [string, any]) => (
+                    <p key={key}><span className="font-bold">{key}:</span> {value}</p>
+                ))}
+            </div>
+        )
     }
 }
 
@@ -144,7 +150,7 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
 
             popup.style.left = `${props.x - popupWidth / 2}px`;
             //subtract 102 (expected popupHeight) from popupHeight to resize
-            popup.style.top = `${props.y - popupHeight - gap }px`;
+            popup.style.top = `${props.y - popupHeight - gap}px`;
         };
 
         // Initial positioning
@@ -183,7 +189,7 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
     };
 
     return (
-            <div
+        <div
             ref={popupRef}
             onClick={handleEventStop}
             onMouseDown={handleEventStop}
@@ -192,32 +198,32 @@ export const PopUpWindow = ({ props, handleClose }: any) => {
             className={`absolute p-2 bg-white border rounded-lg shadow-md text-stone-500 text-xs
                 h-fit min-w-50`}
         >
-                    <div className="flex justify-between items-center mb-1">
-                        <h3 className="font-bold text-sm">{header}</h3>
-                        <button
+            <div className="flex justify-between items-center mb-1">
+                <h3 className="font-bold text-sm">{header}</h3>
+                <button
                     onClick={(event) => {
                         event.stopPropagation();
                         handleClose();
                     }}
-                            className="text-stone-500 hover:text-stone-700"
-                            aria-label="Close popup"
-                        >
-                    <Cross1Icon className="w-4 h-4"/>
-                        </button>
-                    </div>
-            <hr className={'px-1'}/>
-                    <div className="flex justify-between items-end-safe">
-                        {content}
-                        {layerType !== 'RouteLineLayer' || layerType !== 'LocationLayer'  && (
-                            <button
-                                onClick={handleDelete}
-                                className="text-red-500 hover:text-red-700"
-                                aria-label="Delete feature"
-                            >
-                                <TrashIcon className={'h-4 w-4'} />
-                            </button>
-                        )}
-                    </div>
-                </div>
+                    className="text-stone-500 hover:text-stone-700"
+                    aria-label="Close popup"
+                >
+                    <Cross1Icon className="w-4 h-4" />
+                </button>
+            </div>
+            <hr className={'px-1'} />
+            <div className="flex justify-between items-end-safe">
+                {content}
+                {layerType !== 'RouteLineLayer' || layerType !== 'LocationLayer' && (
+                    <button
+                        onClick={handleDelete}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label="Delete feature"
+                    >
+                        <TrashIcon className={'h-4 w-4'} />
+                    </button>
+                )}
+            </div>
+        </div>
     )
 };
